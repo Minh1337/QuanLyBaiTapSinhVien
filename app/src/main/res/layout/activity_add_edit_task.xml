@@ -107,6 +107,97 @@
                 android:layout_marginTop="4dp"
                 android:background="@android:drawable/btn_dropdown" />
 
+            <!-- Task Type -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Loại bài tập:"
+                android:textColor="#382841"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/sp_task_type"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:background="@android:drawable/btn_dropdown" />
+
+            <!-- Attach File Section -->
+            <LinearLayout
+                android:id="@+id/layout_attach_file"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <Button
+                    android:id="@+id/btn_attach_file"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="📎 File tài liệu bất kỳ"
+                    android:textColor="#713E87"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/tv_attached_file"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Chưa đính kèm"
+                    android:textColor="#666666"
+                    android:textSize="12sp"
+                    android:ellipsize="middle"
+                    android:singleLine="true" />
+            </LinearLayout>
+
+            <!-- Attach Quiz File Section -->
+            <LinearLayout
+                android:id="@+id/layout_attach_quiz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/btn_attach_quiz"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="📝 Upload câu hỏi Trắc nghiệm"
+                    android:textColor="#713E87"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/tv_attached_quiz"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Chưa upload (.txt)"
+                    android:textColor="#666666"
+                    android:textSize="12sp"
+                    android:ellipsize="middle"
+                    android:singleLine="true" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_download_quiz_template"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:text="📥 Tải mẫu file văn bản câu hỏi (.docx)"
+                android:textColor="#713E87"
+                android:textSize="11sp"
+                android:visibility="gone" />
+
             <!-- Description / Requirement -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_desc"

@@ -4,6 +4,9 @@ public class Task {
     public static final String SOURCE_PERSONAL = "PERSONAL";
     public static final String SOURCE_TEACHER = "TEACHER";
 
+    public static final String TYPE_NORMAL = "Tự luận";
+    public static final String TYPE_QUIZ = "Trắc nghiệm";
+
     private long id;
     private String title;
     private String description;
@@ -12,10 +15,13 @@ public class Task {
     private Long classId; // nullable
     private Long personalSubjectId; // nullable
     private long createdByUserId;
+    private String attachmentPath; // Dành cho file bài tập tải về (Docx, PDF...)
+    private String quizFilePath;   // Dành cho file Trắc nghiệm (.txt)
+    private String taskType;
 
     public Task() {}
 
-    public Task(long id, String title, String description, String dueDate, String sourceType, Long classId, Long personalSubjectId, long createdByUserId) {
+    public Task(long id, String title, String description, String dueDate, String sourceType, Long classId, Long personalSubjectId, long createdByUserId, String attachmentPath, String quizFilePath, String taskType) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -24,6 +30,9 @@ public class Task {
         this.classId = classId;
         this.personalSubjectId = personalSubjectId;
         this.createdByUserId = createdByUserId;
+        this.attachmentPath = attachmentPath;
+        this.quizFilePath = quizFilePath;
+        this.taskType = taskType != null ? taskType : TYPE_NORMAL;
     }
 
     public long getId() { return id; }
@@ -49,6 +58,15 @@ public class Task {
 
     public long getCreatedByUserId() { return createdByUserId; }
     public void setCreatedByUserId(long createdByUserId) { this.createdByUserId = createdByUserId; }
+
+    public String getAttachmentPath() { return attachmentPath; }
+    public void setAttachmentPath(String attachmentPath) { this.attachmentPath = attachmentPath; }
+
+    public String getQuizFilePath() { return quizFilePath; }
+    public void setQuizFilePath(String quizFilePath) { this.quizFilePath = quizFilePath; }
+
+    public String getTaskType() { return taskType; }
+    public void setTaskType(String taskType) { this.taskType = taskType; }
 
     public boolean isPersonal() {
         return SOURCE_PERSONAL.equalsIgnoreCase(sourceType);

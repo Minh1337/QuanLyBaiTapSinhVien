@@ -168,33 +168,50 @@
 
                     <!-- Attachment Section -->
                     <LinearLayout
+                        android:id="@+id/layout_task_attachment"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:background="#F3E5F5"
                         android:padding="10dp"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
 
                         <TextView
+                            android:id="@+id/tv_task_attachment_name"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="📎 Baitap_DoAn_Android.docx"
+                            android:text="📎 file.docx"
                             android:textColor="#713E87"
                             android:textSize="13sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:ellipsize="middle"
+                            android:singleLine="true" />
 
                         <Button
-                            android:id="@+id/btn_download_attachment"
+                            android:id="@+id/btn_open_task_attachment"
                             style="?attr/materialButtonOutlinedStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="36dp"
-                            android:text="📥 Tải file Word mẫu"
+                            android:text="Mở file đính kèm"
                             android:textColor="#713E87"
                             android:textSize="11sp"
                             android:paddingHorizontal="8dp" />
                     </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btn_take_quiz"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="16dp"
+                        android:backgroundTint="#713E87"
+                        android:text="✏️ LÀM BÀI TRẮC NGHIỆM"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -284,6 +301,72 @@
                         android:text="Lưu trạng thái &amp; ưu tiên"
                         android:textColor="#713E87"
                         android:textSize="12sp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Student File Submission Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="NỘP BÀI LÀM CỦA SINH VIÊN"
+                        android:textColor="#713E87"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_submission_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:background="#FAFAFA"
+                        android:padding="10dp"
+                        android:text="Trạng thái: Chưa nộp file bài làm"
+                        android:textColor="#666666"
+                        android:textSize="13sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_submit_file"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="#713E87"
+                            android:text="📤 Nộp file bài làm"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                        <Button
+                            android:id="@+id/btn_submit_image"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:text="📷 Nộp ảnh bài làm"
+                            android:textColor="#713E87"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

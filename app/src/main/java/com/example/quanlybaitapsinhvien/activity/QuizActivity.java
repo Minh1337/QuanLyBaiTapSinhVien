@@ -1,14 +1,20 @@
 package com.example.quanlybaitapsinhvien.activity;
 
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,6 +24,7 @@ import com.example.quanlybaitapsinhvien.utils.WindowInsetUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +38,7 @@ public class QuizActivity extends AppCompatActivity {
         public String optionC;
         public String optionD;
         public String correctAnswer; // "A", "B", "C", "D"
+        public String imageUri; // Optional image URI
 
         public QuizQuestion(String questionText, String optionA, String optionB, String optionC, String optionD, String correctAnswer) {
             this.questionText = questionText;
@@ -45,12 +53,37 @@ public class QuizActivity extends AppCompatActivity {
     private TextView tvQuestionNumber, tvScore, tvQuestionContent;
     private RadioGroup rgOptions;
     private RadioButton rbA, rbB, rbC, rbD;
-    private Button btnSubmitAnswer, btnDownloadTemplate, btnImportQuiz;
+    private Button btnSubmitAnswer, btnDownloadTemplate, btnImportFileFromDevice, btnEditImportText, btnAttachQuestionImage;
     private ImageButton btnBack;
+    private ImageView ivQuestionImage;
 
-    private List<QuizQuestion> questions = new ArrayList<>();
+    private final List<QuizQuestion> questions = new ArrayList<>();
     private int currentQuestionIndex = 0;
     private int currentScore = 0;
+
+    private String rawImportedText = "";
+
+    private final ActivityResultLauncher<String> pickImportFileLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    readTextFromUriAndShowDialog(uri);
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<String> pickQuestionImageLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null && currentQuestionIndex < questions.size()) {
+                    QuizQuestion q = questions.get(currentQuestionIndex);
+                    q.imageUri = uri.toString();
+                    ivQuestionImage.setImageURI(uri);
+                    ivQuestionImage.setVisibility(View.VISIBLE);
+                    Toast.makeText(this, "Đã đính kèm ảnh cho câu hỏi này!", Toast.LENGTH_SHORT).show();
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +95,28 @@ public class QuizActivity extends AppCompatActivity {
         WindowInsetUtils.applyHeaderAndRootInsets(headerBar, rootView);
 
         initViews();
-        loadSampleQuestionsFromAsset();
+        if (getIntent().hasExtra("quiz_uri")) {
+            String uriStr = getIntent().getStringExtra("quiz_uri");
+            if (uriStr != null) {
+                try {
+                    readTextFromUriAndParseDirectly(Uri.parse(uriStr));
+                } catch (Exception e) {
+                    Toast.makeText(this, "Không thể đọc file đính kèm!", Toast.LENGTH_SHORT).show();
+                    loadSampleQuestionsFromAsset();
+                }
+                
+                // Hide import buttons for student taking quiz
+                btnDownloadTemplate.setVisibility(View.GONE);
+                btnImportFileFromDevice.setVisibility(View.GONE);
+                btnEditImportText.setVisibility(View.GONE);
+                findViewById(R.id.tv_import_label).setVisibility(View.GONE);
+                findViewById(R.id.cv_import_section).setVisibility(View.GONE);
+                btnAttachQuestionImage.setVisibility(View.GONE);
+            }
+        } else {
+            loadSampleQuestionsFromAsset();
+        }
+        
         displayCurrentQuestion();
 
         btnBack.setOnClickListener(v -> finish());
@@ -74,13 +128,11 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
-        btnImportQuiz.setOnClickListener(v -> {
-            loadSampleQuestionsFromAsset();
-            currentQuestionIndex = 0;
-            currentScore = 0;
-            displayCurrentQuestion();
-            Toast.makeText(this, "Đã import thành công " + questions.size() + " câu hỏi trắc nghiệm!", Toast.LENGTH_SHORT).show();
-        });
+        btnImportFileFromDevice.setOnClickListener(v -> pickImportFileLauncher.launch("*/*"));
+
+        btnEditImportText.setOnClickListener(v -> showEditImportDialog(rawImportedText));
+
+        btnAttachQuestionImage.setOnClickListener(v -> pickQuestionImageLauncher.launch("image/*"));
 
         btnSubmitAnswer.setOnClickListener(v -> submitAnswer());
     }
@@ -97,50 +149,127 @@ public class QuizActivity extends AppCompatActivity {
         rbC = findViewById(R.id.rb_option_c);
         rbD = findViewById(R.id.rb_option_d);
 
+        ivQuestionImage = findViewById(R.id.iv_question_image);
+        btnAttachQuestionImage = findViewById(R.id.btn_attach_question_image);
+
         btnSubmitAnswer = findViewById(R.id.btn_submit_answer);
         btnDownloadTemplate = findViewById(R.id.btn_download_quiz_template);
-        btnImportQuiz = findViewById(R.id.btn_import_quiz);
+        btnImportFileFromDevice = findViewById(R.id.btn_import_file_from_device);
+        btnEditImportText = findViewById(R.id.btn_edit_import_text);
+    }
+
+    private void readTextFromUriAndShowDialog(Uri uri) {
+        try {
+            InputStream is = getContentResolver().openInputStream(uri);
+            if (is != null) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+                reader.close();
+                is.close();
+
+                rawImportedText = sb.toString();
+                showEditImportDialog(rawImportedText);
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi đọc file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void readTextFromUriAndParseDirectly(Uri uri) throws Exception {
+        InputStream is = getContentResolver().openInputStream(uri);
+        if (is != null) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            reader.close();
+            is.close();
+            rawImportedText = sb.toString();
+            parseQuestionsFromRawText(rawImportedText);
+        }
+    }
+
+    private void showEditImportDialog(String defaultText) {
+        final EditText etInput = new EditText(this);
+        etInput.setLines(12);
+        etInput.setGravity(Gravity.TOP);
+        etInput.setText(defaultText != null && !defaultText.trim().isEmpty() ? defaultText : rawImportedText);
+        etInput.setHint("Dán hoặc chỉnh sửa danh sách câu hỏi tại đây...\n\nCú pháp mẫu:\nCâu 1: ...\nA. ...\nB. ...\nC. ...\nD. ...\nĐáp án: B");
+
+        new AlertDialog.Builder(this)
+                .setTitle("Chỉnh sửa câu hỏi Import")
+                .setView(etInput)
+                .setPositiveButton("Xác nhận Import", (dialog, which) -> {
+                    String editedText = etInput.getText().toString();
+                    rawImportedText = editedText;
+                    parseQuestionsFromRawText(editedText);
+                    currentQuestionIndex = 0;
+                    currentScore = 0;
+                    displayCurrentQuestion();
+                    Toast.makeText(this, "Đã import thành công " + questions.size() + " câu hỏi!", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    private void parseQuestionsFromRawText(String rawText) {
+        questions.clear();
+        if (rawText == null || rawText.trim().isEmpty()) return;
+
+        String[] lines = rawText.split("\n");
+        String qText = null, optA = null, optB = null, optC = null, optD = null, ans = null;
+
+        for (String l : lines) {
+            String line = l.trim();
+            if (line.isEmpty()) continue;
+
+            if (line.startsWith("Câu") || line.startsWith("Cau")) {
+                if (qText != null && optA != null && optB != null && optC != null && optD != null && ans != null) {
+                    questions.add(new QuizQuestion(qText, optA, optB, optC, optD, ans));
+                    optA = optB = optC = optD = ans = null;
+                }
+                qText = line;
+            } else if (line.startsWith("A.") || line.startsWith("A :")) {
+                optA = line;
+            } else if (line.startsWith("B.") || line.startsWith("B :")) {
+                optB = line;
+            } else if (line.startsWith("C.") || line.startsWith("C :")) {
+                optC = line;
+            } else if (line.startsWith("D.") || line.startsWith("D :")) {
+                optD = line;
+            } else if (line.contains("Đáp án") || line.contains("Dap an") || line.startsWith("Ans:")) {
+                if (line.contains("A")) ans = "A";
+                else if (line.contains("B")) ans = "B";
+                else if (line.contains("C")) ans = "C";
+                else if (line.contains("D")) ans = "D";
+            }
+        }
+
+        if (qText != null && optA != null && optB != null && optC != null && optD != null && ans != null) {
+            questions.add(new QuizQuestion(qText, optA, optB, optC, optD, ans));
+        }
     }
 
     private void loadSampleQuestionsFromAsset() {
-        questions.clear();
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open("danh_sach_cau_hoi.txt"), "UTF-8"));
+            InputStream is = getAssets().open("danh_sach_cau_hoi.txt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            StringBuilder sb = new StringBuilder();
             String line;
-            String qText = null, optA = null, optB = null, optC = null, optD = null, ans = null;
-
             while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty()) continue;
-
-                if (line.startsWith("Câu") || line.startsWith("Cau")) {
-                    if (qText != null && optA != null && optB != null && optC != null && optD != null && ans != null) {
-                        questions.add(new QuizQuestion(qText, optA, optB, optC, optD, ans));
-                        optA = optB = optC = optD = ans = null;
-                    }
-                    qText = line;
-                } else if (line.startsWith("A.") || line.startsWith("A :")) {
-                    optA = line;
-                } else if (line.startsWith("B.") || line.startsWith("B :")) {
-                    optB = line;
-                } else if (line.startsWith("C.") || line.startsWith("C :")) {
-                    optC = line;
-                } else if (line.startsWith("D.") || line.startsWith("D :")) {
-                    optD = line;
-                } else if (line.contains("Đáp án") || line.contains("Dap an") || line.startsWith("Ans:")) {
-                    if (line.contains("A")) ans = "A";
-                    else if (line.contains("B")) ans = "B";
-                    else if (line.contains("C")) ans = "C";
-                    else if (line.contains("D")) ans = "D";
-                }
-            }
-
-            if (qText != null && optA != null && optB != null && optC != null && optD != null && ans != null) {
-                questions.add(new QuizQuestion(qText, optA, optB, optC, optD, ans));
+                sb.append(line).append("\n");
             }
             reader.close();
+            is.close();
+            rawImportedText = sb.toString();
+            parseQuestionsFromRawText(rawImportedText);
         } catch (Exception e) {
-            // Fallback default questions if asset read fails
             questions.add(new QuizQuestion("Câu 1: Ngôn ngữ lập trình chính dùng để phát triển ứng dụng Android gốc là gì?",
                     "A. Swift", "B. Kotlin / Java", "C. C#", "D. PHP", "B"));
             questions.add(new QuizQuestion("Câu 2: SQLite trong Android dùng để làm gì?",
@@ -150,7 +279,8 @@ public class QuizActivity extends AppCompatActivity {
 
     private void displayCurrentQuestion() {
         if (questions.isEmpty()) {
-            tvQuestionContent.setText("Không có câu hỏi nào!");
+            tvQuestionContent.setText("Chưa có câu hỏi nào. Bấm 'Import file từ máy' hoặc 'Chỉnh sửa' để nhập câu hỏi.");
+            ivQuestionImage.setVisibility(View.GONE);
             return;
         }
 
@@ -163,6 +293,17 @@ public class QuizActivity extends AppCompatActivity {
         tvQuestionNumber.setText("Câu hỏi " + (currentQuestionIndex + 1) + " / " + questions.size());
         tvScore.setText("Điểm: " + currentScore);
         tvQuestionContent.setText(q.questionText);
+
+        if (q.imageUri != null && !q.imageUri.isEmpty()) {
+            try {
+                ivQuestionImage.setImageURI(Uri.parse(q.imageUri));
+                ivQuestionImage.setVisibility(View.VISIBLE);
+            } catch (Exception e) {
+                ivQuestionImage.setVisibility(View.GONE);
+            }
+        } else {
+            ivQuestionImage.setVisibility(View.GONE);
+        }
 
         rbA.setText(q.optionA);
         rbB.setText(q.optionB);
@@ -191,7 +332,7 @@ public class QuizActivity extends AppCompatActivity {
             currentScore += 10;
             Toast.makeText(this, "✅ Chính xác! +10 điểm", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "❌ Chế đáp án chưa đúng. Đáp án đúng là: " + q.correctAnswer, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "❌ Đáp án chưa đúng. Đáp án đúng là: " + q.correctAnswer, Toast.LENGTH_SHORT).show();
         }
 
         currentQuestionIndex++;
@@ -200,8 +341,8 @@ public class QuizActivity extends AppCompatActivity {
 
     private void showQuizCompletedDialog() {
         new AlertDialog.Builder(this)
-                .setTitle("Hoàn thành ôn tập!")
-                .setMessage("Chúc mừng bạn đã hoàn thành bài trắc nghiệm!\nTổng số điểm đạt được: " + currentScore + " điểm.")
+                .setTitle("Hoàn thành bài trắc nghiệm!")
+                .setMessage("Chúc mừng bạn đã hoàn thành bài tập!\nTổng số điểm đạt được: " + currentScore + " điểm.")
                 .setPositiveButton("Làm lại", (dialog, which) -> {
                     currentQuestionIndex = 0;
                     currentScore = 0;

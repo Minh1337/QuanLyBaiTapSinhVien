@@ -5,16 +5,22 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 
 import com.example.quanlybaitapsinhvien.model.ChecklistItem;
 import com.example.quanlybaitapsinhvien.model.ClassModel;
 import com.example.quanlybaitapsinhvien.model.PersonalSubject;
+import com.example.quanlybaitapsinhvien.model.StudentReportItem;
 import com.example.quanlybaitapsinhvien.model.Task;
 import com.example.quanlybaitapsinhvien.model.TaskProgress;
 import com.example.quanlybaitapsinhvien.model.TaskWithProgress;
 import com.example.quanlybaitapsinhvien.model.User;
 import com.example.quanlybaitapsinhvien.utils.PasswordUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,7 +31,7 @@ import java.util.Locale;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "quanlybaitap.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
     // Tables
     private static final String TABLE_USERS = "users";
@@ -87,7 +93,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "source_type TEXT NOT NULL, " + // PERSONAL or TEACHER
                 "class_id INTEGER, " +
                 "personal_subject_id INTEGER, " +
-                "created_by_user_id INTEGER NOT NULL" +
+                "created_by_user_id INTEGER NOT NULL, " +
+                "attachment_path TEXT, " +
+                "quiz_file_path TEXT, " +
+                "task_type TEXT DEFAULT 'Tự luận'" +
                 ")");
 
         // 6. Task Progress table
@@ -98,6 +107,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "status TEXT NOT NULL, " + // Chưa làm, Đang làm, Hoàn thành
                 "priority TEXT NOT NULL, " + // Thấp, Trung bình, Cao
                 "reminder_time TEXT, " +
+                "submitted_file_path TEXT, " +
+                "submitted_time TEXT, " +
                 "UNIQUE(task_id, student_id)" +
                 ")");
 
@@ -207,6 +218,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cvTaskA.put("source_type", Task.SOURCE_PERSONAL);
         cvTaskA.put("personal_subject_id", personalSubjectAId);
         cvTaskA.put("created_by_user_id", studentAId);
+        cvTaskA.put("task_type", Task.TYPE_NORMAL);
         long taskPersonalId = db.insert(TABLE_TASKS, null, cvTaskA);
 
         // Seed Progress for Personal Task A
@@ -238,6 +250,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cvTeacherTask.put("source_type", Task.SOURCE_TEACHER);
         cvTeacherTask.put("class_id", classId);
         cvTeacherTask.put("created_by_user_id", teacherId);
+        cvTeacherTask.put("task_type", Task.TYPE_NORMAL);
         long teacherTaskId = db.insert(TABLE_TASKS, null, cvTeacherTask);
 
         // Seed Progress for Student A for Teacher Task
@@ -387,6 +400,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT t.*, ");
         sql.append("p.id AS prog_id, p.status AS prog_status, p.priority AS prog_priority, p.reminder_time AS prog_reminder, ");
+        sql.append("p.submitted_file_path AS prog_sub_file, p.submitted_time AS prog_sub_time, ");
         sql.append("c.class_code, c.class_name, ");
         sql.append("ps.subject_code, ps.subject_name ");
         sql.append("FROM ").append(TABLE_TASKS).append(" t ");
@@ -460,7 +474,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         cursor.getString(cursor.getColumnIndexOrThrow("source_type")),
                         cursor.isNull(cursor.getColumnIndexOrThrow("class_id")) ? null : cursor.getLong(cursor.getColumnIndexOrThrow("class_id")),
                         cursor.isNull(cursor.getColumnIndexOrThrow("personal_subject_id")) ? null : cursor.getLong(cursor.getColumnIndexOrThrow("personal_subject_id")),
-                        cursor.getLong(cursor.getColumnIndexOrThrow("created_by_user_id"))
+                        cursor.getLong(cursor.getColumnIndexOrThrow("created_by_user_id")),
+                        cursor.getColumnIndex("attachment_path") != -1 ? cursor.getString(cursor.getColumnIndexOrThrow("attachment_path")) : null,
+                        cursor.getColumnIndex("quiz_file_path") != -1 ? cursor.getString(cursor.getColumnIndexOrThrow("quiz_file_path")) : null,
+                        cursor.getColumnIndex("task_type") != -1 ? cursor.getString(cursor.getColumnIndexOrThrow("task_type")) : Task.TYPE_NORMAL
                 );
 
                 long progId = cursor.isNull(cursor.getColumnIndexOrThrow("prog_id")) ? -1 : cursor.getLong(cursor.getColumnIndexOrThrow("prog_id"));
@@ -471,8 +488,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (priority == null) priority = TaskProgress.PRIORITY_MEDIUM;
 
                 String reminder = cursor.getString(cursor.getColumnIndexOrThrow("prog_reminder"));
+                String subFile = cursor.getColumnIndex("prog_sub_file") != -1 ? cursor.getString(cursor.getColumnIndexOrThrow("prog_sub_file")) : null;
+                String subTime = cursor.getColumnIndex("prog_sub_time") != -1 ? cursor.getString(cursor.getColumnIndexOrThrow("prog_sub_time")) : null;
 
-                TaskProgress progress = new TaskProgress(progId, task.getId(), studentId, status, priority, reminder);
+                TaskProgress progress = new TaskProgress(progId, task.getId(), studentId, status, priority, reminder, subFile, subTime);
 
                 String subjectOrClassName = "";
                 if (task.isPersonal()) {
@@ -528,6 +547,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cvTask.put("source_type", Task.SOURCE_PERSONAL);
             cvTask.put("personal_subject_id", task.getPersonalSubjectId());
             cvTask.put("created_by_user_id", task.getCreatedByUserId());
+            cvTask.put("attachment_path", task.getAttachmentPath());
+            cvTask.put("quiz_file_path", task.getQuizFilePath());
+            cvTask.put("task_type", task.getTaskType());
             taskId = db.insert(TABLE_TASKS, null, cvTask);
 
             if (taskId != -1) {
@@ -571,6 +593,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 cvTask.put("description", task.getDescription());
                 cvTask.put("due_date", task.getDueDate());
                 cvTask.put("personal_subject_id", task.getPersonalSubjectId());
+                cvTask.put("attachment_path", task.getAttachmentPath());
+                cvTask.put("quiz_file_path", task.getQuizFilePath());
+                cvTask.put("task_type", task.getTaskType());
                 db.update(TABLE_TASKS, cvTask, "id = ?", new String[]{String.valueOf(task.getId())});
 
                 ContentValues cvProg = new ContentValues();
@@ -715,5 +740,375 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         int rows = db.delete(TABLE_CHECKLIST, "id = ?", new String[]{String.valueOf(checklistItemId)});
         return rows > 0;
+    }
+
+    public boolean submitStudentTaskFile(long taskId, long studentId, String filePath, String submittedTime) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("submitted_file_path", filePath);
+        cv.put("submitted_time", submittedTime);
+        cv.put("status", TaskProgress.STATUS_IN_PROGRESS);
+
+        int rows = db.update(TABLE_TASK_PROGRESS, cv, "task_id = ? AND student_id = ?",
+                new String[]{String.valueOf(taskId), String.valueOf(studentId)});
+        if (rows == 0) {
+            cv.put("task_id", taskId);
+            cv.put("student_id", studentId);
+            cv.put("priority", TaskProgress.PRIORITY_MEDIUM);
+            long id = db.insert(TABLE_TASK_PROGRESS, null, cv);
+            return id != -1;
+        }
+        return true;
+    }
+
+    // ADMIN METHODS
+    public List<User> getAllUsers() {
+        List<User> list = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " ORDER BY role ASC, full_name ASC", null);
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(new User(
+                        cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("username")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("password_hash")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("salt")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("full_name")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("role")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("status"))
+                ));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    public long createTeacherAccount(String username, String password, String fullName) {
+        SQLiteDatabase db = getWritableDatabase();
+        username = username.trim().toLowerCase(Locale.ROOT);
+        String salt = PasswordUtils.generateSalt();
+        String hash = PasswordUtils.hashPassword(password, salt);
+
+        ContentValues cv = new ContentValues();
+        cv.put("username", username);
+        cv.put("password_hash", hash);
+        cv.put("salt", salt);
+        cv.put("full_name", fullName);
+        cv.put("role", "TEACHER");
+        cv.put("status", "ACTIVE");
+        return db.insert(TABLE_USERS, null, cv);
+    }
+
+    public boolean toggleUserLockStatus(long userId) {
+        User user = getUserById(userId);
+        if (user == null || "ADMIN".equalsIgnoreCase(user.getRole())) {
+            return false;
+        }
+        SQLiteDatabase db = getWritableDatabase();
+        String newStatus = "LOCKED".equalsIgnoreCase(user.getStatus()) ? "ACTIVE" : "LOCKED";
+        ContentValues cv = new ContentValues();
+        cv.put("status", newStatus);
+        int rows = db.update(TABLE_USERS, cv, "id = ?", new String[]{String.valueOf(userId)});
+        return rows > 0;
+    }
+
+    public List<User> getUsersByRole(String role) {
+        List<User> list = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE role = ? ORDER BY full_name ASC",
+                new String[]{role});
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(new User(
+                        cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("username")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("password_hash")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("salt")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("full_name")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("role")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("status"))
+                ));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    public long createClass(String classCode, String className, long teacherId) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("class_code", classCode);
+        cv.put("class_name", className);
+        cv.put("teacher_id", teacherId);
+        cv.put("is_archived", 0);
+        return db.insert(TABLE_CLASSES, null, cv);
+    }
+
+    public List<ClassModel> getAllClassesIncludeArchived() {
+        List<ClassModel> list = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_CLASSES + " ORDER BY is_archived ASC, class_name ASC", null);
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(new ClassModel(
+                        cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("class_code")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("class_name")),
+                        cursor.getLong(cursor.getColumnIndexOrThrow("teacher_id")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("is_archived")) == 1
+                ));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    public boolean updateClassTeacher(long classId, long newTeacherId) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("teacher_id", newTeacherId);
+        int rows = db.update(TABLE_CLASSES, cv, "id = ?", new String[]{String.valueOf(classId)});
+        return rows > 0;
+    }
+
+    public boolean addStudentToClass(long classId, long studentId) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("class_id", classId);
+        cv.put("student_id", studentId);
+        long id = db.insertWithOnConflict(TABLE_CLASS_MEMBERS, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        return id != -1;
+    }
+
+    public boolean removeStudentFromClass(long classId, long studentId) {
+        SQLiteDatabase db = getWritableDatabase();
+        int rows = db.delete(TABLE_CLASS_MEMBERS, "class_id = ? AND student_id = ?",
+                new String[]{String.valueOf(classId), String.valueOf(studentId)});
+        return rows > 0;
+    }
+
+    public boolean toggleArchiveClass(long classId) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT is_archived FROM " + TABLE_CLASSES + " WHERE id = ?",
+                new String[]{String.valueOf(classId)});
+        if (cursor.moveToFirst()) {
+            int archived = cursor.getInt(0);
+            cursor.close();
+            SQLiteDatabase wdb = getWritableDatabase();
+            ContentValues cv = new ContentValues();
+            cv.put("is_archived", archived == 1 ? 0 : 1);
+            return wdb.update(TABLE_CLASSES, cv, "id = ?", new String[]{String.valueOf(classId)}) > 0;
+        }
+        cursor.close();
+        return false;
+    }
+
+    public List<User> getStudentsInClass(long classId) {
+        List<User> list = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT u.* FROM " + TABLE_USERS + " u " +
+                "INNER JOIN " + TABLE_CLASS_MEMBERS + " cm ON u.id = cm.student_id " +
+                "WHERE cm.class_id = ? ORDER BY u.full_name ASC";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(classId)});
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(new User(
+                        cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("username")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("password_hash")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("salt")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("full_name")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("role")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("status"))
+                ));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    // TEACHER METHODS
+    public List<ClassModel> getClassesForTeacher(long teacherId) {
+        List<ClassModel> list = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_CLASSES + " WHERE teacher_id = ? ORDER BY class_name ASC",
+                new String[]{String.valueOf(teacherId)});
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(new ClassModel(
+                        cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("class_code")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("class_name")),
+                        cursor.getLong(cursor.getColumnIndexOrThrow("teacher_id")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("is_archived")) == 1
+                ));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    public List<Task> getTasksForClass(long classId) {
+        List<Task> list = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_TASKS + " WHERE class_id = ? ORDER BY due_date ASC",
+                new String[]{String.valueOf(classId)});
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(new Task(
+                        cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("title")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("description")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("due_date")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("source_type")),
+                        cursor.isNull(cursor.getColumnIndexOrThrow("class_id")) ? null : cursor.getLong(cursor.getColumnIndexOrThrow("class_id")),
+                        cursor.isNull(cursor.getColumnIndexOrThrow("personal_subject_id")) ? null : cursor.getLong(cursor.getColumnIndexOrThrow("personal_subject_id")),
+                        cursor.getLong(cursor.getColumnIndexOrThrow("created_by_user_id")),
+                        cursor.getColumnIndex("attachment_path") != -1 ? cursor.getString(cursor.getColumnIndexOrThrow("attachment_path")) : null,
+                        cursor.getColumnIndex("quiz_file_path") != -1 ? cursor.getString(cursor.getColumnIndexOrThrow("quiz_file_path")) : null,
+                        cursor.getColumnIndex("task_type") != -1 ? cursor.getString(cursor.getColumnIndexOrThrow("task_type")) : Task.TYPE_NORMAL
+                ));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    public long insertTeacherTask(Task task) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("title", task.getTitle());
+        cv.put("description", task.getDescription());
+        cv.put("due_date", task.getDueDate());
+        cv.put("source_type", Task.SOURCE_TEACHER);
+        cv.put("class_id", task.getClassId());
+        cv.put("created_by_user_id", task.getCreatedByUserId());
+        cv.put("attachment_path", task.getAttachmentPath());
+        cv.put("quiz_file_path", task.getQuizFilePath());
+        cv.put("task_type", task.getTaskType());
+        return db.insert(TABLE_TASKS, null, cv);
+    }
+
+    public boolean updateTeacherTask(Task task) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("title", task.getTitle());
+        cv.put("description", task.getDescription());
+        cv.put("due_date", task.getDueDate());
+        cv.put("attachment_path", task.getAttachmentPath());
+        cv.put("quiz_file_path", task.getQuizFilePath());
+        cv.put("task_type", task.getTaskType());
+        int rows = db.update(TABLE_TASKS, cv, "id = ?", new String[]{String.valueOf(task.getId())});
+        return rows > 0;
+    }
+
+    public boolean deleteTeacherTask(long taskId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            Cursor progCursor = db.rawQuery("SELECT id FROM " + TABLE_TASK_PROGRESS + " WHERE task_id = ?",
+                    new String[]{String.valueOf(taskId)});
+            if (progCursor.moveToFirst()) {
+                do {
+                    long pId = progCursor.getLong(0);
+                    db.delete(TABLE_CHECKLIST, "progress_id = ?", new String[]{String.valueOf(pId)});
+                } while (progCursor.moveToNext());
+            }
+            progCursor.close();
+
+            db.delete(TABLE_TASK_PROGRESS, "task_id = ?", new String[]{String.valueOf(taskId)});
+            int rows = db.delete(TABLE_TASKS, "id = ?", new String[]{String.valueOf(taskId)});
+            db.setTransactionSuccessful();
+            return rows > 0;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public List<StudentReportItem> getStudentsProgressReportForTask(long taskId, long classId) {
+        List<StudentReportItem> report = new ArrayList<>();
+        List<User> students = getStudentsInClass(classId);
+
+        SQLiteDatabase db = getReadableDatabase();
+        for (User student : students) {
+            Cursor cursor = db.rawQuery(
+                    "SELECT p.id AS prog_id, p.status, p.submitted_file_path FROM " + TABLE_TASK_PROGRESS +
+                            " p WHERE p.task_id = ? AND p.student_id = ?",
+                    new String[]{String.valueOf(taskId), String.valueOf(student.getId())});
+
+            String status = TaskProgress.STATUS_NOT_STARTED;
+            String subFile = null;
+            int pct = 0;
+
+            if (cursor.moveToFirst()) {
+                long progId = cursor.getLong(cursor.getColumnIndexOrThrow("prog_id"));
+                status = cursor.getString(cursor.getColumnIndexOrThrow("status"));
+                if (status == null) status = TaskProgress.STATUS_NOT_STARTED;
+                subFile = cursor.getString(cursor.getColumnIndexOrThrow("submitted_file_path"));
+
+                Cursor clCursor = db.rawQuery(
+                        "SELECT COUNT(*) AS total, SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) AS done FROM " + TABLE_CHECKLIST + " WHERE progress_id = ?",
+                        new String[]{String.valueOf(progId)});
+                if (clCursor.moveToFirst()) {
+                    int total = clCursor.getInt(clCursor.getColumnIndexOrThrow("total"));
+                    int done = clCursor.getInt(clCursor.getColumnIndexOrThrow("done"));
+                    if (total > 0) {
+                        pct = (int) Math.round((double) done / total * 100.0);
+                    } else if (TaskProgress.STATUS_COMPLETED.equalsIgnoreCase(status)) {
+                        pct = 100;
+                    }
+                }
+                clCursor.close();
+            }
+            cursor.close();
+
+            report.add(new StudentReportItem(
+                    student.getId(),
+                    student.getFullName(),
+                    student.getUsername(),
+                    status,
+                    pct,
+                    subFile
+            ));
+        }
+        return report;
+    }
+
+    // CSV EXPORT FOR STUDENT
+    public File exportStudentDataToCSV(Context context, long studentId) {
+        try {
+            File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            if (!downloadsDir.exists()) downloadsDir.mkdirs();
+
+            User student = getUserById(studentId);
+            String studentName = student != null ? student.getFullName().replaceAll("[^a-zA-Z0-9_]", "_") : "SinhVien";
+            File csvFile = new File(downloadsDir, "BaoCao_BaiTap_" + studentName + ".csv");
+
+            OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(csvFile), StandardCharsets.UTF_8);
+            writer.write('\ufeff');
+
+            writer.write("Mã bài,Tên bài tập,Nguồn,Môn / Lớp,Hạn nộp,Mức ưu tiên,Trạng thái,Tiến độ (%)\n");
+
+            List<TaskWithProgress> tasks = getTasksForStudent(studentId, null, null, null, null);
+            for (TaskWithProgress twp : tasks) {
+                Task t = twp.getTask();
+                TaskProgress p = twp.getProgress();
+                writer.write(String.format("%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d%%\n",
+                        t.getId(),
+                        t.getTitle().replace("\"", "\"\""),
+                        t.isPersonal() ? "Cá nhân" : "Giáo viên giao",
+                        twp.getSubjectOrClassName().replace("\"", "\"\""),
+                        t.getDueDate(),
+                        p != null ? p.getPriority() : "Trung bình",
+                        p != null ? p.getStatus() : "Chưa làm",
+                        twp.getProgressPercentage()
+                ));
+            }
+            writer.flush();
+            writer.close();
+            return csvFile;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

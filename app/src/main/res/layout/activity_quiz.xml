@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="12dp"
-            android:text="ÔN TẬP TRẮC NGHIỆM"
+            android:text="BÀI TẬP TRẮC NGHIỆM"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -50,6 +50,7 @@
 
             <!-- Template File & Import Actions -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cv_import_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="12dp"
@@ -63,9 +64,10 @@
                     android:padding="14dp">
 
                     <TextView
+                        android:id="@+id/tv_import_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="FILE MẪU &amp; IMPORT CÂU HỎI"
+                        android:text="IMPORT FILE &amp; CHỈNH SỬA CÂU HỎI"
                         android:textColor="#713E87"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -82,24 +84,34 @@
                             android:layout_width="0dp"
                             android:layout_height="42dp"
                             android:layout_weight="1"
-                            android:text="📥 Tải file Word mẫu"
+                            android:text="📥 Tải file mẫu"
                             android:textColor="#713E87"
                             android:textSize="11sp"
                             android:paddingHorizontal="4dp" />
 
                         <Button
-                            android:id="@+id/btn_import_quiz"
+                            android:id="@+id/btn_import_file_from_device"
                             android:layout_width="0dp"
                             android:layout_height="42dp"
                             android:layout_weight="1"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="6dp"
                             android:backgroundTint="#713E87"
-                            android:text="📂 Import câu hỏi mẫu"
+                            android:text="📂 Import file từ máy"
                             android:textColor="#FFFFFF"
                             android:textSize="11sp"
                             android:paddingHorizontal="4dp" />
 
                     </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btn_edit_import_text"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="38dp"
+                        android:layout_marginTop="8dp"
+                        android:text="✏️ Chỉnh sửa danh sách câu hỏi Import"
+                        android:textColor="#713E87"
+                        android:textSize="11sp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -156,11 +168,33 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
+                    <!-- Optional Attached Image for Question -->
+                    <ImageView
+                        android:id="@+id/iv_question_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:layout_marginTop="12dp"
+                        android:scaleType="fitCenter"
+                        android:background="#FAFAFA"
+                        android:visibility="gone"
+                        android:contentDescription="Hình ảnh minh họa câu hỏi" />
+
+                    <Button
+                        android:id="@+id/btn_attach_question_image"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginTop="8dp"
+                        android:text="📷 Đính kèm / Up ảnh câu hỏi"
+                        android:textColor="#713E87"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp" />
+
                     <RadioGroup
                         android:id="@+id/rg_options"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp">
+                        android:layout_marginTop="12dp">
 
                         <RadioButton
                             android:id="@+id/rb_option_a"

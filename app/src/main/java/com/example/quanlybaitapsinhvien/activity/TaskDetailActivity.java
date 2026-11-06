@@ -1,8 +1,11 @@
 package com.example.quanlybaitapsinhvien.activity;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -32,8 +35,11 @@ import com.example.quanlybaitapsinhvien.utils.FileUtils;
 import com.example.quanlybaitapsinhvien.utils.WindowInsetUtils;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class TaskDetailActivity extends AppCompatActivity {
 
@@ -60,6 +66,20 @@ public class TaskDetailActivity extends AppCompatActivity {
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK) {
+                    loadTaskDetail();
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<String> pickFileLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    String fileName = getFileNameFromUri(uri);
+                    String currentTimeStr = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+                    long studentId = sessionManager.getUserId();
+                    dbHelper.submitStudentTaskFile(taskId, studentId, fileName, currentTimeStr);
+                    Toast.makeText(this, "✅ Nộp bài thành công: " + fileName, Toast.LENGTH_LONG).show();
                     loadTaskDetail();
                 }
             }
@@ -101,14 +121,14 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         btnAddChecklist.setOnClickListener(v -> addChecklistItem());
 
-        Button btnDownload = findViewById(R.id.btn_download_attachment);
-        if (btnDownload != null) {
-            btnDownload.setOnClickListener(v -> {
-                File file = FileUtils.copyAssetToDownloads(this, "mau_bai_tap.docx", "Baitap_DoAn_Android.docx");
-                if (file != null) {
-                    FileUtils.openFile(this, file);
-                }
-            });
+        Button btnSubFile = findViewById(R.id.btn_submit_file);
+        if (btnSubFile != null) {
+            btnSubFile.setOnClickListener(v -> pickFileLauncher.launch("*/*"));
+        }
+
+        Button btnSubImg = findViewById(R.id.btn_submit_image);
+        if (btnSubImg != null) {
+            btnSubImg.setOnClickListener(v -> pickFileLauncher.launch("image/*"));
         }
     }
 
@@ -189,6 +209,42 @@ public class TaskDetailActivity extends AppCompatActivity {
         tvDueDate.setText("⏰ Hạn nộp: " + task.getDueDate());
         tvDesc.setText(task.getDescription() != null && !task.getDescription().trim().isEmpty() ? task.getDescription() : "(Không có mô tả)");
 
+        View layoutAttachment = findViewById(R.id.layout_task_attachment);
+        TextView tvAttachmentName = findViewById(R.id.tv_task_attachment_name);
+        Button btnOpenAttachment = findViewById(R.id.btn_open_task_attachment);
+        Button btnTakeQuiz = findViewById(R.id.btn_take_quiz);
+
+        if (task.getAttachmentPath() != null && !task.getAttachmentPath().isEmpty()) {
+            layoutAttachment.setVisibility(View.VISIBLE);
+            String name = getFileNameFromUri(Uri.parse(task.getAttachmentPath()));
+            tvAttachmentName.setText("📎 " + name);
+            btnOpenAttachment.setOnClickListener(v -> {
+                Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+                viewIntent.setData(Uri.parse(task.getAttachmentPath()));
+                viewIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                try {
+                    startActivity(viewIntent);
+                } catch (Exception e) {
+                    Toast.makeText(this, "Không thể mở file này!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            layoutAttachment.setVisibility(View.GONE);
+        }
+
+        if (Task.TYPE_QUIZ.equalsIgnoreCase(task.getTaskType())) {
+            btnTakeQuiz.setVisibility(View.VISIBLE);
+            btnTakeQuiz.setOnClickListener(v -> {
+                Intent quizIntent = new Intent(TaskDetailActivity.this, QuizActivity.class);
+                if (task.getAttachmentPath() != null) {
+                    quizIntent.putExtra("quiz_uri", task.getAttachmentPath());
+                }
+                startActivity(quizIntent);
+            });
+        } else {
+            btnTakeQuiz.setVisibility(View.GONE);
+        }
+
         // Source tag & Edit/Delete buttons visibility
         if (task.isPersonal()) {
             tvSourceTag.setText("Cá nhân");
@@ -211,11 +267,48 @@ public class TaskDetailActivity extends AppCompatActivity {
             if (TaskProgress.STATUS_IN_PROGRESS.equalsIgnoreCase(progress.getStatus())) spStatus.setSelection(1);
             else if (TaskProgress.STATUS_COMPLETED.equalsIgnoreCase(progress.getStatus())) spStatus.setSelection(2);
             else spStatus.setSelection(0);
+
+            TextView tvSubStatus = findViewById(R.id.tv_submission_status);
+            if (tvSubStatus != null) {
+                if (progress.getSubmittedFilePath() != null && !progress.getSubmittedFilePath().trim().isEmpty()) {
+                    tvSubStatus.setText("✅ Đã nộp bài: " + progress.getSubmittedFilePath() + "\n⏰ Thời gian nộp: " + (progress.getSubmittedTime() != null ? progress.getSubmittedTime() : "Vừa xong"));
+                    tvSubStatus.setTextColor(Color.parseColor("#2E7D32"));
+                } else {
+                    tvSubStatus.setText("Trạng thái: Chưa nộp file bài làm");
+                    tvSubStatus.setTextColor(Color.parseColor("#666666"));
+                }
+            }
         }
 
         // Ensure Progress ID exists in DB for checklist
         progressId = dbHelper.ensureProgressRecordExists(taskId, studentId);
         loadChecklistData();
+    }
+
+    private String getFileNameFromUri(Uri uri) {
+        String result = null;
+        if ("content".equals(uri.getScheme())) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (index != -1) {
+                        result = cursor.getString(index);
+                    }
+                }
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            if (result != null) {
+                int cut = result.lastIndexOf('/');
+                if (cut != -1) {
+                    result = result.substring(cut + 1);
+                }
+            }
+        }
+        return result != null ? result : "BaiLam_SinhVien.docx";
     }
 
     private void loadChecklistData() {

@@ -16,16 +16,20 @@ public class TaskProgress {
     private String status; // Chưa làm, Đang làm, Hoàn thành
     private String priority; // Thấp, Trung bình, Cao
     private String reminderTime;
+    private String submittedFilePath;
+    private String submittedTime;
 
     public TaskProgress() {}
 
-    public TaskProgress(long id, long taskId, long studentId, String status, String priority, String reminderTime) {
+    public TaskProgress(long id, long taskId, long studentId, String status, String priority, String reminderTime, String submittedFilePath, String submittedTime) {
         this.id = id;
         this.taskId = taskId;
         this.studentId = studentId;
         this.status = status;
         this.priority = priority;
         this.reminderTime = reminderTime;
+        this.submittedFilePath = submittedFilePath;
+        this.submittedTime = submittedTime;
     }
 
     public long getId() { return id; }
@@ -45,4 +49,10 @@ public class TaskProgress {
 
     public String getReminderTime() { return reminderTime; }
     public void setReminderTime(String reminderTime) { this.reminderTime = reminderTime; }
+
+    public String getSubmittedFilePath() { return submittedFilePath; }
+    public void setSubmittedFilePath(String submittedFilePath) { this.submittedFilePath = submittedFilePath; }
+
+    public String getSubmittedTime() { return submittedTime; }
+    public void setSubmittedTime(String submittedTime) { this.submittedTime = submittedTime; }
 }
