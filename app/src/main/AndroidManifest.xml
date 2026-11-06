@@ -11,16 +11,26 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.QuanLyBaiTapSinhVien">
+
+        <!-- Login Activity as LAUNCHER -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:windowSoftInputMode="adjustResize">
+            android:name=".activity.LoginActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".activity.RegisterActivity" />
+        <activity android:name=".activity.MainActivity" />
+        <activity android:name=".activity.TaskDetailActivity" />
+        <activity android:name=".activity.QuizActivity" />
+        <activity android:name=".activity.AddEditTaskActivity" />
+        <activity android:name=".activity.AddPersonalSubjectActivity" />
+        <activity android:name=".activity.TeacherActivity" />
+        <activity android:name=".activity.AdminActivity" />
+
     </application>
 
 </manifest>
