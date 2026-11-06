@@ -47,6 +47,30 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
+
+        findViewById(R.id.btn_quick_sv_a).setOnClickListener(v -> {
+            etUsername.setText("sv_a");
+            etPassword.setText("sv123456");
+            performLogin();
+        });
+
+        findViewById(R.id.btn_quick_sv_b).setOnClickListener(v -> {
+            etUsername.setText("sv_b");
+            etPassword.setText("sv123456");
+            performLogin();
+        });
+
+        findViewById(R.id.btn_quick_teacher).setOnClickListener(v -> {
+            etUsername.setText("gv_nguyen");
+            etPassword.setText("gv123456");
+            performLogin();
+        });
+
+        findViewById(R.id.btn_quick_admin).setOnClickListener(v -> {
+            etUsername.setText("admin");
+            etPassword.setText("admin123");
+            performLogin();
+        });
     }
 
     private void performLogin() {

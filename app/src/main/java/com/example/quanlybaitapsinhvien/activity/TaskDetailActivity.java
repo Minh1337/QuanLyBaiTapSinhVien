@@ -28,8 +28,10 @@ import com.example.quanlybaitapsinhvien.model.Task;
 import com.example.quanlybaitapsinhvien.model.TaskProgress;
 import com.example.quanlybaitapsinhvien.model.TaskWithProgress;
 import com.example.quanlybaitapsinhvien.session.SessionManager;
+import com.example.quanlybaitapsinhvien.utils.FileUtils;
 import com.example.quanlybaitapsinhvien.utils.WindowInsetUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,6 +100,16 @@ public class TaskDetailActivity extends AppCompatActivity {
         btnUpdateProgress.setOnClickListener(v -> saveStudentProgress());
 
         btnAddChecklist.setOnClickListener(v -> addChecklistItem());
+
+        Button btnDownload = findViewById(R.id.btn_download_attachment);
+        if (btnDownload != null) {
+            btnDownload.setOnClickListener(v -> {
+                File file = FileUtils.copyAssetToDownloads(this, "mau_bai_tap.docx", "Baitap_DoAn_Android.docx");
+                if (file != null) {
+                    FileUtils.openFile(this, file);
+                }
+            });
+        }
     }
 
     private void initViews() {

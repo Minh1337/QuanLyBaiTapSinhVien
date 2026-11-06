@@ -180,6 +180,14 @@ public class MainActivity extends AppCompatActivity {
             refreshLauncher.launch(intent);
         });
 
+        Button btnOpenQuiz = findViewById(R.id.btn_open_quiz);
+        if (btnOpenQuiz != null) {
+            btnOpenQuiz.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, QuizActivity.class);
+                startActivity(intent);
+            });
+        }
+
         fabAddTask.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AddEditTaskActivity.class);
             refreshLauncher.launch(intent);

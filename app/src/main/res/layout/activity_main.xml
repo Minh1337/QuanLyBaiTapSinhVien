@@ -134,12 +134,23 @@
                 android:textColor="#713E87" />
 
             <Button
+                android:id="@+id/btn_open_quiz"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:paddingHorizontal="8dp"
+                android:text="📝 Trắc nghiệm &amp; File mẫu"
+                android:textSize="11sp"
+                android:textColor="#713E87" />
+
+            <Button
                 android:id="@+id/btn_add_personal_subject"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:paddingHorizontal="10dp"
-                android:text="+ Thêm môn cá nhân"
+                android:layout_marginStart="6dp"
+                android:paddingHorizontal="8dp"
+                android:text="+ Môn cá nhân"
                 android:textSize="11sp"
                 android:textColor="#713E87" />
         </LinearLayout>
