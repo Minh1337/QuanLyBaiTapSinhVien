@@ -71,15 +71,21 @@ public class TaskDetailActivity extends AppCompatActivity {
             }
     );
 
+    private final ActivityResultLauncher<Intent> quizLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> loadTaskDetail()
+    );
+
     private final ActivityResultLauncher<String> pickFileLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
             uri -> {
                 if (uri != null) {
-                    String fileName = getFileNameFromUri(uri);
+                    String savedPath = FileUtils.copyUriToInternalStorage(this, uri);
+                    String fileName = FileUtils.getFileNameFromUri(this, uri);
                     String currentTimeStr = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
                     long studentId = sessionManager.getUserId();
-                    dbHelper.submitStudentTaskFile(taskId, studentId, fileName, currentTimeStr);
-                    Toast.makeText(this, "✅ Nộp bài thành công: " + fileName, Toast.LENGTH_LONG).show();
+                    dbHelper.submitStudentTaskFile(taskId, studentId, savedPath, currentTimeStr);
+                    Toast.makeText(this, "✅ Nộp bài thành công: " + fileName + "\n(Tiến độ tự động cập nhật HOÀN THÀNH)", Toast.LENGTH_LONG).show();
                     loadTaskDetail();
                 }
             }
@@ -110,12 +116,22 @@ public class TaskDetailActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         btnEditTask.setOnClickListener(v -> {
+            if ("STUDENT".equalsIgnoreCase(sessionManager.getRole())) {
+                Toast.makeText(this, "Sinh viên không có quyền sửa bài tập!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(TaskDetailActivity.this, AddEditTaskActivity.class);
             intent.putExtra(AddEditTaskActivity.EXTRA_TASK_ID, taskId);
             editLauncher.launch(intent);
         });
 
-        btnDeleteTask.setOnClickListener(v -> confirmDeletePersonalTask());
+        btnDeleteTask.setOnClickListener(v -> {
+            if ("STUDENT".equalsIgnoreCase(sessionManager.getRole())) {
+                Toast.makeText(this, "Sinh viên không có quyền xóa bài tập!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            confirmDeletePersonalTask();
+        });
 
         btnUpdateProgress.setOnClickListener(v -> saveStudentProgress());
 
@@ -216,18 +232,9 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         if (task.getAttachmentPath() != null && !task.getAttachmentPath().isEmpty()) {
             layoutAttachment.setVisibility(View.VISIBLE);
-            String name = getFileNameFromUri(Uri.parse(task.getAttachmentPath()));
+            String name = FileUtils.getFileNameFromUri(this, Uri.parse(task.getAttachmentPath()));
             tvAttachmentName.setText("📎 " + name);
-            btnOpenAttachment.setOnClickListener(v -> {
-                Intent viewIntent = new Intent(Intent.ACTION_VIEW);
-                viewIntent.setData(Uri.parse(task.getAttachmentPath()));
-                viewIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                try {
-                    startActivity(viewIntent);
-                } catch (Exception e) {
-                    Toast.makeText(this, "Không thể mở file này!", Toast.LENGTH_SHORT).show();
-                }
-            });
+            btnOpenAttachment.setOnClickListener(v -> FileUtils.openUriOrFile(this, task.getAttachmentPath()));
         } else {
             layoutAttachment.setVisibility(View.GONE);
         }
@@ -236,26 +243,73 @@ public class TaskDetailActivity extends AppCompatActivity {
             btnTakeQuiz.setVisibility(View.VISIBLE);
             btnTakeQuiz.setOnClickListener(v -> {
                 Intent quizIntent = new Intent(TaskDetailActivity.this, QuizActivity.class);
+                quizIntent.putExtra("extra_task_id", taskId);
+                quizIntent.putExtra("passing_score", task.getPassingScore());
                 if (task.getAttachmentPath() != null) {
                     quizIntent.putExtra("quiz_uri", task.getAttachmentPath());
                 }
-                startActivity(quizIntent);
+                quizLauncher.launch(quizIntent);
             });
         } else {
             btnTakeQuiz.setVisibility(View.GONE);
         }
 
+        TextView tvQuizScoreBadge = findViewById(R.id.tv_quiz_score_badge);
+        if (tvQuizScoreBadge != null) {
+            if (progress != null && progress.getQuizScore() >= 0) {
+                tvQuizScoreBadge.setVisibility(View.VISIBLE);
+                double score = progress.getQuizScore();
+                double passScore = task.getPassingScore();
+                if (passScore > 0) {
+                    if (score >= passScore) {
+                        tvQuizScoreBadge.setText(String.format(Locale.getDefault(), "🏆 Điểm trắc nghiệm: %.1f / 10.0 (✅ ĐẠT - Yêu cầu: %.1f)", score, passScore));
+                        tvQuizScoreBadge.setBackgroundColor(Color.parseColor("#E8F5E9"));
+                        tvQuizScoreBadge.setTextColor(Color.parseColor("#2E7D32"));
+                    } else {
+                        tvQuizScoreBadge.setText(String.format(Locale.getDefault(), "🏆 Điểm trắc nghiệm: %.1f / 10.0 (❌ CHƯA ĐẠT - Yêu cầu: %.1f)", score, passScore));
+                        tvQuizScoreBadge.setBackgroundColor(Color.parseColor("#FFEBEE"));
+                        tvQuizScoreBadge.setTextColor(Color.parseColor("#C62828"));
+                    }
+                } else {
+                    tvQuizScoreBadge.setText(String.format(Locale.getDefault(), "🏆 Điểm trắc nghiệm: %.1f / 10.0 (✅ HOÀN THÀNH)", score));
+                    tvQuizScoreBadge.setBackgroundColor(Color.parseColor("#E8F5E9"));
+                    tvQuizScoreBadge.setTextColor(Color.parseColor("#2E7D32"));
+                }
+            } else if (task.getPassingScore() > 0 && Task.TYPE_QUIZ.equalsIgnoreCase(task.getTaskType())) {
+                tvQuizScoreBadge.setVisibility(View.VISIBLE);
+                tvQuizScoreBadge.setText(String.format(Locale.getDefault(), "🎯 Mức điểm trắc nghiệm cần đạt: %.1f / 10.0", task.getPassingScore()));
+                tvQuizScoreBadge.setBackgroundColor(Color.parseColor("#E1F5FE"));
+                tvQuizScoreBadge.setTextColor(Color.parseColor("#0277BD"));
+            } else {
+                tvQuizScoreBadge.setVisibility(View.GONE);
+            }
+        }
+
         // Source tag & Edit/Delete buttons visibility
+        boolean isStudent = "STUDENT".equalsIgnoreCase(sessionManager.getRole());
         if (task.isPersonal()) {
             tvSourceTag.setText("Cá nhân");
             tvSourceTag.setBackgroundColor(Color.parseColor("#713E87"));
             tvDetailBanner.setVisibility(View.GONE);
-            btnDeleteTask.setVisibility(View.VISIBLE);
         } else {
             tvSourceTag.setText("Giáo viên giao");
             tvSourceTag.setBackgroundColor(Color.parseColor("#0288D1"));
             tvDetailBanner.setVisibility(View.VISIBLE);
+        }
+
+        View cardSubmission = findViewById(R.id.card_student_submission);
+        if (cardSubmission != null) {
+            cardSubmission.setVisibility(task.isRequiresSubmission() ? View.VISIBLE : View.GONE);
+        }
+
+        if (isStudent) {
+            btnEditTask.setVisibility(View.GONE);
             btnDeleteTask.setVisibility(View.GONE);
+            spStatus.setEnabled(false); // Sinh viên không được tự chỉnh trạng thái; hệ thống tự tính toán!
+        } else {
+            btnEditTask.setVisibility(View.VISIBLE);
+            btnDeleteTask.setVisibility(task.isPersonal() || "ADMIN".equalsIgnoreCase(sessionManager.getRole()) || "TEACHER".equalsIgnoreCase(sessionManager.getRole()) ? View.VISIBLE : View.GONE);
+            spStatus.setEnabled(true);
         }
 
         // Set Priority & Status
@@ -271,11 +325,14 @@ public class TaskDetailActivity extends AppCompatActivity {
             TextView tvSubStatus = findViewById(R.id.tv_submission_status);
             if (tvSubStatus != null) {
                 if (progress.getSubmittedFilePath() != null && !progress.getSubmittedFilePath().trim().isEmpty()) {
-                    tvSubStatus.setText("✅ Đã nộp bài: " + progress.getSubmittedFilePath() + "\n⏰ Thời gian nộp: " + (progress.getSubmittedTime() != null ? progress.getSubmittedTime() : "Vừa xong"));
+                    String subName = FileUtils.getFileNameFromUri(this, Uri.parse(progress.getSubmittedFilePath()));
+                    tvSubStatus.setText("✅ Đã nộp bài: " + subName + " (Nhấn để xem)\n⏰ Thời gian nộp: " + (progress.getSubmittedTime() != null ? progress.getSubmittedTime() : "Vừa xong"));
                     tvSubStatus.setTextColor(Color.parseColor("#2E7D32"));
+                    tvSubStatus.setOnClickListener(v -> FileUtils.openUriOrFile(this, progress.getSubmittedFilePath()));
                 } else {
                     tvSubStatus.setText("Trạng thái: Chưa nộp file bài làm");
                     tvSubStatus.setTextColor(Color.parseColor("#666666"));
+                    tvSubStatus.setOnClickListener(null);
                 }
             }
         }
@@ -285,31 +342,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         loadChecklistData();
     }
 
-    private String getFileNameFromUri(Uri uri) {
-        String result = null;
-        if ("content".equals(uri.getScheme())) {
-            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                    if (index != -1) {
-                        result = cursor.getString(index);
-                    }
-                }
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
-        if (result == null) {
-            result = uri.getPath();
-            if (result != null) {
-                int cut = result.lastIndexOf('/');
-                if (cut != -1) {
-                    result = result.substring(cut + 1);
-                }
-            }
-        }
-        return result != null ? result : "BaiLam_SinhVien.docx";
-    }
+
 
     private void loadChecklistData() {
         if (progressId <= 0) return;

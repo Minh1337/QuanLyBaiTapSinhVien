@@ -15,12 +15,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.quanlybaitapsinhvien.R;
 import com.example.quanlybaitapsinhvien.db.DatabaseHelper;
 import com.example.quanlybaitapsinhvien.model.ClassModel;
+import com.example.quanlybaitapsinhvien.model.Task;
 import com.example.quanlybaitapsinhvien.model.User;
 import com.example.quanlybaitapsinhvien.session.SessionManager;
 import com.example.quanlybaitapsinhvien.utils.WindowInsetUtils;
@@ -34,9 +37,18 @@ public class AdminActivity extends AppCompatActivity {
     private SessionManager sessionManager;
 
     private TextView tvAdminInfo;
-    private LinearLayout layoutUserList, layoutClassList;
+    private LinearLayout layoutUserList, layoutClassList, layoutAdminTaskList;
     private Button btnAddTeacher, btnCreateClass;
     private ImageButton btnLogout;
+
+    private final ActivityResultLauncher<Intent> refreshLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    refreshAdminData();
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +65,7 @@ public class AdminActivity extends AppCompatActivity {
         tvAdminInfo = findViewById(R.id.tv_admin_info);
         layoutUserList = findViewById(R.id.layout_user_list);
         layoutClassList = findViewById(R.id.layout_class_list);
+        layoutAdminTaskList = findViewById(R.id.layout_admin_task_list);
         btnAddTeacher = findViewById(R.id.btn_add_teacher);
         btnCreateClass = findViewById(R.id.btn_create_class);
         btnLogout = findViewById(R.id.btn_admin_logout);
@@ -76,6 +89,7 @@ public class AdminActivity extends AppCompatActivity {
     private void refreshAdminData() {
         renderUsersList();
         renderClassesList();
+        renderAdminTasksList();
     }
 
     private void renderUsersList() {
@@ -188,6 +202,72 @@ public class AdminActivity extends AppCompatActivity {
             container.addView(actionLayout);
 
             layoutClassList.addView(container);
+        }
+    }
+
+    private void renderAdminTasksList() {
+        if (layoutAdminTaskList == null) return;
+        layoutAdminTaskList.removeAllViews();
+        List<Task> tasks = dbHelper.getAllTasksForAdmin();
+
+        if (tasks.isEmpty()) {
+            TextView emptyText = new TextView(this);
+            emptyText.setText("Chưa có bài tập nào được tạo.");
+            emptyText.setTextColor(Color.GRAY);
+            emptyText.setPadding(0, 16, 0, 16);
+            layoutAdminTaskList.addView(emptyText);
+            return;
+        }
+
+        for (Task task : tasks) {
+            LinearLayout container = new LinearLayout(this);
+            container.setOrientation(LinearLayout.VERTICAL);
+            container.setBackgroundColor(Color.parseColor("#FAFAFA"));
+            container.setPadding(16, 16, 16, 16);
+            LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            clp.setMargins(0, 12, 0, 0);
+            container.setLayoutParams(clp);
+
+            TextView tvTitle = new TextView(this);
+            tvTitle.setText(task.getTitle());
+            tvTitle.setTextSize(14);
+            tvTitle.setTypeface(null, Typeface.BOLD);
+            tvTitle.setTextColor(Color.parseColor("#382841"));
+
+            TextView tvDue = new TextView(this);
+            tvDue.setText("⏰ Hạn nộp: " + task.getDueDate());
+            tvDue.setTextSize(12);
+            tvDue.setTextColor(Color.parseColor("#555555"));
+
+            LinearLayout btnLayout = new LinearLayout(this);
+            btnLayout.setOrientation(LinearLayout.HORIZONTAL);
+            btnLayout.setPadding(0, 8, 0, 0);
+
+            Button btnDelete = new Button(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            btnDelete.setText("🗑️ Xóa bài tập");
+            btnDelete.setTextSize(10);
+            btnDelete.setTextColor(Color.RED);
+
+            btnDelete.setOnClickListener(v -> {
+                new AlertDialog.Builder(AdminActivity.this)
+                        .setTitle("Xóa bài tập")
+                        .setMessage("Bạn có chắc chắn muốn xóa bài tập '" + task.getTitle() + "'?")
+                        .setPositiveButton("Xóa", (dialog, which) -> {
+                            dbHelper.deleteTeacherTask(task.getId());
+                            Toast.makeText(AdminActivity.this, "Đã xóa bài tập!", Toast.LENGTH_SHORT).show();
+                            refreshAdminData();
+                        })
+                        .setNegativeButton("Hủy", null)
+                        .show();
+            });
+
+            btnLayout.addView(btnDelete);
+
+            container.addView(tvTitle);
+            container.addView(tvDue);
+            container.addView(btnLayout);
+
+            layoutAdminTaskList.addView(container);
         }
     }
 

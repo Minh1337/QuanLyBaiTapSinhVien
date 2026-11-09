@@ -26,7 +26,9 @@ import com.example.quanlybaitapsinhvien.model.ClassModel;
 import com.example.quanlybaitapsinhvien.model.StudentReportItem;
 import com.example.quanlybaitapsinhvien.model.Task;
 import com.example.quanlybaitapsinhvien.session.SessionManager;
+import com.example.quanlybaitapsinhvien.utils.FileUtils;
 import com.example.quanlybaitapsinhvien.utils.WindowInsetUtils;
+import android.net.Uri;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -268,8 +270,11 @@ public class TeacherActivity extends AppCompatActivity {
             tvName.setTextColor(Color.parseColor("#382841"));
 
             TextView tvStatus = new TextView(this);
-            String subText = item.getSubmittedFilePath() != null ? " [📄 File: " + item.getSubmittedFilePath() + "]" : "";
-            tvStatus.setText("Trạng thái: " + item.getStatus() + " (" + item.getProgressPercentage() + "% completed)" + subText);
+            String statusText = "Trạng thái: " + item.getStatus() + " (" + item.getProgressPercentage() + "% hoàn thành)";
+            if (item.getQuizScore() >= 0) {
+                statusText += " | 🏆 Điểm TN: " + String.format(Locale.getDefault(), "%.1f", item.getQuizScore()) + "/10.0";
+            }
+            tvStatus.setText(statusText);
             tvStatus.setTextSize(12);
 
             if ("Hoàn thành".equalsIgnoreCase(item.getStatus())) tvStatus.setTextColor(Color.parseColor("#2E7D32"));
@@ -278,6 +283,20 @@ public class TeacherActivity extends AppCompatActivity {
 
             row.addView(tvName);
             row.addView(tvStatus);
+
+            if (item.getSubmittedFilePath() != null && !item.getSubmittedFilePath().trim().isEmpty()) {
+                String fileName = FileUtils.getFileNameFromUri(this, Uri.parse(item.getSubmittedFilePath()));
+                Button btnOpenSubmission = new Button(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+                btnOpenSubmission.setText("📄 Mở bài nộp: " + fileName);
+                btnOpenSubmission.setTextSize(11);
+                btnOpenSubmission.setTextColor(Color.parseColor("#713E87"));
+                btnOpenSubmission.setOnClickListener(v -> FileUtils.openUriOrFile(TeacherActivity.this, item.getSubmittedFilePath()));
+                
+                LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                btnLp.setMargins(0, 8, 0, 0);
+                btnOpenSubmission.setLayoutParams(btnLp);
+                row.addView(btnOpenSubmission);
+            }
 
             layoutReportList.addView(row);
         }

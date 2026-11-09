@@ -213,6 +213,19 @@
                         android:textStyle="bold"
                         android:visibility="gone" />
 
+                    <TextView
+                        android:id="@+id/tv_quiz_score_badge"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:background="#E8F5E9"
+                        android:padding="10dp"
+                        android:text="🏆 Điểm trắc nghiệm: 8.0/10 (Đạt)"
+                        android:textColor="#2E7D32"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -307,6 +320,7 @@
 
             <!-- Student File Submission Card -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_student_submission"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"

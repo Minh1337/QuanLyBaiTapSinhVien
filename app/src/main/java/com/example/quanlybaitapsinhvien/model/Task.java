@@ -18,6 +18,8 @@ public class Task {
     private String attachmentPath; // Dành cho file bài tập tải về (Docx, PDF...)
     private String quizFilePath;   // Dành cho file Trắc nghiệm (.txt)
     private String taskType;
+    private double passingScore = 0.0; // Mức điểm cần đạt (0.0 = Không yêu cầu)
+    private boolean requiresSubmission = false; // Yêu cầu sinh viên nộp file bài làm
 
     public Task() {}
 
@@ -33,6 +35,16 @@ public class Task {
         this.attachmentPath = attachmentPath;
         this.quizFilePath = quizFilePath;
         this.taskType = taskType != null ? taskType : TYPE_NORMAL;
+    }
+
+    public Task(long id, String title, String description, String dueDate, String sourceType, Long classId, Long personalSubjectId, long createdByUserId, String attachmentPath, String quizFilePath, String taskType, double passingScore) {
+        this(id, title, description, dueDate, sourceType, classId, personalSubjectId, createdByUserId, attachmentPath, quizFilePath, taskType);
+        this.passingScore = passingScore;
+    }
+
+    public Task(long id, String title, String description, String dueDate, String sourceType, Long classId, Long personalSubjectId, long createdByUserId, String attachmentPath, String quizFilePath, String taskType, double passingScore, boolean requiresSubmission) {
+        this(id, title, description, dueDate, sourceType, classId, personalSubjectId, createdByUserId, attachmentPath, quizFilePath, taskType, passingScore);
+        this.requiresSubmission = requiresSubmission;
     }
 
     public long getId() { return id; }
@@ -67,6 +79,12 @@ public class Task {
 
     public String getTaskType() { return taskType; }
     public void setTaskType(String taskType) { this.taskType = taskType; }
+
+    public double getPassingScore() { return passingScore; }
+    public void setPassingScore(double passingScore) { this.passingScore = passingScore; }
+
+    public boolean isRequiresSubmission() { return requiresSubmission; }
+    public void setRequiresSubmission(boolean requiresSubmission) { this.requiresSubmission = requiresSubmission; }
 
     public boolean isPersonal() {
         return SOURCE_PERSONAL.equalsIgnoreCase(sourceType);

@@ -243,12 +243,23 @@ public class MainActivity extends AppCompatActivity {
         }
 
         View.OnClickListener openAddEdit = v -> {
+            if ("STUDENT".equalsIgnoreCase(sessionManager.getRole())) {
+                Toast.makeText(MainActivity.this, "Sinh viên không có quyền tạo bài tập!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(MainActivity.this, AddEditTaskActivity.class);
             refreshLauncher.launch(intent);
         };
 
         fabAddTask.setOnClickListener(openAddEdit);
         if (btnHomeAddTask != null) btnHomeAddTask.setOnClickListener(openAddEdit);
+
+        // Hide task creation buttons for STUDENT role (only Admin/Teacher can create tasks)
+        if ("STUDENT".equalsIgnoreCase(sessionManager.getRole())) {
+            if (btnHomeAddTask != null) btnHomeAddTask.setVisibility(View.GONE);
+            if (fabAddTask != null) fabAddTask.setVisibility(View.GONE);
+            if (btnAddPersonalSubject != null) btnAddPersonalSubject.setVisibility(View.GONE);
+        }
 
         if (btnExportCsv != null) {
             btnExportCsv.setOnClickListener(v -> {
@@ -384,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
             rvTasks.setVisibility(View.GONE);
 
             tvNearestTitle.setText("Không có bài tập cận hạn");
-            tvNearestSub.setText("Hãy tạo bài tập mới để theo dõi");
+            tvNearestSub.setText("Chưa có bài tập nào được giao");
             pbNearest.setProgress(0);
         } else {
             tvEmptyView.setVisibility(View.GONE);

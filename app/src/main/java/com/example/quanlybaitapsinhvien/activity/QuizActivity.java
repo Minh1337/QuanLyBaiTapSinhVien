@@ -19,15 +19,20 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.quanlybaitapsinhvien.R;
+import com.example.quanlybaitapsinhvien.db.DatabaseHelper;
+import com.example.quanlybaitapsinhvien.model.TaskProgress;
+import com.example.quanlybaitapsinhvien.session.SessionManager;
 import com.example.quanlybaitapsinhvien.utils.FileUtils;
 import com.example.quanlybaitapsinhvien.utils.WindowInsetUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class QuizActivity extends AppCompatActivity {
 
@@ -60,6 +65,12 @@ public class QuizActivity extends AppCompatActivity {
     private final List<QuizQuestion> questions = new ArrayList<>();
     private int currentQuestionIndex = 0;
     private int currentScore = 0;
+    private int correctAnswersCount = 0;
+
+    private DatabaseHelper dbHelper;
+    private SessionManager sessionManager;
+    private long taskId = -1;
+    private double passingScore = 0.0;
 
     private String rawImportedText = "";
 
@@ -76,11 +87,16 @@ public class QuizActivity extends AppCompatActivity {
             new ActivityResultContracts.GetContent(),
             uri -> {
                 if (uri != null && currentQuestionIndex < questions.size()) {
+                    String savedUri = FileUtils.copyUriToInternalStorage(this, uri);
                     QuizQuestion q = questions.get(currentQuestionIndex);
-                    q.imageUri = uri.toString();
-                    ivQuestionImage.setImageURI(uri);
-                    ivQuestionImage.setVisibility(View.VISIBLE);
-                    Toast.makeText(this, "Đã đính kèm ảnh cho câu hỏi này!", Toast.LENGTH_SHORT).show();
+                    q.imageUri = savedUri;
+                    try {
+                        ivQuestionImage.setImageURI(Uri.parse(savedUri));
+                        ivQuestionImage.setVisibility(View.VISIBLE);
+                    } catch (Exception e) {
+                        ivQuestionImage.setVisibility(View.GONE);
+                    }
+                    Toast.makeText(this, "✅ Đã đính kèm ảnh cho câu hỏi này!", Toast.LENGTH_SHORT).show();
                 }
             }
     );
@@ -95,6 +111,17 @@ public class QuizActivity extends AppCompatActivity {
         WindowInsetUtils.applyHeaderAndRootInsets(headerBar, rootView);
 
         initViews();
+        dbHelper = new DatabaseHelper(this);
+        sessionManager = new SessionManager(this);
+        if (getIntent().hasExtra("extra_task_id")) {
+            taskId = getIntent().getLongExtra("extra_task_id", -1);
+        }
+        if (getIntent().hasExtra("passing_score")) {
+            passingScore = getIntent().getDoubleExtra("passing_score", 0.0);
+        }
+
+        boolean isTeacherOrAdmin = "TEACHER".equalsIgnoreCase(sessionManager.getRole()) || "ADMIN".equalsIgnoreCase(sessionManager.getRole());
+
         if (getIntent().hasExtra("quiz_uri")) {
             String uriStr = getIntent().getStringExtra("quiz_uri");
             if (uriStr != null) {
@@ -104,17 +131,20 @@ public class QuizActivity extends AppCompatActivity {
                     Toast.makeText(this, "Không thể đọc file đính kèm!", Toast.LENGTH_SHORT).show();
                     loadSampleQuestionsFromAsset();
                 }
-                
-                // Hide import buttons for student taking quiz
-                btnDownloadTemplate.setVisibility(View.GONE);
-                btnImportFileFromDevice.setVisibility(View.GONE);
-                btnEditImportText.setVisibility(View.GONE);
-                findViewById(R.id.tv_import_label).setVisibility(View.GONE);
-                findViewById(R.id.cv_import_section).setVisibility(View.GONE);
-                btnAttachQuestionImage.setVisibility(View.GONE);
             }
         } else {
             loadSampleQuestionsFromAsset();
+        }
+
+        if (!isTeacherOrAdmin) {
+            btnDownloadTemplate.setVisibility(View.GONE);
+            btnImportFileFromDevice.setVisibility(View.GONE);
+            btnEditImportText.setVisibility(View.GONE);
+            if (findViewById(R.id.tv_import_label) != null) findViewById(R.id.tv_import_label).setVisibility(View.GONE);
+            if (findViewById(R.id.cv_import_section) != null) findViewById(R.id.cv_import_section).setVisibility(View.GONE);
+            btnAttachQuestionImage.setVisibility(View.GONE);
+        } else {
+            btnAttachQuestionImage.setVisibility(View.VISIBLE);
         }
         
         displayCurrentQuestion();
@@ -122,10 +152,7 @@ public class QuizActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         btnDownloadTemplate.setOnClickListener(v -> {
-            File file = FileUtils.copyAssetToDownloads(this, "mau_cau_hoi_trac_nghiem.docx", "Mau_Cau_Hoi_Trac_Nghiem_HNUE.docx");
-            if (file != null) {
-                FileUtils.openFile(this, file);
-            }
+            FileUtils.copyAssetToDownloads(this, "danh_sach_cau_hoi.txt", "Mau_Cau_Hoi_Trac_Nghiem_HNUE.docx");
         });
 
         btnImportFileFromDevice.setOnClickListener(v -> pickImportFileLauncher.launch("*/*"));
@@ -180,7 +207,19 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void readTextFromUriAndParseDirectly(Uri uri) throws Exception {
-        InputStream is = getContentResolver().openInputStream(uri);
+        InputStream is = null;
+        try {
+            is = getContentResolver().openInputStream(uri);
+        } catch (Exception e) {
+            String path = uri.getPath();
+            if (path != null) {
+                File file = new File(path);
+                if (file.exists()) {
+                    is = new FileInputStream(file);
+                }
+            }
+        }
+
         if (is != null) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             StringBuilder sb = new StringBuilder();
@@ -229,29 +268,37 @@ public class QuizActivity extends AppCompatActivity {
             String line = l.trim();
             if (line.isEmpty()) continue;
 
-            if (line.startsWith("Câu") || line.startsWith("Cau")) {
-                if (qText != null && optA != null && optB != null && optC != null && optD != null && ans != null) {
+            String lower = line.toLowerCase();
+            if (line.startsWith("Câu") || line.startsWith("Cau") || lower.startsWith("question") || line.startsWith("Q1") || line.startsWith("Q2") || line.startsWith("Q3") || line.startsWith("1.") || line.startsWith("2.") || line.startsWith("3.")) {
+                if (qText != null && optA != null && optB != null) {
+                    if (optC == null) optC = "C. Đáp án C";
+                    if (optD == null) optD = "D. Đáp án D";
+                    if (ans == null) ans = "A";
                     questions.add(new QuizQuestion(qText, optA, optB, optC, optD, ans));
                     optA = optB = optC = optD = ans = null;
                 }
                 qText = line;
-            } else if (line.startsWith("A.") || line.startsWith("A :")) {
+            } else if (line.startsWith("A.") || line.startsWith("A:") || line.startsWith("A)") || line.startsWith("A -") || line.startsWith("a.")) {
                 optA = line;
-            } else if (line.startsWith("B.") || line.startsWith("B :")) {
+            } else if (line.startsWith("B.") || line.startsWith("B:") || line.startsWith("B)") || line.startsWith("B -") || line.startsWith("b.")) {
                 optB = line;
-            } else if (line.startsWith("C.") || line.startsWith("C :")) {
+            } else if (line.startsWith("C.") || line.startsWith("C:") || line.startsWith("C)") || line.startsWith("C -") || line.startsWith("c.")) {
                 optC = line;
-            } else if (line.startsWith("D.") || line.startsWith("D :")) {
+            } else if (line.startsWith("D.") || line.startsWith("D:") || line.startsWith("D)") || line.startsWith("D -") || line.startsWith("d.")) {
                 optD = line;
-            } else if (line.contains("Đáp án") || line.contains("Dap an") || line.startsWith("Ans:")) {
-                if (line.contains("A")) ans = "A";
-                else if (line.contains("B")) ans = "B";
-                else if (line.contains("C")) ans = "C";
-                else if (line.contains("D")) ans = "D";
+            } else if (line.contains("Đáp án") || line.contains("Dap an") || line.contains("Answer") || line.startsWith("Ans:")) {
+                String upper = line.toUpperCase();
+                if (upper.contains("A")) ans = "A";
+                else if (upper.contains("B")) ans = "B";
+                else if (upper.contains("C")) ans = "C";
+                else if (upper.contains("D")) ans = "D";
             }
         }
 
-        if (qText != null && optA != null && optB != null && optC != null && optD != null && ans != null) {
+        if (qText != null && optA != null && optB != null) {
+            if (optC == null) optC = "C. Đáp án C";
+            if (optD == null) optD = "D. Đáp án D";
+            if (ans == null) ans = "A";
             questions.add(new QuizQuestion(qText, optA, optB, optC, optD, ans));
         }
     }
@@ -329,10 +376,8 @@ public class QuizActivity extends AppCompatActivity {
 
         QuizQuestion q = questions.get(currentQuestionIndex);
         if (userAns.equalsIgnoreCase(q.correctAnswer)) {
+            correctAnswersCount++;
             currentScore += 10;
-            Toast.makeText(this, "✅ Chính xác! +10 điểm", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "❌ Đáp án chưa đúng. Đáp án đúng là: " + q.correctAnswer, Toast.LENGTH_SHORT).show();
         }
 
         currentQuestionIndex++;
@@ -340,15 +385,45 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void showQuizCompletedDialog() {
+        int totalQuestions = questions.isEmpty() ? 1 : questions.size();
+        double finalScore = Math.round(((double) correctAnswersCount / totalQuestions * 10.0) * 10.0) / 10.0;
+        boolean passed = (passingScore <= 0 || finalScore >= passingScore);
+        String autoStatus = passed ? TaskProgress.STATUS_COMPLETED : TaskProgress.STATUS_IN_PROGRESS;
+
+        long studentId = sessionManager != null ? sessionManager.getUserId() : -1;
+        if (taskId != -1 && studentId != -1 && dbHelper != null) {
+            dbHelper.updateStudentQuizResult(taskId, studentId, finalScore, autoStatus);
+        }
+
+        StringBuilder msg = new StringBuilder();
+        msg.append("Kết quả bài trắc nghiệm:\n");
+        msg.append("• Số câu đúng: ").append(correctAnswersCount).append(" / ").append(totalQuestions).append("\n");
+        msg.append("• Điểm số: ").append(String.format(Locale.getDefault(), "%.1f", finalScore)).append(" / 10.0\n");
+
+        if (passingScore > 0) {
+            msg.append("• Mức điểm cần đạt: ").append(String.format(Locale.getDefault(), "%.1f", passingScore)).append(" / 10.0\n");
+            if (passed) {
+                msg.append("• Trạng thái: ✅ ĐẠT (Đã tự động cập nhật Hoàn thành)");
+            } else {
+                msg.append("• Trạng thái: ❌ CHƯA ĐẠT (Hãy thử lại!)");
+            }
+        } else {
+            msg.append("• Tiến độ: ✅ Tự động cập nhật HOÀN THÀNH!");
+        }
+
         new AlertDialog.Builder(this)
-                .setTitle("Hoàn thành bài trắc nghiệm!")
-                .setMessage("Chúc mừng bạn đã hoàn thành bài tập!\nTổng số điểm đạt được: " + currentScore + " điểm.")
+                .setTitle("🎉 Hoàn thành bài trắc nghiệm!")
+                .setMessage(msg.toString())
                 .setPositiveButton("Làm lại", (dialog, which) -> {
                     currentQuestionIndex = 0;
                     currentScore = 0;
+                    correctAnswersCount = 0;
                     displayCurrentQuestion();
                 })
-                .setNegativeButton("Thoát", (dialog, which) -> finish())
+                .setNegativeButton("Thoát", (dialog, which) -> {
+                    setResult(RESULT_OK);
+                    finish();
+                })
                 .setCancelable(false)
                 .show();
     }

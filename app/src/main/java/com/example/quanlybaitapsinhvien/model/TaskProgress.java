@@ -18,6 +18,7 @@ public class TaskProgress {
     private String reminderTime;
     private String submittedFilePath;
     private String submittedTime;
+    private double quizScore = -1.0;
 
     public TaskProgress() {}
 
@@ -30,6 +31,11 @@ public class TaskProgress {
         this.reminderTime = reminderTime;
         this.submittedFilePath = submittedFilePath;
         this.submittedTime = submittedTime;
+    }
+
+    public TaskProgress(long id, long taskId, long studentId, String status, String priority, String reminderTime, String submittedFilePath, String submittedTime, double quizScore) {
+        this(id, taskId, studentId, status, priority, reminderTime, submittedFilePath, submittedTime);
+        this.quizScore = quizScore;
     }
 
     public long getId() { return id; }
@@ -55,4 +61,7 @@ public class TaskProgress {
 
     public String getSubmittedTime() { return submittedTime; }
     public void setSubmittedTime(String submittedTime) { this.submittedTime = submittedTime; }
+
+    public double getQuizScore() { return quizScore; }
+    public void setQuizScore(double quizScore) { this.quizScore = quizScore; }
 }

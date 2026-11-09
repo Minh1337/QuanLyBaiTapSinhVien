@@ -7,6 +7,7 @@ public class StudentReportItem {
     private String status;
     private int progressPercentage;
     private String submittedFilePath;
+    private double quizScore = -1.0;
 
     public StudentReportItem() {}
 
@@ -17,6 +18,11 @@ public class StudentReportItem {
         this.status = status;
         this.progressPercentage = progressPercentage;
         this.submittedFilePath = submittedFilePath;
+    }
+
+    public StudentReportItem(long studentId, String studentName, String username, String status, int progressPercentage, String submittedFilePath, double quizScore) {
+        this(studentId, studentName, username, status, progressPercentage, submittedFilePath);
+        this.quizScore = quizScore;
     }
 
     public long getStudentId() { return studentId; }
@@ -36,4 +42,7 @@ public class StudentReportItem {
 
     public String getSubmittedFilePath() { return submittedFilePath; }
     public void setSubmittedFilePath(String submittedFilePath) { this.submittedFilePath = submittedFilePath; }
+
+    public double getQuizScore() { return quizScore; }
+    public void setQuizScore(double quizScore) { this.quizScore = quizScore; }
 }
