@@ -1,5 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Basic Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Blue Theme Palette -->
+    <color name="blue_primary">#2563EB</color>
+    <color name="blue_primary_dark">#1D4ED8</color>
+    <color name="blue_secondary">#3B82F6</color>
+    <color name="blue_light_bg">#EFF6FF</color>
+    <color name="blue_card_bg">#DBEAFE</color>
+    <color name="blue_icon_bg">#E0E7FF</color>
+
+    <!-- Background Colors -->
+    <color name="bg_screen">#FAFCFF</color>
+    <color name="bg_dialog_overlay">#800F172A</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#64748B</color>
+    <color name="text_hint">#94A3B8</color>
+    <color name="text_link">#2563EB</color>
+
+    <!-- UI Component Colors -->
+    <color name="input_bg">#F8FAFC</color>
+    <color name="input_border">#E2E8F0</color>
+    <color name="input_border_focus">#2563EB</color>
+    <color name="success_green">#10B981</color>
+    <color name="error_red">#EF4444</color>
 </resources>
