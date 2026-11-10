@@ -96,12 +96,16 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * Đọc vai trò (Role) của tài khoản và mở màn hình Trang chủ tương ứng
+     * Lưu phiên đăng nhập và mở màn hình Trang chủ tương ứng với vai trò
      * @param taiKhoan Đối tượng tài khoản vừa đăng nhập thành công
      */
     private void phanQuyenDieuHuong(TaiKhoan taiKhoan) {
         String vaiTro = taiKhoan.getVaiTro();
         Toast.makeText(this, "Đăng nhập thành công với vai trò " + vaiTro + "!", Toast.LENGTH_SHORT).show();
+
+        // Lưu phiên đăng nhập vào SharedPreferences
+        SessionManager sessionManager = new SessionManager(this);
+        sessionManager.taoPhienDangNhap(taiKhoan.getId(), taiKhoan.getEmail(), vaiTro);
 
         // Mở Trang chủ phân quyền HomeActivity
         Intent intent = new Intent(LoginActivity.this, HomeActivity.class);

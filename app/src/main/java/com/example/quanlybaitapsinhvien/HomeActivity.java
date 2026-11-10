@@ -82,6 +82,10 @@ public class HomeActivity extends AppCompatActivity {
      * Thực hiện đăng xuất tài khoản và quay về màn hình Chào mừng (WelcomeActivity)
      */
     private void dangXuatTaiKhoan() {
+        // Xóa sạch phiên đăng nhập trong SharedPreferences
+        SessionManager sessionManager = new SessionManager(this);
+        sessionManager.xoaPhienDangNhap();
+
         Toast.makeText(this, "Đã đăng xuất tài khoản", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(HomeActivity.this, WelcomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

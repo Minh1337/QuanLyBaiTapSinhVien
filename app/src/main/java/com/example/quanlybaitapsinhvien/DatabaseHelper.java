@@ -79,8 +79,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return ketQua != -1;
     }
 
-
-    //Kiểm tra xem địa chỉ Email đã tồn tại trong hệ thống hay chưa
+    /**
+     * Kiểm tra xem địa chỉ Email đã tồn tại trong hệ thống hay chưa
+     */
     public boolean kiemTraEmailTonTai(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "SELECT * FROM " + BANG_TAI_KHOAN + " WHERE LOWER(" + COT_EMAIL + ") = ?";
@@ -90,11 +91,43 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return tonTai;
     }
 
-    // Kiểm tra đăng nhập với Email và Mật khẩu
+    /**
+     * Kiểm tra đăng nhập với Email và Mật khẩu
+     */
     public TaiKhoan kiemTraDangNhap(String email, String matKhau) {
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "SELECT * FROM " + BANG_TAI_KHOAN + " WHERE LOWER(" + COT_EMAIL + ") = ? AND " + COT_MAT_KHAU + " = ?";
         Cursor cursor = db.rawQuery(sql, new String[]{email.trim().toLowerCase(), matKhau.trim()});
+
+        TaiKhoan taiKhoan = null;
+        if (cursor.moveToFirst()) {
+            int idIndex = cursor.getColumnIndexOrThrow(COT_ID);
+            int emailIndex = cursor.getColumnIndexOrThrow(COT_EMAIL);
+            int matKhauIndex = cursor.getColumnIndexOrThrow(COT_MAT_KHAU);
+            int vaiTroIndex = cursor.getColumnIndexOrThrow(COT_VAI_TRO);
+            int trangThaiIndex = cursor.getColumnIndexOrThrow(COT_TRANG_THAI);
+
+            taiKhoan = new TaiKhoan(
+                    cursor.getInt(idIndex),
+                    cursor.getString(emailIndex),
+                    cursor.getString(matKhauIndex),
+                    cursor.getString(vaiTroIndex),
+                    cursor.getInt(trangThaiIndex)
+            );
+        }
+        cursor.close();
+        return taiKhoan;
+    }
+
+    /**
+     * Lấy thông tin tài khoản theo ID người dùng
+     * @param userId ID tài khoản cần tìm
+     * @return Đối tượng TaiKhoan nếu tìm thấy, null nếu không tồn tại
+     */
+    public TaiKhoan layTaiKhoanTheoId(int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT * FROM " + BANG_TAI_KHOAN + " WHERE " + COT_ID + " = ?";
+        Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(userId)});
 
         TaiKhoan taiKhoan = null;
         if (cursor.moveToFirst()) {
