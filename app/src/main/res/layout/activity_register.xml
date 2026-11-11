@@ -56,16 +56,12 @@
                 android:layout_height="1dp"
                 android:layout_weight="1" />
 
-            <!-- Icon Q nhỏ ở góc trên phải -->
-            <TextView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@drawable/bg_logo_card"
-                android:gravity="center"
-                android:text="Q"
-                android:textColor="@color/blue_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+            <!-- Logo HNUE nhỏ ở góc trên phải -->
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:contentDescription="Logo HNUE"
+                android:src="@drawable/ic_logo_hnue" />
         </LinearLayout>
 
         <!-- Tiêu đề trang đăng ký -->
@@ -87,7 +83,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Bắt đầu trải nghiệm cùng Q ngay hôm nay."
+            android:text="Bắt đầu trải nghiệm ứng dụng ngay hôm nay."
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Nền đường tròn xanh lam đậm HNUE -->
+    <path
+        android:fillColor="#153E85"
+        android:pathData="M100,0 C155.23,0 200,44.77 200,100 C200,155.23 155.23,200 100,200 C44.77,200 0,155.23 0,100 C0,44.77 44.77,0 100,0 Z" />
+
+    <!-- Sách xếp tầng trên (Lớp 1) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,32 L78,46 L100,56 L122,46 Z M100,40 L86,47 L100,53 L114,47 Z" />
+
+    <!-- Sách xếp tầng trên (Lớp 2) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,52 L68,68 L100,80 L132,68 Z M100,60 L78,69 L100,77 L122,69 Z" />
+
+    <!-- Biểu tượng cuốn sách mở lớn ở giữa -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,106 L20,95 L20,108 L100,122 L180,108 L180,95 Z M100,113 L30,102 L100,110 L170,102 Z" />
+
+    <!-- Chữ HNUE màu trắng giữa logo -->
+    <!-- Chữ H -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M62,135 H68 V144 H76 V135 H82 V155 H76 V148 H68 V155 H62 Z" />
+    <!-- Chữ N -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M87,135 H93 L101,148 V135 H106 V155 H100 L92,142 V155 H87 Z" />
+    <!-- Chữ U -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M112,135 H118 V149 C118,151 120,152 122,152 C124,152 126,151 126,149 V135 H132 V149 C132,154 128,157 122,157 C116,157 112,154 112,149 Z" />
+    <!-- Chữ E -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M138,135 H154 V140 H144 V143 H152 V147 H144 V150 H154 V155 H138 Z" />
+
+    <!-- Vòng chữ cong phía dưới: ĐẠI HỌC SƯ PHẠM HÀ NỘI (Biểu diễn bằng các nét đường nét đơn giản) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,165 C55,178 76,185 100,185 C124,185 145,178 160,165 L156,162 C142,174 122,180 100,180 C78,180 58,174 44,162 Z" />
+
+</vector>

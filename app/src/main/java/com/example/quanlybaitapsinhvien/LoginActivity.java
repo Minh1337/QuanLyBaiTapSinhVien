@@ -2,153 +2,173 @@ package com.example.quanlybaitapsinhvien;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
- * Màn hình Đăng nhập
- * Kiểm tra tài khoản từ CSDL SQLite và phân quyền chuyển trang theo vai trò (ADMIN, TEACHER, STUDENT)
+ * Màn hình Đăng nhập ứng dụng Sổ Bài Tập Sinh Viên
+ * Hỗ trợ Đăng nhập chuẩn và nút ĐĂNG NHẬP NHANH DEMO cho 4 vai trò
  */
 public class LoginActivity extends AppCompatActivity {
 
-    private View btnQuayLai;
     private EditText etTenDangNhap;
     private EditText etMatKhau;
+    private ImageView ivAnHienMatKhau;
     private TextView tvDangKyNgay;
     private Button btnThucHienDangNhap;
 
-    // Đối tượng quản lý CSDL SQLite
+    // Nút Đăng nhập nhanh Demo
+    private Button btnDemoSvA;
+    private Button btnDemoSvB;
+    private Button btnDemoGiaoVien;
+    private Button btnDemoAdmin;
+
+    private boolean isPasswordVisible = false;
     private DatabaseHelper dbHelper;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Khởi tạo DatabaseHelper
         dbHelper = new DatabaseHelper(this);
+        sessionManager = new SessionManager(this);
 
-        // Khởi tạo và ánh xạ các view trong giao diện
         khoiTaoViews();
-
-        // Gán sự kiện tương tác cho các nút
         caiDatSuKien();
     }
 
     /**
-     * Khởi tạo và liên kết các view với thành phần trên layout XML
+     * Khởi tạo và ánh xạ các view giao diện
      */
     private void khoiTaoViews() {
-        btnQuayLai = findViewById(R.id.btnQuayLai);
         etTenDangNhap = findViewById(R.id.etTenDangNhap);
         etMatKhau = findViewById(R.id.etMatKhau);
+        ivAnHienMatKhau = findViewById(R.id.ivAnHienMatKhau);
         tvDangKyNgay = findViewById(R.id.tvDangKyNgay);
         btnThucHienDangNhap = findViewById(R.id.btnThucHienDangNhap);
+
+        btnDemoSvA = findViewById(R.id.btnDemoSvA);
+        btnDemoSvB = findViewById(R.id.btnDemoSvB);
+        btnDemoGiaoVien = findViewById(R.id.btnDemoGiaoVien);
+        btnDemoAdmin = findViewById(R.id.btnDemoAdmin);
     }
 
     /**
-     * Cài đặt lắng nghe sự kiện click cho nút Quay lại, chữ Đăng ký và nút Đăng nhập
+     * Cài đặt các sự kiện click nút
      */
     private void caiDatSuKien() {
-        // Sự kiện khi bấm nút Quay lại góc trên bên trái
-        btnQuayLai.setOnClickListener(v -> quayLaiTrangTruoc());
+        // Sự kiện ẩn/hiện mật khẩu
+        ivAnHienMatKhau.setOnClickListener(v -> toggleMatKhau());
 
-        // Sự kiện khi bấm vào chữ "Đăng ký" góc dưới bên phải phần mật khẩu
-        tvDangKyNgay.setOnClickListener(v -> chuyenDenDangKy());
+        // Chuyển sang màn hình Đăng ký
+        tvDangKyNgay.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
 
-        // Sự kiện khi bấm nút "Đăng nhập"
+        // Nút Đăng nhập chính
         btnThucHienDangNhap.setOnClickListener(v -> xuLyDangNhap());
+
+        // Nút Đăng nhập nhanh Demo
+        btnDemoSvA.setOnClickListener(v -> dangNhapNhanhDemo("sv_a", "123456"));
+        btnDemoSvB.setOnClickListener(v -> dangNhapNhanhDemo("sv_b", "123456"));
+        btnDemoGiaoVien.setOnClickListener(v -> dangNhapNhanhDemo("gv_nguyen", "123456"));
+        btnDemoAdmin.setOnClickListener(v -> dangNhapNhanhDemo("admin", "admin123"));
     }
 
     /**
-     * Kiểm tra thông tin nhập vào từ SQLite và phân quyền chuyển trang tương ứng
+     * Xử lý ẩn/hiện mật khẩu trong ô nhập
+     */
+    private void toggleMatKhau() {
+        if (isPasswordVisible) {
+            etMatKhau.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            ivAnHienMatKhau.setImageResource(R.drawable.ic_eye_off);
+            isPasswordVisible = false;
+        } else {
+            etMatKhau.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            ivAnHienMatKhau.setImageResource(R.drawable.ic_eye);
+            isPasswordVisible = true;
+        }
+        etMatKhau.setSelection(etMatKhau.getText().length());
+    }
+
+    /**
+     * Xử lý đăng nhập thông thường
      */
     private void xuLyDangNhap() {
-        String tenDangNhap = etTenDangNhap.getText().toString().trim();
+        String username = etTenDangNhap.getText().toString().trim();
         String matKhau = etMatKhau.getText().toString().trim();
 
-        if (!kiemTraNhapLieu(tenDangNhap, matKhau)) {
-            return;
-        }
-
-        // Kiểm tra tài khoản trong SQLite Database
-        TaiKhoan taiKhoan = dbHelper.kiemTraDangNhap(tenDangNhap, matKhau);
-
-        if (taiKhoan == null) {
-            Toast.makeText(this, "Email hoặc mật khẩu không chính xác!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Kiểm tra trạng thái hoạt động của tài khoản
-        if (taiKhoan.getTrangThai() == 0) {
-            Toast.makeText(this, "Tài khoản của bạn hiện đã bị khóa!", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // Phân quyền điều hướng theo vai trò (Role) đọc từ SQLite
-        phanQuyenDieuHuong(taiKhoan);
-    }
-
-    /**
-     * Lưu phiên đăng nhập và mở màn hình Trang chủ tương ứng với vai trò
-     * @param taiKhoan Đối tượng tài khoản vừa đăng nhập thành công
-     */
-    private void phanQuyenDieuHuong(TaiKhoan taiKhoan) {
-        String vaiTro = taiKhoan.getVaiTro();
-        Toast.makeText(this, "Đăng nhập thành công với vai trò " + vaiTro + "!", Toast.LENGTH_SHORT).show();
-
-        // Lưu phiên đăng nhập vào SharedPreferences
-        SessionManager sessionManager = new SessionManager(this);
-        sessionManager.taoPhienDangNhap(taiKhoan.getId(), taiKhoan.getEmail(), vaiTro);
-
-        // Mở Trang chủ phân quyền HomeActivity
-        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-        intent.putExtra("EMAIL", taiKhoan.getEmail());
-        intent.putExtra("VAI_TRO", vaiTro);
-        startActivity(intent);
-        finish();
-    }
-
-    /**
-     * Kiểm tra tính hợp lệ của thông tin đầu vào (không được bỏ trống)
-     * @param tenDangNhap Tên đăng nhập hoặc Email người dùng đã nhập
-     * @param matKhau Mật khẩu người dùng đã nhập
-     * @return true nếu hợp lệ, false nếu thiếu thông tin
-     */
-    private boolean kiemTraNhapLieu(String tenDangNhap, String matKhau) {
-        if (TextUtils.isEmpty(tenDangNhap)) {
-            etTenDangNhap.setError("Vui lòng nhập tên đăng nhập hoặc email");
+        if (TextUtils.isEmpty(username)) {
+            etTenDangNhap.setError("Vui lòng nhập tên đăng nhập");
             etTenDangNhap.requestFocus();
-            return false;
+            return;
         }
 
         if (TextUtils.isEmpty(matKhau)) {
             etMatKhau.setError("Vui lòng nhập mật khẩu");
             etMatKhau.requestFocus();
-            return false;
+            return;
         }
 
-        return true;
+        TaiKhoan taiKhoan = dbHelper.kiemTraDangNhap(username, matKhau);
+        if (taiKhoan == null) {
+            Toast.makeText(this, "Tên đăng nhập hoặc mật khẩu không chính xác!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (taiKhoan.getTrangThai() == 0) {
+            Toast.makeText(this, "Tài khoản này hiện đã bị khóa!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        chuyenManHinhTheoVaiTro(taiKhoan);
     }
 
     /**
-     * Chuyển sang màn hình Đăng ký (RegisterActivity)
+     * Đăng nhập nhanh cho các tài khoản Demo
      */
-    private void chuyenDenDangKy() {
-        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+    private void dangNhapNhanhDemo(String username, String matKhau) {
+        TaiKhoan taiKhoan = dbHelper.kiemTraDangNhap(username, matKhau);
+        if (taiKhoan != null && taiKhoan.getTrangThai() == 1) {
+            Toast.makeText(this, "⚡ Đăng nhập Demo thành công: " + taiKhoan.getHoTen(), Toast.LENGTH_SHORT).show();
+            chuyenManHinhTheoVaiTro(taiKhoan);
+        } else {
+            Toast.makeText(this, "Lỗi tài khoản demo!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Lưu phiên đăng nhập và mở màn hình theo vai trò (ADMIN, TEACHER, STUDENT)
+     */
+    private void chuyenManHinhTheoVaiTro(TaiKhoan taiKhoan) {
+        sessionManager.taoPhienDangNhap(taiKhoan.getId(), taiKhoan.getEmail(), taiKhoan.getVaiTro());
+
+        Intent intent;
+        switch (taiKhoan.getVaiTro()) {
+            case "ADMIN":
+                intent = new Intent(LoginActivity.this, AdminHomeActivity.class);
+                break;
+            case "TEACHER":
+                intent = new Intent(LoginActivity.this, TeacherHomeActivity.class);
+                break;
+            case "STUDENT":
+            default:
+                intent = new Intent(LoginActivity.this, StudentHomeActivity.class);
+                break;
+        }
+        intent.putExtra("USER_ID", taiKhoan.getId());
+        intent.putExtra("HO_TEN", taiKhoan.getHoTen());
         startActivity(intent);
-    }
-
-    /**
-     * Quay lại màn hình trước đó
-     */
-    private void quayLaiTrangTruoc() {
         finish();
     }
 }

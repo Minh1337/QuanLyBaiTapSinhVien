@@ -35,20 +35,38 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Màn hình Trang chủ phân quyền -->
+        <!-- Màn hình Sinh viên -->
         <activity
-            android:name=".HomeActivity"
+            android:name=".StudentHomeActivity"
             android:exported="false" />
 
-        <!-- Màn hình Dashboard thống kê -->
+        <!-- Màn hình Chi tiết bài tập -->
         <activity
-            android:name=".DashboardActivity"
+            android:name=".AssignmentDetailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Màn hình Giáo viên -->
+        <activity
+            android:name=".TeacherHomeActivity"
             android:exported="false" />
 
-        <!-- Màn hình Trang chủ chính (đặt sẵn cho ứng dụng) -->
+        <!-- Màn hình Quản trị viên -->
         <activity
-            android:name=".MainActivity"
+            android:name=".AdminHomeActivity"
             android:exported="false" />
+
+        <!-- FileProvider để chia sẻ file Báo cáo CSV -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 
 </manifest>

@@ -4,28 +4,43 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Blue Theme Palette -->
-    <color name="blue_primary">#2563EB</color>
-    <color name="blue_primary_dark">#1D4ED8</color>
-    <color name="blue_secondary">#3B82F6</color>
-    <color name="blue_light_bg">#EFF6FF</color>
-    <color name="blue_card_bg">#DBEAFE</color>
-    <color name="blue_icon_bg">#E0E7FF</color>
+    <!-- Purple / Pink Theme Palette (Figma & Prompt standard) -->
+    <color name="purple_primary">#713E87</color>
+    <color name="purple_primary_dark">#522765</color>
+    <color name="purple_secondary">#6B21A8</color>
+    <color name="purple_light_bg">#F6DFEC</color>
+    <color name="pink_highlight">#F6DFEC</color>
+    <color name="bg_screen">#FBF5FA</color>
 
-    <!-- Background Colors -->
-    <color name="bg_screen">#FAFCFF</color>
-    <color name="bg_dialog_overlay">#800F172A</color>
+    <!-- Legacy Blue support -->
+    <color name="blue_primary">#713E87</color>
+    <color name="blue_primary_dark">#522765</color>
+    <color name="blue_secondary">#6B21A8</color>
+    <color name="blue_light_bg">#F6DFEC</color>
+    <color name="blue_card_bg">#F6DFEC</color>
+    <color name="blue_icon_bg">#F6DFEC</color>
+
+    <!-- Background & Dialog Overlay -->
+    <color name="bg_dialog_overlay">#80382841</color>
+    <color name="card_bg">#FFFFFF</color>
 
     <!-- Text Colors -->
-    <color name="text_primary">#0F172A</color>
-    <color name="text_secondary">#64748B</color>
-    <color name="text_hint">#94A3B8</color>
-    <color name="text_link">#2563EB</color>
+    <color name="text_primary">#382841</color>
+    <color name="text_secondary">#6B5E74</color>
+    <color name="text_hint">#9E8FA5</color>
+    <color name="text_link">#713E87</color>
+
+    <!-- Status & Badge Colors -->
+    <color name="badge_teacher">#713E87</color>
+    <color name="badge_personal">#0284C7</color>
+    <color name="badge_overdue">#DC2626</color>
+    <color name="badge_ongoing">#D97706</color>
+    <color name="badge_done">#16A34A</color>
 
     <!-- UI Component Colors -->
-    <color name="input_bg">#F8FAFC</color>
-    <color name="input_border">#E2E8F0</color>
-    <color name="input_border_focus">#2563EB</color>
-    <color name="success_green">#10B981</color>
-    <color name="error_red">#EF4444</color>
+    <color name="input_bg">#FFFFFF</color>
+    <color name="input_border">#E5D9E8</color>
+    <color name="input_border_focus">#713E87</color>
+    <color name="success_green">#16A34A</color>
+    <color name="error_red">#DC2626</color>
 </resources>

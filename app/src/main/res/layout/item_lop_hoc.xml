@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <!-- Mã + Tên lớp -->
+    <TextView
+        android:id="@+id/tvTenLop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="MOB01 - Lập trình Android MOB01"
+        android:textColor="@color/text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Giáo viên phụ trách -->
+    <TextView
+        android:id="@+id/tvGiaoVien"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Giáo viên: ThS. Nguyễn Văn Thầy"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
+
+    <!-- Nút thao tác: Đổi GV, Thêm SV, Bớt SV -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnDoiGv"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_pill_demo"
+            android:text="Đổi GV"
+            android:textAllCaps="false"
+            android:textColor="@color/purple_primary"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnThemSv"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginHorizontal="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_pill_demo"
+            android:text="+ Thêm SV"
+            android:textAllCaps="false"
+            android:textColor="@color/purple_primary"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnBotSv"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_pill_demo"
+            android:text="- Bớt SV"
+            android:textAllCaps="false"
+            android:textColor="@color/error_red"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+</LinearLayout>

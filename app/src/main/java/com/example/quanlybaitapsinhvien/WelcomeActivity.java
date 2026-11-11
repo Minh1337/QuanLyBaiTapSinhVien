@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Màn hình Chào mừng (Trang ngoài)
- * Hiển thị logo Q, câu chào mừng, tự động khôi phục phiên đăng nhập cũ nếu có
+ * Tự động khôi phục phiên đăng nhập và điều hướng theo vai trò (ADMIN, TEACHER, STUDENT)
  */
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -20,21 +20,14 @@ public class WelcomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Kiểm tra và khôi phục phiên đăng nhập cũ (nếu đã đăng nhập trước đó)
+        // Khôi phục phiên đăng nhập cũ nếu có
         khoiPhucPhienDangNhap();
 
         setContentView(R.layout.activity_welcome);
-
-        // Khởi tạo và ánh xạ giao diện
         khoiTaoViews();
-
-        // Cài đặt các sự kiện tương tác
         caiDatSuKien();
     }
 
-    /**
-     * Kiểm tra và khôi phục phiên đăng nhập cũ từ SharedPreferences và SQLite
-     */
     private void khoiPhucPhienDangNhap() {
         SessionManager sessionManager = new SessionManager(this);
         if (sessionManager.daDangNhap()) {
@@ -42,53 +35,45 @@ public class WelcomeActivity extends AppCompatActivity {
             DatabaseHelper dbHelper = new DatabaseHelper(this);
             TaiKhoan taiKhoan = dbHelper.layTaiKhoanTheoId(userId);
 
-            // Nếu tài khoản tồn tại và đang ở trạng thái Hoạt động (1)
             if (taiKhoan != null && taiKhoan.getTrangThai() == 1) {
-                Intent intent = new Intent(WelcomeActivity.this, HomeActivity.class);
-                intent.putExtra("EMAIL", taiKhoan.getEmail());
-                intent.putExtra("VAI_TRO", taiKhoan.getVaiTro());
+                Intent intent;
+                switch (taiKhoan.getVaiTro()) {
+                    case "ADMIN":
+                        intent = new Intent(WelcomeActivity.this, AdminHomeActivity.class);
+                        break;
+                    case "TEACHER":
+                        intent = new Intent(WelcomeActivity.this, TeacherHomeActivity.class);
+                        break;
+                    case "STUDENT":
+                    default:
+                        intent = new Intent(WelcomeActivity.this, StudentHomeActivity.class);
+                        break;
+                }
+                intent.putExtra("USER_ID", taiKhoan.getId());
+                intent.putExtra("HO_TEN", taiKhoan.getHoTen());
                 startActivity(intent);
                 finish();
             } else {
-                // Nếu tài khoản bị khóa hoặc không hợp lệ, xóa phiên đăng nhập cũ
-                Toast.makeText(this, "Phiên đăng nhập hết hạn hoặc tài khoản đã bị khóa", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Phiên đăng nhập hết hạn hoặc tài khoản bị khóa", Toast.LENGTH_SHORT).show();
                 sessionManager.xoaPhienDangNhap();
             }
         }
     }
 
-    /**
-     * Khởi tạo và ánh xạ các phần tử giao diện từ layout XML
-     */
     private void khoiTaoViews() {
         btnDangNhap = findViewById(R.id.btnDangNhap);
         btnDangKy = findViewById(R.id.btnDangKy);
     }
 
-    /**
-     * Cài đặt các lắng nghe sự kiện click cho nút Đăng nhập và Đăng ký
-     */
     private void caiDatSuKien() {
-        // Sự kiện khi bấm nút Đăng nhập
-        btnDangNhap.setOnClickListener(v -> chuyenDenDangNhap());
+        btnDangNhap.setOnClickListener(v -> {
+            Intent intent = new Intent(WelcomeActivity.this, LoginActivity.class);
+            startActivity(intent);
+        });
 
-        // Sự kiện khi bấm nút Đăng ký
-        btnDangKy.setOnClickListener(v -> chuyenDenDangKy());
-    }
-
-    /**
-     * Chuyển sang màn hình Đăng nhập (LoginActivity)
-     */
-    private void chuyenDenDangNhap() {
-        Intent intent = new Intent(WelcomeActivity.this, LoginActivity.class);
-        startActivity(intent);
-    }
-
-    /**
-     * Chuyển sang màn hình Đăng ký (RegisterActivity)
-     */
-    private void chuyenDenDangKy() {
-        Intent intent = new Intent(WelcomeActivity.this, RegisterActivity.class);
-        startActivity(intent);
+        btnDangKy.setOnClickListener(v -> {
+            Intent intent = new Intent(WelcomeActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
     }
 }
