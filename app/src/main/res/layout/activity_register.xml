@@ -56,16 +56,14 @@
                 android:layout_height="1dp"
                 android:layout_weight="1" />
 
-            <!-- Icon Q nhỏ ở góc trên phải -->
-            <TextView
+            <!-- Biểu tượng ứng dụng -->
+            <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@drawable/bg_logo_card"
-                android:gravity="center"
-                android:text="Q"
-                android:textColor="@color/blue_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:contentDescription="@string/app_name"
+                android:padding="5dp"
+                android:src="@drawable/ic_app_mark" />
         </LinearLayout>
 
         <!-- Tiêu đề trang đăng ký -->
@@ -74,7 +72,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="36dp"
-            android:text="Tạo tài khoản\ncủa bạn."
+            android:text="Tạo tài khoản"
             android:textColor="@color/text_primary"
             android:textSize="32sp"
             android:textStyle="bold"
@@ -87,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Bắt đầu trải nghiệm cùng Q ngay hôm nay."
+            android:text="Đăng ký tài khoản sinh viên trên Sổ bài tập."
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -199,7 +197,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:layout_marginBottom="16dp"
-            android:text="Một khởi đầu mới đang chờ bạn."
+            android:text="Đã có tài khoản? Quay lại để đăng nhập."
             android:textColor="@color/text_hint"
             android:textSize="13sp"
             app:layout_constraintBottom_toBottomOf="parent"

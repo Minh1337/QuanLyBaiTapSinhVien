@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Quản lý học tập"
+        android:text="@string/app_name"
         android:textColor="@color/text_secondary"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -36,20 +36,18 @@
         app:layout_constraintTop_toBottomOf="@+id/tvTieuDeTrang"
         app:layout_constraintVertical_bias="0.4">
 
-        <!-- Icon chữ Q lớn -->
+        <!-- Biểu tượng sổ bài tập -->
         <FrameLayout
             android:layout_width="140dp"
             android:layout_height="140dp"
             android:background="@drawable/bg_logo_card">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <ImageView
+                android:layout_width="82dp"
+                android:layout_height="82dp"
                 android:layout_gravity="center"
-                android:text="Q"
-                android:textColor="@color/blue_primary"
-                android:textSize="72sp"
-                android:textStyle="bold" />
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_app_mark" />
         </FrameLayout>
 
         <!-- Tiêu đề chính -->
@@ -57,7 +55,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="Quản lý học tập"
+            android:text="@string/app_name"
             android:textColor="@color/text_primary"
             android:textSize="26sp"
             android:textStyle="bold" />
@@ -67,7 +65,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Một tài khoản. Mọi trải nghiệm."
+            android:text="Theo dõi bài tập, chủ động từng hạn nộp."
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
     </LinearLayout>
@@ -110,7 +108,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="Chào mừng bạn đến với Q"
+        android:text="Sổ bài tập · Học tập có kế hoạch"
         android:textColor="@color/text_hint"
         android:textSize="13sp"
         app:layout_constraintBottom_toBottomOf="parent"
