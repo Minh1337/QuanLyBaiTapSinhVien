@@ -49,6 +49,16 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
+        <!-- Màn hình Việc của tôi (Phần 6) -->
+        <activity
+            android:name=".MyTasksActivity"
+            android:exported="true" />
+
+        <!-- Màn hình Thống kê (Phần 6) -->
+        <activity
+            android:name=".StatisticsActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

@@ -28,4 +28,16 @@
     <color name="input_border_focus">#2563EB</color>
     <color name="success_green">#10B981</color>
     <color name="error_red">#EF4444</color>
+
+    <!-- Purple Theme Palette (Figma Design) -->
+    <color name="purple_primary">#6B3482</color>
+    <color name="purple_dark">#522463</color>
+    <color name="purple_light_bg">#FAF3FB</color>
+    <color name="purple_card_bg">#F1E5F4</color>
+    <color name="purple_chip_bg">#EADBEE</color>
+
+    <!-- Progress Status Colors -->
+    <color name="stat_progress_pink">#C46295</color>
+    <color name="stat_progress_purple">#6B3482</color>
+    <color name="stat_progress_green">#4F7363</color>
 </resources>
