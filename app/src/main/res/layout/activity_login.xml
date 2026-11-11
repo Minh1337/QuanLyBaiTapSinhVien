@@ -56,16 +56,14 @@
                 android:layout_height="1dp"
                 android:layout_weight="1" />
 
-            <!-- Icon Q nhỏ ở góc trên phải -->
-            <TextView
+            <!-- Biểu tượng ứng dụng -->
+            <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@drawable/bg_logo_card"
-                android:gravity="center"
-                android:text="Q"
-                android:textColor="@color/blue_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:contentDescription="@string/app_name"
+                android:padding="5dp"
+                android:src="@drawable/ic_app_mark" />
         </LinearLayout>
 
         <!-- Tiêu đề trang -->
@@ -74,7 +72,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="36dp"
-            android:text="Chào mừng\ntrở lại."
+            android:text="Đăng nhập"
             android:textColor="@color/text_primary"
             android:textSize="32sp"
             android:textStyle="bold"
@@ -87,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Đăng nhập để tiếp tục trải nghiệm."
+            android:text="Tiếp tục quản lý bài tập cùng Sổ bài tập."
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -108,7 +106,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tên đăng nhập / email"
+                android:text="Email"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -120,7 +118,7 @@
                 android:layout_height="52dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_input_field"
-                android:hint="Nhập tên đăng nhập hoặc email"
+                android:hint="Nhập email của bạn"
                 android:inputType="textEmailAddress"
                 android:paddingHorizontal="16dp"
                 android:textColor="@color/text_primary"
@@ -159,7 +157,7 @@
                 android:layout_gravity="end"
                 android:layout_marginTop="12dp"
                 android:padding="4dp"
-                android:text="Đăng ký"
+                android:text="Chưa có tài khoản? Đăng ký"
                 android:textColor="@color/blue_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -188,7 +186,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:layout_marginBottom="16dp"
-            android:text="Rất vui được gặp lại bạn."
+            android:text="Sổ bài tập · Học tập có kế hoạch"
             android:textColor="@color/text_hint"
             android:textSize="13sp"
             app:layout_constraintBottom_toBottomOf="parent"
