@@ -10,6 +10,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 /**
  * Màn hình Đăng nhập
@@ -30,6 +33,26 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        // Xử lý WindowInsets để tránh bị che khuất bởi thanh trạng thái (status bar) và notch/camera
+        View mainLayout = findViewById(R.id.mainLayout);
+        if (mainLayout != null) {
+            final int initialPaddingLeft = mainLayout.getPaddingLeft();
+            final int initialPaddingTop = mainLayout.getPaddingTop();
+            final int initialPaddingRight = mainLayout.getPaddingRight();
+            final int initialPaddingBottom = mainLayout.getPaddingBottom();
+
+            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(
+                        initialPaddingLeft,
+                        systemBars.top + initialPaddingTop,
+                        initialPaddingRight,
+                        systemBars.bottom + initialPaddingBottom
+                );
+                return insets;
+            });
+        }
 
         // Khởi tạo DatabaseHelper
         dbHelper = new DatabaseHelper(this);
@@ -64,6 +87,27 @@ public class LoginActivity extends AppCompatActivity {
 
         // Sự kiện khi bấm nút "Đăng nhập"
         btnThucHienDangNhap.setOnClickListener(v -> xuLyDangNhap());
+
+        // Đăng nhập nhanh bằng tài khoản Demo (1 tap)
+        View btnDemoStudent = findViewById(R.id.btnDemoStudent);
+        View btnDemoTeacher = findViewById(R.id.btnDemoTeacher);
+        View btnDemoAdmin = findViewById(R.id.btnDemoAdmin);
+
+        if (btnDemoStudent != null) {
+            btnDemoStudent.setOnClickListener(v -> dangNhapNhanh("student@gmail.com", "student123"));
+        }
+        if (btnDemoTeacher != null) {
+            btnDemoTeacher.setOnClickListener(v -> dangNhapNhanh("teacher@gmail.com", "teacher123"));
+        }
+        if (btnDemoAdmin != null) {
+            btnDemoAdmin.setOnClickListener(v -> dangNhapNhanh("admin@gmail.com", "admin123"));
+        }
+    }
+
+    private void dangNhapNhanh(String email, String matKhau) {
+        etTenDangNhap.setText(email);
+        etMatKhau.setText(matKhau);
+        xuLyDangNhap();
     }
 
     /**

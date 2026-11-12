@@ -49,6 +49,50 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
+        <!-- Màn hình Chi tiết Môn học (Giao diện chuẩn @design) -->
+        <activity
+            android:name=".CourseDetailActivity"
+            android:exported="false" />
+
+        <!-- Màn hình Thi Trắc Nghiệm (Đếm giờ) -->
+        <activity
+            android:name=".QuizActivity"
+            android:exported="false" />
+
+        <!-- Màn hình Tạo Đề Thi Trắc Nghiệm (Giáo viên / Txt Import) -->
+        <activity
+            android:name=".CreateQuizActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Màn hình Nộp File Bài Tập -->
+        <activity
+            android:name=".SubmitAssignmentActivity"
+            android:exported="false" />
+
+        <!-- Màn hình Tạo Bài Tập Nộp File (Giáo viên) -->
+        <activity
+            android:name=".CreateAssignmentActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Màn hình Quản trị Admin -->
+        <activity
+            android:name=".AdminManagementActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- FileProvider cho phép chia sẻ & mở tệp an toàn -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

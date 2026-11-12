@@ -2,10 +2,14 @@ package com.example.quanlybaitapsinhvien;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 /**
  * Màn hình Chào mừng (Trang ngoài)
@@ -24,6 +28,26 @@ public class WelcomeActivity extends AppCompatActivity {
         khoiPhucPhienDangNhap();
 
         setContentView(R.layout.activity_welcome);
+
+        // Xử lý WindowInsets tránh bị che khuất bởi thanh trạng thái status bar / punch hole
+        View mainLayout = findViewById(R.id.mainLayout);
+        if (mainLayout != null) {
+            final int initialPaddingLeft = mainLayout.getPaddingLeft();
+            final int initialPaddingTop = mainLayout.getPaddingTop();
+            final int initialPaddingRight = mainLayout.getPaddingRight();
+            final int initialPaddingBottom = mainLayout.getPaddingBottom();
+
+            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(
+                        initialPaddingLeft,
+                        systemBars.top + initialPaddingTop,
+                        initialPaddingRight,
+                        systemBars.bottom + initialPaddingBottom
+                );
+                return insets;
+            });
+        }
 
         // Khởi tạo và ánh xạ giao diện
         khoiTaoViews();

@@ -14,6 +14,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 /**
  * Màn hình Đăng ký tài khoản
@@ -34,6 +37,26 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        // Xử lý WindowInsets tránh bị che bởi thanh trạng thái status bar / punch hole
+        View mainLayout = findViewById(R.id.mainLayout);
+        if (mainLayout != null) {
+            final int initialPaddingLeft = mainLayout.getPaddingLeft();
+            final int initialPaddingTop = mainLayout.getPaddingTop();
+            final int initialPaddingRight = mainLayout.getPaddingRight();
+            final int initialPaddingBottom = mainLayout.getPaddingBottom();
+
+            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(
+                        initialPaddingLeft,
+                        systemBars.top + initialPaddingTop,
+                        initialPaddingRight,
+                        systemBars.bottom + initialPaddingBottom
+                );
+                return insets;
+            });
+        }
 
         // Khởi tạo DatabaseHelper
         dbHelper = new DatabaseHelper(this);
