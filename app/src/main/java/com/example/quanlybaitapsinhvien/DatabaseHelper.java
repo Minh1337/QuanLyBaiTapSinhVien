@@ -549,10 +549,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.delete(BANG_NOI_DUNG, COT_ID + " = ?", new String[]{String.valueOf(idNoiDung)}) > 0;
     }
 
-    public boolean capNhatNoiDungMonHoc(int idNoiDung, String tieuDe, String phanCum, String moTa, String urlFile, String hanNop) {
+    public boolean capNhatNoiDungMonHoc(int idNoiDung, String tieuDe, String loaiNoiDung, String phanCum, String moTa, String urlFile, String hanNop) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COT_TIEU_DE, tieuDe.trim());
+        if (loaiNoiDung != null && !loaiNoiDung.trim().isEmpty()) {
+            values.put(COT_LOAI_NOI_DUNG, loaiNoiDung.trim());
+        }
         values.put(COT_PHAN_CUM, phanCum.trim());
         values.put(COT_MO_TA, moTa.trim());
         if (urlFile != null) {
@@ -562,6 +565,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(COT_HAN_NOP, hanNop.trim());
         }
         return db.update(BANG_NOI_DUNG, values, COT_ID + " = ?", new String[]{String.valueOf(idNoiDung)}) > 0;
+    }
+
+    public boolean capNhatNoiDungMonHoc(int idNoiDung, String tieuDe, String phanCum, String moTa, String urlFile, String hanNop) {
+        return capNhatNoiDungMonHoc(idNoiDung, tieuDe, null, phanCum, moTa, urlFile, hanNop);
     }
 
     public boolean capNhatNoiDungMonHoc(int idNoiDung, String tieuDe, String phanCum, String moTa, String urlFile) {
@@ -608,6 +615,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public boolean capNhatDeThi(int idDeThi, String tieuDe, int thoiGianPhut) {
         return capNhatDeThi(idDeThi, tieuDe, thoiGianPhut, "", "");
+    }
+
+    public boolean xoaDeThi(int idDeThi) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(BANG_CAU_HOI, COT_ID_DE_THI + " = ?", new String[]{String.valueOf(idDeThi)});
+        db.delete(BANG_KET_QUA, COT_ID_DE_THI + " = ?", new String[]{String.valueOf(idDeThi)});
+        return db.delete(BANG_DE_THI, COT_ID + " = ?", new String[]{String.valueOf(idDeThi)}) > 0;
     }
 
     public void xoaCauHoiCuaDeThi(int idDeThi) {
@@ -720,36 +734,91 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public static class BaiNopItem {
+        public int id;
+        public int idSinhVien;
         public String email;
         public String tenFile;
         public String duongDanFile;
         public String ngayNop;
 
-        public BaiNopItem(String email, String tenFile, String duongDanFile, String ngayNop) {
+        public BaiNopItem(int id, int idSinhVien, String email, String tenFile, String duongDanFile, String ngayNop) {
+            this.id = id;
+            this.idSinhVien = idSinhVien;
             this.email = email;
             this.tenFile = tenFile;
             this.duongDanFile = duongDanFile;
             this.ngayNop = ngayNop;
+        }
+
+        public BaiNopItem(String email, String tenFile, String duongDanFile, String ngayNop) {
+            this(0, 0, email, tenFile, duongDanFile, ngayNop);
         }
     }
 
     public List<BaiNopItem> layDanhSachBaiNopFull(int idNoiDung) {
         List<BaiNopItem> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String sql = "SELECT t." + COT_EMAIL + ", b." + COT_TEN_FILE + ", b." + COT_DUONG_DAN_FILE + ", b." + COT_NGAY_NOP + " " +
+        String sql = "SELECT b." + COT_ID + ", b." + COT_ID_SINH_VIEN + ", t." + COT_EMAIL + ", b." + COT_TEN_FILE + ", b." + COT_DUONG_DAN_FILE + ", b." + COT_NGAY_NOP + " " +
                 "FROM " + BANG_BAI_NOP_FILE + " b " +
                 "INNER JOIN " + BANG_TAI_KHOAN + " t ON b." + COT_ID_SINH_VIEN + " = t." + COT_ID + " " +
                 "WHERE b." + COT_ID_NOI_DUNG + " = ? ORDER BY b." + COT_ID + " DESC";
         Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(idNoiDung)});
         while (cursor.moveToNext()) {
-            String email = cursor.getString(0);
-            String tenFile = cursor.getString(1);
-            String duongDan = cursor.getString(2);
-            String ngayNop = cursor.getString(3);
-            list.add(new BaiNopItem(email, tenFile, duongDan, ngayNop));
+            int id = cursor.getInt(0);
+            int svId = cursor.getInt(1);
+            String email = cursor.getString(2);
+            String tenFile = cursor.getString(3);
+            String duongDan = cursor.getString(4);
+            String ngayNop = cursor.getString(5);
+            list.add(new BaiNopItem(id, svId, email, tenFile, duongDan, ngayNop));
         }
         cursor.close();
         return list;
+    }
+
+    public List<BaiNopItem> layDanhSachBaiNopCuaSinhVienEx(int idSinhVien, int idNoiDung) {
+        List<BaiNopItem> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT b." + COT_ID + ", b." + COT_ID_SINH_VIEN + ", t." + COT_EMAIL + ", b." + COT_TEN_FILE + ", b." + COT_DUONG_DAN_FILE + ", b." + COT_NGAY_NOP + " " +
+                "FROM " + BANG_BAI_NOP_FILE + " b " +
+                "INNER JOIN " + BANG_TAI_KHOAN + " t ON b." + COT_ID_SINH_VIEN + " = t." + COT_ID + " " +
+                "WHERE b." + COT_ID_SINH_VIEN + " = ? AND b." + COT_ID_NOI_DUNG + " = ? ORDER BY b." + COT_ID + " DESC";
+        Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(idSinhVien), String.valueOf(idNoiDung)});
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(0);
+            int svId = cursor.getInt(1);
+            String email = cursor.getString(2);
+            String tenFile = cursor.getString(3);
+            String duongDan = cursor.getString(4);
+            String ngayNop = cursor.getString(5);
+            list.add(new BaiNopItem(id, svId, email, tenFile, duongDan, ngayNop));
+        }
+        cursor.close();
+        return list;
+    }
+
+    public boolean xoaBaiNopFile(int idBaiNop) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete(BANG_BAI_NOP_FILE, COT_ID + " = ?", new String[]{String.valueOf(idBaiNop)}) > 0;
+    }
+
+    public boolean capNhatTenFileBaiNop(int idBaiNop, String tenFileMoi) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues val = new ContentValues();
+        val.put(COT_TEN_FILE, tenFileMoi.trim());
+        return db.update(BANG_BAI_NOP_FILE, val, COT_ID + " = ?", new String[]{String.valueOf(idBaiNop)}) > 0;
+    }
+
+    public double layDiemThiCuaSinhVien(int idSinhVien, int idDeThi) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT " + COT_DIEM_SO + " FROM " + BANG_KET_QUA + " WHERE " + COT_ID_SINH_VIEN + " = ? AND " + COT_ID_DE_THI + " = ? ORDER BY " + COT_ID + " DESC LIMIT 1";
+        Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(idSinhVien), String.valueOf(idDeThi)});
+        double diem = -1.0;
+        if (cursor.moveToFirst()) {
+            diem = cursor.getDouble(0);
+        }
+        cursor.close();
+        return diem;
     }
 
     public List<String> layDanhSachBaiNopCuaSinhVien(int idNoiDung) {

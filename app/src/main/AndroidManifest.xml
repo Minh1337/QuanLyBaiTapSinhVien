@@ -53,12 +53,14 @@
         <!-- Màn hình Chi tiết Môn học (Giao diện chuẩn @design) -->
         <activity
             android:name=".CourseDetailActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Màn hình Thi Trắc Nghiệm (Đếm giờ) -->
         <activity
             android:name=".QuizActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Màn hình Tạo Đề Thi Trắc Nghiệm (Giáo viên / Txt Import) -->
         <activity
