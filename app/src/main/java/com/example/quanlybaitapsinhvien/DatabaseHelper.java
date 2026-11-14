@@ -293,7 +293,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COT_EMAIL, email.trim().toLowerCase());
         values.put(COT_MAT_KHAU, matKhau.trim());
         values.put(COT_VAI_TRO, "STUDENT");
-        values.put(COT_TRANG_THAI, 1);
+        values.put(COT_TRANG_THAI, 0); // 0: Chờ Admin duyệt
         long result = db.insert(BANG_TAI_KHOAN, null, values);
         return result != -1;
     }
@@ -307,6 +307,65 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COT_TRANG_THAI, 1);
         long result = db.insert(BANG_TAI_KHOAN, null, values);
         return result != -1;
+    }
+
+    public boolean taoTaiKhoanBoiAdmin(String email, String matKhau, String vaiTro) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COT_EMAIL, email.trim().toLowerCase());
+        values.put(COT_MAT_KHAU, matKhau.trim());
+        values.put(COT_VAI_TRO, vaiTro.trim().toUpperCase());
+        values.put(COT_TRANG_THAI, 1); // Admin tạo thì tự động kích hoạt/đã duyệt
+        long result = db.insert(BANG_TAI_KHOAN, null, values);
+        return result != -1;
+    }
+
+    public boolean duyetTaiKhoan(int idTaiKhoan) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COT_TRANG_THAI, 1);
+        return db.update(BANG_TAI_KHOAN, values, COT_ID + " = ?", new String[]{String.valueOf(idTaiKhoan)}) > 0;
+    }
+
+    public boolean khoaMoTaiKhoan(int idTaiKhoan, int trangThaiMoi) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COT_TRANG_THAI, trangThaiMoi);
+        return db.update(BANG_TAI_KHOAN, values, COT_ID + " = ?", new String[]{String.valueOf(idTaiKhoan)}) > 0;
+    }
+
+    public List<TaiKhoan> layTatCaTaiKhoan() {
+        List<TaiKhoan> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + BANG_TAI_KHOAN + " ORDER BY " + COT_ID + " DESC", null);
+        while (cursor.moveToNext()) {
+            list.add(new TaiKhoan(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COT_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_EMAIL)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_MAT_KHAU)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_VAI_TRO)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COT_TRANG_THAI))
+            ));
+        }
+        cursor.close();
+        return list;
+    }
+
+    public List<TaiKhoan> layDanhSachSinhVienDaDuyet() {
+        List<TaiKhoan> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + BANG_TAI_KHOAN + " WHERE " + COT_VAI_TRO + " = 'STUDENT' AND " + COT_TRANG_THAI + " = 1 ORDER BY " + COT_ID + " DESC", null);
+        while (cursor.moveToNext()) {
+            list.add(new TaiKhoan(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COT_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_EMAIL)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_MAT_KHAU)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_VAI_TRO)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COT_TRANG_THAI))
+            ));
+        }
+        cursor.close();
+        return list;
     }
 
     public boolean kiemTraEmailTonTai(String email) {
@@ -369,7 +428,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return list;
     }
 
-    // --- CÁC HÀM QUẢN LÝ MÔN HỌC ---
+    // --- CÁC HÀM QUẢN LÝ MÔN HỌC & XẾP LỚP ---
+
+    public boolean kiemTraMaMonTonTai(String maMon) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + BANG_MON_HOC + " WHERE LOWER(" + COT_MA_MON + ") = ?", new String[]{maMon.trim().toLowerCase()});
+        boolean tonTai = cursor.getCount() > 0;
+        cursor.close();
+        return tonTai;
+    }
 
     public boolean taoMonHoc(String maMon, String tenMon, String namHoc, int idGiaoVien) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -379,6 +446,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COT_NAM_HOC, namHoc.trim());
         values.put(COT_ID_GIAO_VIEN, idGiaoVien);
         return db.insert(BANG_MON_HOC, null, values) != -1;
+    }
+
+    public boolean capNhatMonHoc(int idMonHoc, String maMon, String tenMon, String namHoc, int idGiaoVien) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COT_MA_MON, maMon.trim());
+        values.put(COT_TEN_MON, tenMon.trim());
+        values.put(COT_NAM_HOC, namHoc.trim());
+        values.put(COT_ID_GIAO_VIEN, idGiaoVien);
+        return db.update(BANG_MON_HOC, values, COT_ID + " = ?", new String[]{String.valueOf(idMonHoc)}) > 0;
+    }
+
+    public boolean xoaMonHoc(int idMonHoc) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(BANG_SV_MON_HOC, COT_ID_MON_HOC + " = ?", new String[]{String.valueOf(idMonHoc)});
+        db.delete(BANG_NOI_DUNG, COT_ID_MON_HOC + " = ?", new String[]{String.valueOf(idMonHoc)});
+        db.delete(BANG_DE_THI, COT_ID_MON_HOC + " = ?", new String[]{String.valueOf(idMonHoc)});
+        return db.delete(BANG_MON_HOC, COT_ID + " = ?", new String[]{String.valueOf(idMonHoc)}) > 0;
+    }
+
+    public MonHoc layMonHocTheoId(int idMonHoc) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT m.*, t." + COT_EMAIL + " AS ten_gv FROM " + BANG_MON_HOC + " m " +
+                "LEFT JOIN " + BANG_TAI_KHOAN + " t ON m." + COT_ID_GIAO_VIEN + " = t." + COT_ID + " " +
+                "WHERE m." + COT_ID + " = ?";
+        Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(idMonHoc)});
+        MonHoc monHoc = null;
+        if (cursor.moveToFirst()) {
+            monHoc = new MonHoc(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COT_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_MA_MON)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_TEN_MON)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_NAM_HOC)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COT_ID_GIAO_VIEN)),
+                    cursor.getString(cursor.getColumnIndexOrThrow("ten_gv"))
+            );
+        }
+        cursor.close();
+        return monHoc;
     }
 
     public List<MonHoc> layDanhSachMonHocChoSinhVien(int idSinhVien) {
@@ -400,9 +506,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ));
         }
         cursor.close();
-        if (list.isEmpty()) {
-            return layTatCaMonHoc();
-        }
         return list;
     }
 
@@ -431,7 +534,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<MonHoc> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "SELECT m.*, t." + COT_EMAIL + " AS ten_gv FROM " + BANG_MON_HOC + " m " +
-                "LEFT JOIN " + BANG_TAI_KHOAN + " t ON m." + COT_ID_GIAO_VIEN + " = t." + COT_ID;
+                "LEFT JOIN " + BANG_TAI_KHOAN + " t ON m." + COT_ID_GIAO_VIEN + " = t." + COT_ID + " ORDER BY m." + COT_ID + " DESC";
         Cursor cursor = db.rawQuery(sql, null);
         while (cursor.moveToNext()) {
             list.add(new MonHoc(
@@ -441,6 +544,75 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndexOrThrow(COT_NAM_HOC)),
                     cursor.getInt(cursor.getColumnIndexOrThrow(COT_ID_GIAO_VIEN)),
                     cursor.getString(cursor.getColumnIndexOrThrow("ten_gv"))
+            ));
+        }
+        cursor.close();
+        return list;
+    }
+
+    // --- CÁC HÀM XẾP SINH VIÊN VÀO MÔN HỌC ---
+
+    public boolean kiemTraSinhVienTrongMonHoc(int idSinhVien, int idMonHoc) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + BANG_SV_MON_HOC + " WHERE " + COT_ID_SINH_VIEN + " = ? AND " + COT_ID_MON_HOC + " = ?",
+                new String[]{String.valueOf(idSinhVien), String.valueOf(idMonHoc)});
+        boolean coTrongLop = cursor.getCount() > 0;
+        cursor.close();
+        return coTrongLop;
+    }
+
+    public boolean themSinhVienVaoMonHoc(int idSinhVien, int idMonHoc) {
+        if (kiemTraSinhVienTrongMonHoc(idSinhVien, idMonHoc)) {
+            return false; // Chặn trùng thành viên
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COT_ID_SINH_VIEN, idSinhVien);
+        values.put(COT_ID_MON_HOC, idMonHoc);
+        return db.insert(BANG_SV_MON_HOC, null, values) != -1;
+    }
+
+    public boolean xoaSinhVienKhoiMonHoc(int idSinhVien, int idMonHoc) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete(BANG_SV_MON_HOC, COT_ID_SINH_VIEN + " = ? AND " + COT_ID_MON_HOC + " = ?",
+                new String[]{String.valueOf(idSinhVien), String.valueOf(idMonHoc)}) > 0;
+    }
+
+    public List<TaiKhoan> layDanhSachSinhVienCuaMonHoc(int idMonHoc) {
+        List<TaiKhoan> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT t.* FROM " + BANG_TAI_KHOAN + " t " +
+                "INNER JOIN " + BANG_SV_MON_HOC + " sm ON t." + COT_ID + " = sm." + COT_ID_SINH_VIEN + " " +
+                "WHERE sm." + COT_ID_MON_HOC + " = ? ORDER BY t." + COT_ID + " DESC";
+        Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(idMonHoc)});
+        while (cursor.moveToNext()) {
+            list.add(new TaiKhoan(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COT_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_EMAIL)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_MAT_KHAU)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_VAI_TRO)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COT_TRANG_THAI))
+            ));
+        }
+        cursor.close();
+        return list;
+    }
+
+    public List<TaiKhoan> layDanhSachSinhVienChuaVaoMonHoc(int idMonHoc) {
+        List<TaiKhoan> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT t.* FROM " + BANG_TAI_KHOAN + " t " +
+                "WHERE t." + COT_VAI_TRO + " = 'STUDENT' AND t." + COT_TRANG_THAI + " = 1 " +
+                "AND t." + COT_ID + " NOT IN (SELECT " + COT_ID_SINH_VIEN + " FROM " + BANG_SV_MON_HOC + " WHERE " + COT_ID_MON_HOC + " = ?) " +
+                "ORDER BY t." + COT_ID + " DESC";
+        Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(idMonHoc)});
+        while (cursor.moveToNext()) {
+            list.add(new TaiKhoan(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COT_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_EMAIL)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_MAT_KHAU)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COT_VAI_TRO)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COT_TRANG_THAI))
             ));
         }
         cursor.close();

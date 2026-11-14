@@ -46,7 +46,7 @@
             android:layout_marginTop="12dp"
             android:gravity="center"
             android:lineSpacingExtra="4dp"
-            android:text="Tài khoản của bạn đã được tạo.\nVui lòng quay lại trang đăng nhập."
+            android:text="Tài khoản của bạn đã được gửi đăng ký.\nVui lòng chờ Admin duyệt trước khi đăng nhập."
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
 

@@ -117,8 +117,17 @@ public class HomeActivity extends AppCompatActivity {
             setText(R.id.tvSectionTitle, "Các môn học đang tham gia");
 
             List<MonHoc> danhSach = dbHelper.layDanhSachMonHocChoSinhVien(session.layUserId());
-            for (MonHoc mon : danhSach) {
-                addCourseCard(list, mon, false);
+            if (danhSach.isEmpty()) {
+                TextView tvEmpty = new TextView(this);
+                tvEmpty.setText("Bạn chưa được xếp vào lớp học nào. Vui lòng liên hệ Admin!");
+                tvEmpty.setTextColor(getResources().getColor(R.color.text_secondary));
+                tvEmpty.setTextSize(14);
+                tvEmpty.setPadding(0, dp(12), 0, dp(12));
+                list.addView(tvEmpty);
+            } else {
+                for (MonHoc mon : danhSach) {
+                    addCourseCard(list, mon, false);
+                }
             }
         }
     }

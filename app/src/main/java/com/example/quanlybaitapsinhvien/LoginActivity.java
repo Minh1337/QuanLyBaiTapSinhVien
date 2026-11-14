@@ -131,7 +131,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // Kiểm tra trạng thái hoạt động của tài khoản
         if (taiKhoan.getTrangThai() == 0) {
-            Toast.makeText(this, "Tài khoản của bạn hiện đã bị khóa!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Tài khoản của bạn chưa được Admin duyệt hoặc đã bị khóa!", Toast.LENGTH_LONG).show();
             return;
         }
 
