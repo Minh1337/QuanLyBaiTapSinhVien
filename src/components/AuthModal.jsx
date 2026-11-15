@@ -9,6 +9,8 @@ export default function AuthModal() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [termsError, setTermsError] = useState("");
 
   const [prevAuthModalOpen, setPrevAuthModalOpen] = useState(authModalOpen);
   if (authModalOpen !== prevAuthModalOpen) {
@@ -16,6 +18,8 @@ export default function AuthModal() {
     if (authModalOpen) {
       setTab("login");
       setShowPassword(false);
+      setAgreeTerms(false);
+      setTermsError("");
     }
   }
 
@@ -24,6 +28,8 @@ export default function AuthModal() {
   const handleTabSwitch = (newTab) => {
     setTab(newTab);
     setPassword("");
+    setAgreeTerms(false);
+    setTermsError("");
   };
 
   const handleSubmit = (e) => {
@@ -33,6 +39,11 @@ export default function AuthModal() {
       login(email, password);
     } else {
       if (!name.trim() || !email.trim() || !password) return;
+      if (!agreeTerms) {
+        setTermsError("Bạn cần tích chọn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật để tiếp tục.");
+        return;
+      }
+      setTermsError("");
       register({ name, email, password });
     }
   };
@@ -239,6 +250,46 @@ export default function AuthModal() {
               </button>
             </div>
           </div>
+
+          {tab === "register" && (
+            <div className="pt-1">
+              <label className="flex items-start gap-2 cursor-pointer text-[11px] select-none text-base-content/80 leading-snug">
+                <input
+                  type="checkbox"
+                  checked={agreeTerms}
+                  onChange={(e) => {
+                    setAgreeTerms(e.target.checked);
+                    if (termsError) setTermsError("");
+                  }}
+                  className={`checkbox checkbox-xs checkbox-primary rounded mt-0.5 border border-base-300 ${termsError ? "checkbox-error" : ""}`}
+                />
+                <span>
+                  Tôi đồng ý với{" "}
+                  <a
+                    href="/policy?section=terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline font-semibold"
+                  >
+                    Điều khoản dịch vụ
+                  </a>{" "}
+                  và{" "}
+                  <a
+                    href="/policy?section=privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline font-semibold"
+                  >
+                    Chính sách bảo mật
+                  </a>{" "}
+                  của IT Blog (đồng ý thu thập và xử lý họ tên, email, mật khẩu phục vụ tạo tài khoản).
+                </span>
+              </label>
+              {termsError && (
+                <p className="text-error text-[11px] mt-1 font-medium">{termsError}</p>
+              )}
+            </div>
+          )}
 
           <button type="submit" className="btn btn-primary btn-sm w-full mt-4 font-bold text-white shadow-md">
             {tab === "login" ? "Đăng nhập ngay" : "Tạo tài khoản & Tiếp tục"}

@@ -152,7 +152,7 @@ export default function Logup_page({ onNavigate }) {
     }
 
     if (!agreeTerms) {
-      errs.agreeTerms = "Bạn cần đồng ý với Điều khoản dịch vụ để tiếp tục";
+      errs.agreeTerms = "Bạn cần đồng ý với Điều khoản dịch vụ và Chính sách bảo mật để tiếp tục";
     }
 
     setErrors(errs);
@@ -441,7 +441,7 @@ export default function Logup_page({ onNavigate }) {
             )}
           </div>
 
-          {/* Hàng 5: Chấp nhận điều khoản dịch vụ (Viblo Style) */}
+          {/* Hàng 5: Chấp nhận điều khoản dịch vụ & Chính sách bảo mật */}
           <div className="pt-1">
             <label className="flex items-start gap-2.5 cursor-pointer text-xs select-none">
               <input
@@ -456,10 +456,23 @@ export default function Logup_page({ onNavigate }) {
                 }`}
               />
               <span className="text-base-content/80 leading-snug">
-                Tôi đồng ý{" "}
-                <span className="text-primary hover:underline font-semibold cursor-pointer">
-                  Điều khoản dịch vụ của IT Blog
-                </span>
+                Tôi đồng ý với{" "}
+                <button
+                  type="button"
+                  onClick={() => onNavigate && onNavigate("policy", { section: "terms" })}
+                  className="text-primary hover:underline font-semibold inline p-0 bg-transparent border-0 cursor-pointer"
+                >
+                  Điều khoản dịch vụ
+                </button>{" "}
+                và{" "}
+                <button
+                  type="button"
+                  onClick={() => onNavigate && onNavigate("policy", { section: "privacy" })}
+                  className="text-primary hover:underline font-semibold inline p-0 bg-transparent border-0 cursor-pointer"
+                >
+                  Chính sách bảo mật
+                </button>{" "}
+                của IT Blog (đồng ý thu thập và xử lý họ tên, email, tên đăng nhập, mật khẩu phục vụ tạo và quản lý tài khoản thành viên).
               </span>
             </label>
             {errors.agreeTerms && (
