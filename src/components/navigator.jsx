@@ -551,7 +551,7 @@ ${rows}
 
   return (
     <header className="sticky top-0 z-40 w-full bg-base-100/90 backdrop-blur-md border-b border-base-300">
-      <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 h-16 flex items-center justify-between gap-2 sm:gap-4">
+      <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 h-16 flex items-center justify-between gap-1.5 sm:gap-3">
         {/* Left: Logo & Navigation */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Mobile Navigation Dropdown (chỉ hiển thị khi màn hình < lg) */}
@@ -568,7 +568,7 @@ ${rows}
             </div>
             <ul
               tabIndex={0}
-              className="dropdown-content menu menu-sm bg-base-100 rounded-2xl z-50 w-64 p-2.5 shadow-2xl border border-base-300 mt-2 space-y-1 max-h-[calc(100vh-5rem)] overflow-y-auto"
+              className="dropdown-content menu menu-sm bg-base-100 rounded-2xl z-50 w-72 sm:w-80 p-2.5 shadow-2xl border border-base-300 mt-2 space-y-1 max-h-[calc(100vh-5rem)] overflow-y-auto overflow-x-hidden flex-col flex-nowrap"
             >
               <li className="pb-1">
                 <div className="relative p-0 hover:bg-transparent">
@@ -587,7 +587,7 @@ ${rows}
                   )}
                 </div>
               </li>
-              <div className="divider my-0.5"></div>
+              <li className="border-t border-base-200/80 my-1 pointer-events-none"></li>
               <li>
                 <button
                   onClick={() => handleNavAndCloseMobile("home")}
@@ -613,6 +613,24 @@ ${rows}
                 >
                   <GraduationCap size={18} className="text-emerald-500 shrink-0" />
                   <span>Khóa học</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNavAndCloseMobile("series")}
+                  className={`flex items-center gap-2 py-2 font-semibold ${currentPage === "series" ? "active text-white bg-primary font-bold" : ""}`}
+                >
+                  <span className="text-base shrink-0">📚</span>
+                  <span>Chuỗi bài (Series)</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNavAndCloseMobile("gallery")}
+                  className={`flex items-center gap-2 py-2 font-semibold ${currentPage === "gallery" || currentPage === "ngoai_le" ? "active text-white bg-primary font-bold" : ""}`}
+                >
+                  <span className="text-base shrink-0">📸</span>
+                  <span>Góc ngoài lề (Flickr)</span>
                 </button>
               </li>
               <li>
@@ -695,7 +713,7 @@ ${rows}
               )}
               {currentUser ? (
                 <>
-                  <div className="divider my-1"></div>
+                  <li className="border-t border-base-200/80 my-1 pointer-events-none"></li>
                   <li>
                     <button
                       onClick={() => handleNavAndCloseMobile("profile")}
@@ -720,7 +738,7 @@ ${rows}
                 </>
               ) : (
                 <>
-                  <div className="divider my-1"></div>
+                  <li className="border-t border-base-200/80 my-1 pointer-events-none"></li>
                   <li>
                     <button
                       onClick={() => handleNavAndCloseMobile("login")}
@@ -787,81 +805,38 @@ ${rows}
               Khóa học
             </button>
             <button
-              onClick={() => onNavigate && onNavigate("quiz")}
+              onClick={() => onNavigate && onNavigate("series")}
               className={`btn btn-sm text-xs font-semibold rounded-lg transition-all px-2 sm:px-2.5 ${
-                currentPage === "quiz"
+                currentPage === "series"
                   ? "bg-primary/10 text-primary font-bold shadow-2xs"
                   : "btn-ghost text-base-content/80 hover:text-base-content"
               }`}
             >
-              Trắc nghiệm
+              Chuỗi bài
             </button>
             <button
-              onClick={() => onNavigate && onNavigate("jobs")}
-              className={`btn btn-sm text-xs font-semibold rounded-lg transition-all px-2 sm:px-2.5 hidden xl:inline-flex ${
-                currentPage === "jobs"
+              onClick={() => onNavigate && onNavigate("gallery")}
+              className={`btn btn-sm text-xs font-semibold rounded-lg transition-all px-2 sm:px-2.5 ${
+                currentPage === "gallery" || currentPage === "ngoai_le"
                   ? "bg-primary/10 text-primary font-bold shadow-2xs"
                   : "btn-ghost text-base-content/80 hover:text-base-content"
               }`}
             >
-              Việc làm
+              📸 Ngoài lề
             </button>
-            <button
-              onClick={() => onNavigate && onNavigate("events")}
-              className={`btn btn-sm text-xs font-semibold rounded-lg transition-all px-2 sm:px-2.5 hidden xl:inline-flex ${
-                currentPage === "events"
-                  ? "bg-primary/10 text-primary font-bold shadow-2xs"
-                  : "btn-ghost text-base-content/80 hover:text-base-content"
-              }`}
-            >
-              Sự kiện
-            </button>
-            <button
-              onClick={() => onNavigate && onNavigate("leaderboard")}
-              className={`btn btn-sm text-xs font-semibold rounded-lg transition-all px-2 sm:px-2.5 hidden xl:inline-flex ${
-                currentPage === "leaderboard"
-                  ? "bg-primary/10 text-primary font-bold shadow-2xs"
-                  : "btn-ghost text-base-content/80 hover:text-base-content"
-              }`}
-            >
-              Xếp hạng
-            </button>
-            {canAccessModeration && (
-              <button
-                onClick={() => onNavigate && onNavigate("moderation")}
-                className={`btn btn-sm text-xs font-semibold rounded-lg transition-all gap-1.5 px-2 sm:px-2.5 hidden xl:inline-flex ${
-                  currentPage === "moderation"
-                    ? "bg-primary/10 text-primary font-bold shadow-2xs"
-                    : "btn-ghost text-base-content/80 hover:text-base-content"
-                }`}
-                title="Cài đặt & Quản trị hệ thống"
-              >
-                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="hidden 2xl:inline">Cài đặt hệ thống</span>
-                {pendingPosts?.length > 0 && (
-                  <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-[11px] font-extrabold text-amber-950 bg-amber-400 rounded-full shadow-xs leading-none shrink-0">
-                    {pendingPosts.length}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {/* Dropdown menu phụ khi màn hình lg (1024px-1279px) để không bao giờ bị đè nút tìm kiếm */}
-            <div className="dropdown dropdown-bottom xl:hidden">
+            {/* Dropdown Khám phá: Trắc nghiệm, Việc làm, Sự kiện, Bảng xếp hạng, Quản trị */}
+            <div className="dropdown dropdown-bottom">
               <div
                 tabIndex={0}
                 role="button"
-                className={`btn btn-sm text-xs font-semibold rounded-lg transition-all px-2 gap-1 ${
-                  ["jobs", "events", "leaderboard", "moderation"].includes(currentPage)
+                className={`btn btn-sm text-xs font-semibold rounded-lg transition-all px-2 sm:px-2.5 gap-1 cursor-pointer ${
+                  ["quiz", "jobs", "events", "leaderboard", "moderation"].includes(currentPage)
                     ? "bg-primary/10 text-primary font-bold shadow-2xs"
                     : "btn-ghost text-base-content/80 hover:text-base-content"
                 }`}
               >
-                <span>Thêm</span>
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span>Khám phá</span>
+                <svg className="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                 </svg>
                 {pendingPosts?.length > 0 && (
@@ -870,46 +845,64 @@ ${rows}
               </div>
               <ul
                 tabIndex={0}
-                className="dropdown-content menu menu-sm bg-base-100 rounded-2xl z-50 w-52 p-2 shadow-2xl border border-base-300 mt-2 space-y-1"
+                className="dropdown-content menu menu-sm bg-base-100 rounded-2xl z-50 w-56 p-2 shadow-2xl border border-base-300 mt-2 space-y-1"
               >
                 <li>
                   <button
-                    onClick={() => onNavigate && onNavigate("jobs")}
-                    className={currentPage === "jobs" ? "active text-white bg-primary font-bold" : ""}
+                    onClick={() => onNavigate && onNavigate("quiz")}
+                    className={`flex items-center gap-2 py-2 font-medium ${currentPage === "quiz" ? "active text-white bg-primary font-bold" : ""}`}
                   >
-                    <span className="flex items-center gap-2"><Briefcase size={16} className="text-sky-500 shrink-0" /> Việc làm IT</span>
+                    <HelpCircle size={16} className="text-amber-500 shrink-0" />
+                    <span>Trắc nghiệm IT</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => onNavigate && onNavigate("jobs")}
+                    className={`flex items-center gap-2 py-2 font-medium ${currentPage === "jobs" ? "active text-white bg-primary font-bold" : ""}`}
+                  >
+                    <Briefcase size={16} className="text-sky-500 shrink-0" />
+                    <span>Việc làm IT</span>
                   </button>
                 </li>
                 <li>
                   <button
                     onClick={() => onNavigate && onNavigate("events")}
-                    className={currentPage === "events" ? "active text-white bg-primary font-bold" : ""}
+                    className={`flex items-center gap-2 py-2 font-medium ${currentPage === "events" ? "active text-white bg-primary font-bold" : ""}`}
                   >
-                    <span className="flex items-center gap-2"><Calendar size={16} className="text-purple-500 shrink-0" /> Sự kiện & Workshop</span>
+                    <Calendar size={16} className="text-purple-500 shrink-0" />
+                    <span>Sự kiện & Workshop</span>
                   </button>
                 </li>
                 <li>
                   <button
                     onClick={() => onNavigate && onNavigate("leaderboard")}
-                    className={currentPage === "leaderboard" ? "active text-white bg-primary font-bold" : ""}
+                    className={`flex items-center gap-2 py-2 font-medium ${currentPage === "leaderboard" ? "active text-white bg-primary font-bold" : ""}`}
                   >
-                    <span className="flex items-center gap-2"><Award size={16} className="text-amber-500 shrink-0" /> Bảng xếp hạng</span>
+                    <Award size={16} className="text-amber-500 shrink-0" />
+                    <span>Bảng xếp hạng</span>
                   </button>
                 </li>
                 {canAccessModeration && (
-                  <li>
-                    <button
-                      onClick={() => onNavigate && onNavigate("moderation")}
-                      className={currentPage === "moderation" ? "active text-white bg-primary font-bold" : ""}
-                    >
-                      <span className="flex items-center gap-2"><ShieldCheck size={16} className="text-rose-500 shrink-0" /> Cài đặt hệ thống</span>
-                      {pendingPosts?.length > 0 && (
-                        <span className="badge badge-xs bg-amber-400 text-amber-950 font-bold ml-auto">
-                          {pendingPosts.length}
+                  <>
+                    <div className="divider my-0.5"></div>
+                    <li>
+                      <button
+                        onClick={() => onNavigate && onNavigate("moderation")}
+                        className={`flex items-center justify-between py-2 font-medium ${currentPage === "moderation" ? "active text-white bg-primary font-bold" : ""}`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <ShieldCheck size={16} className="text-rose-500 shrink-0" />
+                          <span>Cài đặt hệ thống</span>
                         </span>
-                      )}
-                    </button>
-                  </li>
+                        {pendingPosts?.length > 0 && (
+                          <span className="badge badge-xs bg-amber-400 text-amber-950 font-bold ml-auto">
+                            {pendingPosts.length}
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  </>
                 )}
               </ul>
             </div>
@@ -1065,6 +1058,42 @@ ${rows}
                     <div>
                       <p className="font-bold">Viết bài mới</p>
                       <p className="text-[10px] text-base-content/60 font-normal">Soạn thảo bài viết & chia sẻ kiến thức IT</p>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      requireAuth(
+                        () => onNavigate && onNavigate("series", { action: "create" }),
+                        "Vui lòng đăng nhập để tạo chuỗi bài viết!"
+                      );
+                    }}
+                    className="flex items-center gap-2.5 py-2 hover:bg-base-200 rounded-xl cursor-pointer"
+                  >
+                    <span className="text-lg shrink-0">📚</span>
+                    <div>
+                      <p className="font-bold text-base-content">Tạo Chuỗi bài (Series)</p>
+                      <p className="text-[10px] text-base-content/60 font-normal">Ghép các bài đã viết thành tuyển tập</p>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      requireAuth(
+                        () => onNavigate && onNavigate("create_post", { defaultCategory: "Ngoài Lề" }),
+                        "Vui lòng đăng nhập để chia sẻ ảnh ngoài lề!"
+                      );
+                    }}
+                    className="flex items-center gap-2.5 py-2 hover:bg-base-200 rounded-xl cursor-pointer"
+                  >
+                    <span className="text-lg shrink-0">📸</span>
+                    <div>
+                      <p className="font-bold text-base-content">Chia sẻ ảnh Ngoài Lề</p>
+                      <p className="text-[10px] text-base-content/60 font-normal">Khoe góc làm việc, đời sống dev (#ngoài-lề)</p>
                     </div>
                   </button>
                 </li>
@@ -1477,12 +1506,12 @@ ${rows}
           </div>
           ) : (
             /* Chưa đăng nhập: Nút Đăng nhập & Đăng ký */
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
               <div className="dropdown dropdown-end">
                 <button
                   tabIndex={0}
                   type="button"
-                  className="btn btn-xs sm:btn-sm btn-outline btn-warning font-bold flex items-center gap-1 rounded-xl"
+                  className="btn btn-xs sm:btn-sm btn-outline btn-warning font-bold flex items-center gap-1 rounded-xl px-2 sm:px-2.5"
                   title="Trải nghiệm nhanh các vai trò Demo"
                 >
                   <Sparkles size={14} className="text-amber-500 shrink-0" /> <span>Demo</span>
@@ -1523,13 +1552,13 @@ ${rows}
               </div>
               <button
                 onClick={() => onNavigate && onNavigate("login")}
-                className="btn btn-sm btn-ghost font-semibold text-base-content text-xs sm:text-sm px-2 sm:px-3"
+                className="btn btn-xs sm:btn-sm btn-ghost font-semibold text-base-content px-2 sm:px-2.5 shrink-0"
               >
                 Đăng nhập
               </button>
               <button
                 onClick={() => onNavigate && onNavigate("logup")}
-                className="btn btn-sm btn-outline btn-primary font-semibold hidden sm:inline-flex text-xs sm:text-sm"
+                className="btn btn-xs sm:btn-sm btn-outline btn-primary font-semibold hidden md:inline-flex px-2 sm:px-3 shrink-0"
               >
                 Đăng ký
               </button>

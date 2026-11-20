@@ -37,6 +37,87 @@ def build_fallback_questions(
     """Generate high-quality default fallback questions when AI service is unavailable."""
     sample_bank = [
         {
+            "question": "Trong ngôn ngữ lập trình C++, tính năng cốt lõi nào giúp tổ chức mã nguồn theo các đối tượng, hỗ trợ tính đóng gói (encapsulation), kế thừa (inheritance) và đa hình (polymorphism)?",
+            "options": [
+                "Lập trình hướng đối tượng (OOP - Object-Oriented Programming)",
+                "Lập trình hướng sự kiện thuần túy",
+                "Lập trình hàm không trạng thái (Pure Functional)",
+                "Lập trình kịch bản thông dịch (Scripting)"
+            ],
+            "answer_index": 0,
+            "explanation": "C++ là ngôn ngữ mở rộng từ C với tính năng hướng đối tượng mạnh mẽ thông qua class, struct, virtual functions và access specifiers.",
+            "difficulty": "easy",
+            "lang": "C++"
+        },
+        {
+            "question": "Những môi trường phát triển (IDE) hoặc trình biên tập mã nguồn nào sau đây thường được sử dụng phổ biến nhất để bắt đầu học và biên dịch chương trình C++?",
+            "options": [
+                "Dev-C++, CodeBlocks, VS Code (kèm MinGW/GCC) hoặc Visual Studio",
+                "Microsoft Word hoặc Google Docs",
+                "Adobe Photoshop và Illustrator",
+                "Figma và Canva"
+            ],
+            "answer_index": 0,
+            "explanation": "Dev-C++, CodeBlocks, CLion và VS Code kết hợp với trình biên dịch như GCC/G++ là những công cụ tiêu chuẩn hàng đầu cho người học và lập trình viên C++.",
+            "difficulty": "easy",
+            "lang": "C++"
+        },
+        {
+            "question": "Để bắt đầu học lập trình C++, người học cần nắm vững những khối kiến thức nền tảng cơ bản nào trước khi đi sâu vào cấu trúc dữ liệu nâng cao?",
+            "options": [
+                "Biến, kiểu dữ liệu, hàm, vòng lặp (for/while) và cấu trúc điều kiện (if/else)",
+                "Chỉ cần học cách cài đặt hệ điều hành Linux",
+                "Lập trình mạng Socket và điện toán đám mây Kubernetes",
+                "Thiết kế giao diện Photoshop và dựng video"
+            ],
+            "answer_index": 0,
+            "explanation": "Nắm vững biến, kiểu dữ liệu nguyên thủy, hàm, vòng lặp và câu lệnh rẽ nhánh là bước khởi đầu cốt lõi bắt buộc khi học lập trình C++.",
+            "difficulty": "easy",
+            "lang": "C++"
+        },
+        {
+            "question": "Đặc điểm nổi bật nào giúp C++ trở thành ngôn ngữ hàng đầu trong phát triển phần mềm hệ thống, game engine (Unreal Engine), thuật toán và đồ họa hiệu năng cao?",
+            "options": [
+                "Tốc độ thực thi cực nhanh gần sát phần cứng, quản lý bộ nhớ trực tiếp và khả năng tối ưu hóa sâu",
+                "Tự động tải xuống mã nguồn từ Internet",
+                "Không cần khai báo kiểu dữ liệu cho biến",
+                "Chỉ chạy được trên máy tính cấu hình yếu"
+            ],
+            "answer_index": 0,
+            "explanation": "C++ được biên dịch trực tiếp sang mã máy nhị phân mà không cần thông dịch qua máy ảo, mang lại hiệu năng tối đa và quyền kiểm soát bộ nhớ chi tiết.",
+            "difficulty": "easy",
+            "lang": "C++"
+        },
+        {
+            "question": "Trong C++, đối tượng nào thuộc thư viện `<iostream>` được sử dụng chuẩn mực để in dữ liệu ra màn hình dòng lệnh (Console Output)?",
+            "options": [
+                "std::cout (kết hợp toán tử chèn luồng <<)",
+                "std::cin (dùng để nhập dữ liệu)",
+                "printf_screen()",
+                "console.log()"
+            ],
+            "answer_index": 0,
+            "explanation": "std::cout trong thư viện <iostream> là đối tượng luồng đầu ra tiêu chuẩn (standard character output) của C++.",
+            "difficulty": "easy",
+            "lang": "C++"
+        },
+        {
+            "question": "Trong giao thức HTTP, mã trạng thái (HTTP Status Code) nào biểu thị yêu cầu đã được máy chủ xử lý thành công và tạo mới tài nguyên (Resource Created)?",
+            "options": ["201 Created", "200 OK", "400 Bad Request", "404 Not Found"],
+            "answer_index": 0,
+            "explanation": "Mã 201 Created thường được trả về sau các thao tác POST thành công để thông báo tài nguyên mới đã được tạo và lưu trữ trên máy chủ.",
+            "difficulty": "easy",
+            "lang": "HTTP"
+        },
+        {
+            "question": "Trong các phương thức HTTP chuẩn của kiến trúc RESTful API, phương thức nào mang tính chất an toàn (Safe) và lũy kế (Idempotent) dùng để lấy dữ liệu mà không làm thay đổi trạng thái máy chủ?",
+            "options": ["GET", "POST", "PATCH", "CONNECT"],
+            "answer_index": 0,
+            "explanation": "Phương thức GET là safe và idempotent: gọi GET nhiều lần với cùng tham số sẽ trả về cùng kết quả và không gây tác dụng phụ lên dữ liệu máy chủ.",
+            "difficulty": "easy",
+            "lang": "HTTP"
+        },
+        {
             "question": "Trong React 19, cú pháp để sử dụng Form Actions và xử lý trạng thái submit bất đồng bộ là gì?",
             "options": ["Sử dụng hook useActionState()", "Sử dụng hook useEffect() kết hợp useState()", "Bắt buộc dùng Redux Thunk", "Dùng useCallback() với ref"],
             "answer_index": 0,
@@ -61,14 +142,6 @@ def build_fallback_questions(
             "lang": "PostgreSQL"
         },
         {
-            "question": "Trong kiến trúc Microservices, Pattern nào thường được sử dụng để duy trì tính nhất quán dữ liệu giữa các dịch vụ phân tán?",
-            "options": ["Singleton Pattern", "Saga Pattern (Choreography hoặc Orchestration)", "Factory Pattern", "Decorator Pattern"],
-            "answer_index": 1,
-            "explanation": "Saga Pattern chia transaction phân tán thành chuỗi các local transaction với các giao dịch bù trừ (compensating transactions) khi có lỗi.",
-            "difficulty": "hard",
-            "lang": "Architecture"
-        },
-        {
             "question": "Trong quy trình CI/CD với Docker, Multi-stage Build mang lại lợi ích quan trọng nào?",
             "options": ["Cho phép chạy nhiều container cùng một port", "Giảm đáng kể kích thước image thành phẩm bằng cách loại bỏ compiler và dev dependencies", "Tự động backup dữ liệu container", "Thay thế hoàn toàn Kubernetes"],
             "answer_index": 1,
@@ -83,11 +156,85 @@ def build_fallback_questions(
             "explanation": "Python 3.11 triển khai dự án Faster CPython với Adaptive Specializing Interpreter giúp tối ưu các bytecode thường xuyên được gọi.",
             "difficulty": "hard",
             "lang": "Python"
+        },
+        {
+            "question": "Trong hệ thống quản lý phiên bản phân tán Git, lệnh nào được sử dụng để tải toàn bộ lịch sử và mã nguồn của một kho chứa từ xa (Remote Repository) về máy tính cá nhân?",
+            "options": ["git clone <repository_url>", "git pull --all", "git fork <url>", "git copy <url>"],
+            "answer_index": 0,
+            "explanation": "Lệnh 'git clone' sao chép toàn bộ kho mã nguồn từ xa bao gồm mọi nhánh (branches) và lịch sử commit về máy tính local.",
+            "difficulty": "easy",
+            "lang": "Git"
+        },
+        {
+            "question": "Trong Git, thao tác nào được sử dụng để tạm thời lưu trữ (cất đi) các thay đổi đang làm dở trong thư mục làm việc mà chưa muốn tạo commit?",
+            "options": ["git stash (kèm git stash pop để lấy lại)", "git reset --hard", "git clean -f", "git checkout -b"],
+            "answer_index": 0,
+            "explanation": "Lệnh 'git stash' lưu tạm thời các thay đổi vào ngăn xếp stash để bạn có thể chuyển nhánh sạch sẽ mà không làm mất code.",
+            "difficulty": "easy",
+            "lang": "Git"
+        },
+        {
+            "question": "Sự khác biệt cơ bản nhất giữa `git merge` và `git rebase` khi hợp nhất hai nhánh là gì?",
+            "options": [
+                "`git merge` tạo ra một commit hợp nhất (Merge Commit) giữ nguyên lịch sử thực tế, trong khi `git rebase` tua lại và xếp các commit thành một đường thẳng tuyến tính sạch sẽ",
+                "`git rebase` chỉ dùng cho file hình ảnh",
+                "`git merge` tự động xóa nhánh gốc",
+                "Không có sự khác biệt giữa hai lệnh này"
+            ],
+            "answer_index": 0,
+            "explanation": "Merge bảo toàn lịch sử theo nhánh rẽ với merge commit; Rebase viết lại lịch sử commit để nhánh trông như được phát triển tuần tự thẳng hàng.",
+            "difficulty": "medium",
+            "lang": "Git"
+        },
+        {
+            "question": "Một Commit trong Git về bản chất kỹ thuật lưu trữ thông tin gì?",
+            "options": [
+                "Một ảnh chụp nhanh (Snapshot) toàn bộ trạng thái của cây thư mục dự án tại thời điểm đó cùng metadata (tác giả, ngày giờ, commit cha)",
+                "Chỉ lưu một dòng chữ tin nhắn văn bản ngắn",
+                "Một tệp nén zip chứa toàn bộ hệ điều hành",
+                "Một file PDF báo cáo tiến độ công việc"
+            ],
+            "answer_index": 0,
+            "explanation": "Git không lưu theo kiểu chênh lệch diff delta giữa các file, mà lưu dưới dạng snapshot (commit object) trỏ tới cây thư mục (tree object).",
+            "difficulty": "medium",
+            "lang": "Git"
+        },
+        {
+            "question": "Khi đã commit nhầm hoặc muốn quay ngược lại commit trước đó trên nhánh đang làm việc một cách an toàn mà vẫn giữ lại code đã sửa đổi trong thư mục làm việc, lệnh nào tối ưu nhất?",
+            "options": ["git reset --soft HEAD~1", "git reset --hard HEAD~1", "git branch -D main", "git push --force"],
+            "answer_index": 0,
+            "explanation": "'git reset --soft HEAD~1' đưa HEAD về commit trước đó nhưng vẫn giữ nguyên tất cả thay đổi trong Staging Area để bạn có thể chỉnh sửa lại và commit tiếp.",
+            "difficulty": "medium",
+            "lang": "Git"
         }
     ]
 
-    # Filter matching language if possible
-    matched = [q for q in sample_bank if language.lower() in q.get("lang", "").lower()]
+    # Detect matching domain from language and material content
+    search_text = f"{language} {material}".lower()
+    target_lang = None
+    if "git" in search_text or "version control" in search_text or "quản lý phiên bản" in search_text:
+        target_lang = "Git"
+    elif "c++" in search_text or "cpp" in search_text or "lập trình c" in search_text:
+        target_lang = "C++"
+    elif "http" in search_text or "rest api" in search_text:
+        target_lang = "HTTP"
+    elif "docker" in search_text or "devops" in search_text or "kubernetes" in search_text:
+        target_lang = "DevOps"
+    elif "postgres" in search_text or "database" in search_text or "sql" in search_text:
+        target_lang = "PostgreSQL"
+    elif "fastapi" in search_text:
+        target_lang = "FastAPI"
+    elif "python" in search_text:
+        target_lang = "Python"
+    elif "react" in search_text:
+        target_lang = "React"
+
+    matched = []
+    if target_lang:
+        matched = [q for q in sample_bank if q.get("lang") == target_lang]
+    if not matched:
+        clean_lang = language.strip().lower()
+        matched = [q for q in sample_bank if clean_lang in q.get("lang", "").lower()]
     if not matched:
         matched = sample_bank
 
@@ -167,6 +314,27 @@ DEFAULT_TOPICS_METADATA = [
         "icon": "💻",
         "badge": "Software Eng",
         "description": "gRPC vs REST, HTTP/2 & 3, SSE, SOLID, Clean Architecture và SemVer."
+    },
+    {
+        "id": "C++",
+        "title": "Lập trình C / C++",
+        "icon": "⚙️",
+        "badge": "Systems & OOP",
+        "description": "Lập trình hướng đối tượng OOP, quản lý bộ nhớ, con trỏ, STL và tối ưu hiệu năng."
+    },
+    {
+        "id": "HTTP",
+        "title": "Giao thức HTTP & REST API",
+        "icon": "🌐",
+        "badge": "Web Protocols",
+        "description": "HTTP Methods, Status Codes, HTTP/2 & 3 Multiplexing, Headers và chuẩn RESTful API."
+    },
+    {
+        "id": "Git",
+        "title": "Git & Quản lý Phiên bản",
+        "icon": "🐙",
+        "badge": "VCS & Git Flow",
+        "description": "Quản lý mã nguồn phân tán, Commit snapshot, Merge vs Rebase, Stash và Reset."
     }
 ]
 
@@ -179,7 +347,10 @@ TOPIC_ALIASES = {
     "Python": ["python", "asyncio", "python core", "cpython"],
     "Security": ["security", "web security", "owasp", "bảo mật", "bảo mật web", "jwt"],
     "Architecture": ["architecture", "microservices", "system design", "kiến trúc", "hệ thống", "kiến trúc hệ thống"],
-    "Fullstack": ["fullstack", "full stack", "html5", "css3", "javascript", "html/web", "web", "clean architecture"]
+    "Fullstack": ["fullstack", "full stack", "html5", "css3", "javascript", "html/web", "web", "clean architecture"],
+    "C++": ["c++", "cpp", "c/c++", "c và c++", "lập trình c++", "lập trình c", "clang", "g++"],
+    "HTTP": ["http", "https", "giao thức http", "làm chủ http", "rest api", "restful", "api"],
+    "Git": ["git", "github", "gitlab", "vcs", "version control", "quản lý phiên bản", "commit", "stash"]
 }
 
 
@@ -306,14 +477,6 @@ def get_quiz_questions(
     query = db.query(QuizQuestion)
 
     if post_id is not None:
-        # Kiểm tra xem bài viết đã có câu hỏi trắc nghiệm chưa, nếu chưa có thì tự động sinh hoặc liên kết
-        count_existing = db.query(QuizQuestionPost).filter(QuizQuestionPost.post_id == post_id).count()
-        if count_existing == 0:
-            target_post = db.query(Post).filter(Post.id == post_id).first()
-            if target_post:
-                from app.services.quiz_generator import ensure_post_quiz_questions
-                ensure_post_quiz_questions(db, target_post, count=5)
-
         query = query.join(QuizQuestionPost, QuizQuestionPost.question_id == QuizQuestion.id)\
                      .filter(QuizQuestionPost.post_id == post_id)
         if isinstance(difficulty, str) and difficulty.strip() and difficulty.lower().strip() != "mixed":
@@ -443,11 +606,18 @@ def create_quiz_question(
         if not course:
             raise HTTPException(status_code=400, detail="Khóa học được chỉ định không tồn tại.")
 
-    is_admin = bool(current_user and (getattr(current_user, "is_superuser", False) or any(getattr(r, "name", "") in ["admin", "moderator"] for r in getattr(current_user, "roles", []))))
-    if current_user is not None and not is_admin:
+    user_roles = [r.name.lower() for r in getattr(current_user, "roles", [])] if current_user else []
+    is_staff = bool(
+        current_user and (
+            getattr(current_user, "is_superuser", False)
+            or "admin" in user_roles
+            or "moderator" in user_roles
+        )
+    )
+    if not is_staff:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Chỉ Quản trị viên (Admin) mới có quyền thêm câu hỏi trắc nghiệm."
+            detail="Chỉ Quản trị viên (Admin) hoặc Kiểm duyệt viên mới có quyền thêm câu hỏi trắc nghiệm."
         )
 
     user_id = getattr(current_user, "id", None) if (current_user and not hasattr(current_user, "dependency")) else None
@@ -538,11 +708,18 @@ def generate_quiz_with_ai(
     dựa trên nội dung Khóa học hoặc các Bài viết được chỉ định.
     Chỉ Quản trị viên (Admin) mới có quyền tạo đề thi bằng AI.
     """
-    is_admin = bool(current_user and (getattr(current_user, "is_superuser", False) or any(getattr(r, "name", "") in ["admin", "moderator"] for r in getattr(current_user, "roles", []))))
-    if current_user is not None and not is_admin:
+    user_roles = [r.name.lower() for r in getattr(current_user, "roles", [])] if current_user else []
+    is_staff = bool(
+        current_user and (
+            getattr(current_user, "is_superuser", False)
+            or "admin" in user_roles
+            or "moderator" in user_roles
+        )
+    )
+    if not is_staff:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Chỉ Quản trị viên (Admin) mới có quyền tạo đề thi bằng AI."
+            detail="Chỉ Quản trị viên (Admin) hoặc Kiểm duyệt viên mới có quyền tạo đề trắc nghiệm bằng AI."
         )
 
     materials = []
@@ -565,11 +742,34 @@ def generate_quiz_with_ai(
         materials.append(course_text)
 
     if req.post_ids:
-        posts = db.query(Post).filter(Post.id.in_(req.post_ids)).all()
+        all_posts = db.query(Post).filter(Post.id.in_(req.post_ids)).all()
+        from app.services.quiz_generator import is_meaningful_post_content
+        posts = [p for p in all_posts if is_meaningful_post_content(p)]
+        if not posts and all_posts:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Bài viết chứa nội dung hoặc tiêu đề không mang nhiều ý nghĩa (ký tự lặp vô nghĩa hoặc quá ngắn) để tạo câu hỏi trắc nghiệm."
+            )
+        from app.services.quiz_generator import _classify_post_domain, DOMAIN_TO_LANG
+
         for idx, post in enumerate(posts, 1):
-            if not lang and post.category:
-                lang = post.category.name if hasattr(post.category, "name") else str(post.category)
             materials.append(f"--- BÀI {idx}: {post.title} ---\n{post.content[:3000]}")
+
+        # Intelligently resolve the canonical language/domain from post title, material & requested topic
+        combined_text = f"{req.language or ''} {' '.join([p.title for p in posts])} {' '.join([(p.content or '')[:200] for p in posts])}".lower()
+        if "git" in combined_text or "github" in combined_text or "version control" in combined_text or "quản lý phiên bản" in combined_text:
+            lang = "Git"
+        elif "c++" in combined_text or "cpp" in combined_text or "lập trình c" in combined_text:
+            lang = "C++"
+        elif "http" in combined_text or "giao thức http" in combined_text:
+            lang = "HTTP"
+        elif "python" in combined_text:
+            lang = "Python"
+        elif len(posts) == 1:
+            dom = _classify_post_domain(posts[0])
+            lang = DOMAIN_TO_LANG.get(dom) or (posts[0].category.name if posts[0].category else "IT")
+        elif not lang:
+            lang = "IT"
 
     if not materials:
         materials.append(f"Chủ đề kỹ thuật và kiến thức lập trình: {lang or 'Công nghệ thông tin, Lập trình Web & Backend'}")
@@ -622,21 +822,30 @@ def generate_quiz_with_ai(
 
     # Fallback to local intelligent questions generator if AI failed or unconfigured
     if not generated_questions:
-        generated_questions = build_fallback_questions(
-            material=context_str,
-            count=count,
-            language=lang or "IT",
-            difficulty=difficulty
-        )
-        via = "fallback_local"
+        if posts and len(posts) == 1:
+            from app.services.quiz_generator import generate_questions_from_post_text
+            extracted = generate_questions_from_post_text(posts[0], count=count)
+            if extracted:
+                generated_questions = extracted
+                via = "content_extracted"
+
+        if not generated_questions:
+            generated_questions = build_fallback_questions(
+                material=context_str,
+                count=count,
+                language=lang or "IT",
+                difficulty=difficulty
+            )
+            via = "fallback_local"
 
     user_id = getattr(current_user, "id", None) if (current_user and not hasattr(current_user, "dependency")) else None
     created = []
 
     for q_data in generated_questions:
+        q_lang = (q_data.get("language") or q_data.get("lang") or lang or "IT").strip()
         q_obj = QuizQuestion(
             course_id=valid_course_id,
-            language=lang or "IT",
+            language=q_lang,
             question=str(q_data.get("question", "")).strip(),
             options=q_data.get("options", []),
             answer_index=int(q_data.get("answer_index", 0)),

@@ -73,6 +73,8 @@ class PostResponse(BaseModel):
     likes_count: int = 0
     comments_count: int = 0
     bookmarks_count: int = 0
+    has_quiz: bool = False
+    quiz_count: int = 0
     created_at: datetime
     updated_at: datetime
 
@@ -91,6 +93,8 @@ class PostListItem(BaseModel):
     likes_count: int = 0
     comments_count: int = 0
     bookmarks_count: int = 0
+    has_quiz: bool = False
+    quiz_count: int = 0
     read_time: str
     author: AuthorSummary
     category: Optional[CategoryResponse] = None

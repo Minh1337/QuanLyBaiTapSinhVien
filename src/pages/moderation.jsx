@@ -352,6 +352,24 @@ export default function ModerationPage({ onNavigate, onSelectPost, initialTab = 
     }
   };
 
+  const [aiInspectResults, setAiInspectResults] = useState({});
+  const [inspectingReportId, setInspectingReportId] = useState(null);
+
+  const handleAiInspect = async (reportId) => {
+    setInspectingReportId(reportId);
+    try {
+      const res = await api.moderation.aiInspectReport(reportId);
+      if (res) {
+        setAiInspectResults((prev) => ({ ...prev, [reportId]: res }));
+        addToast("Hệ thống AI đã quét và đánh giá mức độ vi phạm xong! 🤖", "success");
+      }
+    } catch (err) {
+      addToast(err.message || "Không thể phân tích bằng AI.", "error");
+    } finally {
+      setInspectingReportId(null);
+    }
+  };
+
   const loadBugReports = useCallback((status = bugReportsFilter, category = bugCategoryFilter, search = bugSearch) => {
     setLoadingBugReports(true);
     api.bugReports.adminList({ status, category, search })
@@ -1762,11 +1780,58 @@ ${mdRows}
                     <div className="text-xs text-base-content/60 flex items-center gap-2">
                       <span>Người báo cáo: <strong>{report.reporter?.name || "Người dùng ẩn danh"}</strong> (@{report.reporter?.username || "user"})</span>
                     </div>
+
+                    {/* AI Inspection Result Panel */}
+                    {aiInspectResults[report.id] && (
+                      <div className={`mt-3 p-3.5 rounded-xl border text-xs space-y-1.5 animate-fade-in ${
+                        aiInspectResults[report.id].verdict === "violation"
+                          ? "bg-error/10 border-error/30 text-error-content"
+                          : aiInspectResults[report.id].verdict === "warning"
+                          ? "bg-warning/10 border-warning/30 text-warning-content"
+                          : "bg-success/10 border-success/30 text-success-content"
+                      }`}>
+                        <div className="flex items-center justify-between font-bold">
+                          <span className="flex items-center gap-1.5">
+                            <span>🤖 Đánh giá kiểm duyệt AI</span>
+                            <span className="badge badge-xs font-mono">
+                              Điểm an toàn: {aiInspectResults[report.id].safety_score}%
+                            </span>
+                          </span>
+                          <span className="uppercase text-[10px] font-black">
+                            {aiInspectResults[report.id].verdict === "violation" ? "⚠️ Vi phạm nghiêm trọng" : aiInspectResults[report.id].verdict === "warning" ? "⚡ Cần chú ý" : "✓ Nội dung an toàn"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] leading-relaxed">
+                          <strong>Khuyến nghị:</strong> {aiInspectResults[report.id].recommendation}
+                        </p>
+                        {aiInspectResults[report.id].detected_issues?.length > 0 && (
+                          <ul className="list-disc pl-4 text-[11px] space-y-0.5 opacity-90">
+                            {aiInspectResults[report.id].detected_issues.map((iss, i) => (
+                              <li key={i}>{iss}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                  <div className="flex flex-wrap items-center gap-2 shrink-0 self-end md:self-center">
                     {report.status === "pending" ? (
                       <>
+                        <button
+                          type="button"
+                          onClick={() => handleAiInspect(report.id)}
+                          disabled={inspectingReportId === report.id}
+                          className="btn btn-xs btn-outline btn-primary text-xs gap-1 font-bold"
+                          title="Chạy mô hình AI phân tích tự động nội dung báo cáo"
+                        >
+                          {inspectingReportId === report.id ? (
+                            <span className="loading loading-spinner loading-xs"></span>
+                          ) : (
+                            <span>🤖</span>
+                          )}
+                          <span>{aiInspectResults[report.id] ? "Quét lại AI" : "AI Quét nội dung"}</span>
+                        </button>
                         <button
                           type="button"
                           onClick={() => handleResolveReport(report.id, "dismiss")}

@@ -34,7 +34,7 @@ def load_env_files_from_project() -> None:
                     continue
 
                 current = os.environ.get(key)
-                if current is None or not str(current).strip():
+                if (current is None or not str(current).strip()) and value:
                     os.environ[key] = value
 
 
@@ -59,6 +59,13 @@ class Settings(BaseSettings):
 
     # Database (PostgreSQL). Matches the local pgAdmin database "it_blog" with password 123456.
     DATABASE_URL: str = "postgresql://postgres:123456@localhost:5432/it_blog"
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def assemble_database_url(cls, v: Optional[str]) -> str:
+        if v and str(v).strip():
+            return str(v).strip()
+        return "postgresql://postgres:123456@localhost:5432/it_blog"
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"

@@ -357,13 +357,27 @@ export default function PolicyPage({ onNavigate, initialSection = "terms" }) {
               <div className="space-y-3">
                 <h3 className="text-base font-bold text-base-content flex items-center gap-2">
                   <span className="text-primary font-mono font-black">Điều 7.</span>
-                  Tài Trợ & Cơ Hội Dành Cho Lập Trình Viên (Developer Promotions)
+                  Thu Thập Email, Dữ Liệu Cá Nhân Để Gợi Ý Nội Dung & Quảng Cáo Công Nghệ
                 </h3>
+                <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-2 text-xs sm:text-sm">
+                  <p className="font-bold text-primary flex items-center gap-2">
+                    <span>🛡️</span> Thỏa thuận minh bạch về dữ liệu cá nhân & email thành viên (Theo Nghị định 13/2023/NĐ-CP)
+                  </p>
+                  <p className="text-base-content/80">
+                    Bằng việc đăng ký tài khoản, bạn đồng ý cho phép IT Blog thu thập và xử lý các thông tin cá nhân bao gồm: địa chỉ email, họ tên, vị trí chuyên môn, các chủ đề công nghệ theo dõi và hành vi tương tác đọc bài (bài viết đã thích, đánh dấu, bình luận).
+                  </p>
+                </div>
                 <p>
-                  7.1. IT Blog hiển thị các mẩu tin tài trợ phù hợp với ngữ cảnh chuyên môn (như mã ưu đãi Cloud, giấy phép IDE, công cụ DevOps) qua thẻ quảng cáo trên trang.
+                  7.1. <strong>Cá nhân hóa nội dung & gợi ý kỹ thuật:</strong> Dữ liệu tương tác và chuyên môn của bạn được sử dụng để thuật toán AI Recommendation đề xuất các bài viết, chuỗi bài (Series) và lộ trình học tập sát với nhu cầu phát triển sự nghiệp của bạn.
                 </p>
                 <p>
-                  7.2. Các liên kết tài trợ có thể chuyển hướng bạn sang website của bên thứ ba. IT Blog chỉ cung cấp không gian giới thiệu kỹ thuật và không chịu trách nhiệm đối với bất kỳ cam kết thương mại, chính sách thanh toán hoặc tranh chấp phát sinh giữa bạn và bên thứ ba đó.
+                  7.2. <strong>Bản tin công nghệ định kỳ (Tech Digest):</strong> IT Blog sử dụng địa chỉ email bạn đăng ký để gửi bản tin cập nhật xu hướng công nghệ nổi bật, các bài viết hay trong tuần và thông báo hệ thống quan trọng.
+                </p>
+                <p>
+                  7.3. <strong>Phân phối quảng cáo & tài trợ phù hợp ngữ cảnh:</strong> Dựa trên sở thích công nghệ (như Cloud, DevOps, Frontend, AI), hệ thống hiển thị các mẩu tin tài trợ, chương trình học bổng, việc làm IT và mã ưu đãi công cụ lập trình viên (Cloud Credits, bản quyền IDE, công cụ CI/CD) phù hợp. Chúng tôi <strong>tuyệt đối không bán danh sách email hay thông tin danh tính của bạn cho bất kỳ bên thứ ba nào</strong>.
+                </p>
+                <p>
+                  7.4. <strong>Quyền kiểm soát của người dùng:</strong> Bạn có quyền chủ động bật/tắt nhận email quảng cáo tại trang Cài đặt Hồ sơ, hoặc yêu cầu trích xuất/xóa toàn bộ dữ liệu cá nhân bất kỳ lúc nào bằng cách gửi yêu cầu tới <code className="text-primary font-mono font-bold">support@itblog.local</code>.
                 </p>
               </div>
 

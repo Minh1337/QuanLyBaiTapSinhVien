@@ -315,15 +315,50 @@ export default function CreatePostPage({ editPostData, onNavigate, onPostCreated
 
   const markdownFileRef = useRef(null);
 
-  // Nhập tệp Markdown từ máy tính (Obsidian / VS Code / Typora)
-  const handleImportMarkdownFile = (e) => {
+  // Nhập tệp tài liệu từ máy tính (Word .docx, Markdown .md, Text .txt, HTML)
+  const handleImportMarkdownFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const fileName = file.name.toLowerCase();
+
+    // 1. Nếu là tệp Word (.docx)
+    if (fileName.endsWith(".docx")) {
+      addToast(`Đang phân tích tài liệu Word "${file.name}"... ⏳`, "info");
+      try {
+        const res = await api.uploads.importDocument(file);
+        if (res && (res.content || res.title)) {
+          if (res.title && !title.trim()) setTitle(res.title);
+          if (res.content) setContent(res.content);
+          addToast(`Đã nhập tài liệu Word "${file.name}" và chuyển đổi sang Markdown thành công! 📄`, "success");
+          return;
+        }
+      } catch (err) {
+        console.warn("Lỗi nhập .docx qua API:", err);
+        addToast(err.message || "Không thể nạp tệp Word này. Vui lòng thử lại.", "error");
+      } finally {
+        if (markdownFileRef.current) markdownFileRef.current.value = "";
+      }
+      return;
+    }
+
+    // 2. Nếu là tệp Markdown hoặc Text (.md, .txt, .html)
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const text = String(event.target.result || "");
+
+        if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
+          const div = document.createElement("div");
+          div.innerHTML = text;
+          const h1 = div.querySelector("h1, title");
+          if (h1 && !title.trim()) setTitle(h1.textContent.trim());
+          const cleanText = div.innerText || div.textContent || text;
+          setContent(cleanText.trim());
+          addToast("Đã trích xuất nội dung từ tệp HTML! 📄", "success");
+          return;
+        }
+
         // Phân tích YAML Frontmatter nếu có
         const frontmatterMatch = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
         if (frontmatterMatch) {
@@ -360,11 +395,11 @@ export default function CreatePostPage({ editPostData, onNavigate, onPostCreated
           } else {
             setContent(text);
           }
-          addToast("Đã nạp toàn bộ nội dung từ tệp Markdown! 📄", "success");
+          addToast("Đã nạp toàn bộ nội dung từ tệp văn bản! 📄", "success");
         }
       } catch (err) {
-        console.warn("Lỗi đọc Markdown:", err);
-        addToast("Không thể đọc tệp Markdown này.", "error");
+        console.warn("Lỗi đọc tệp:", err);
+        addToast("Không thể đọc tệp này.", "error");
       } finally {
         if (markdownFileRef.current) markdownFileRef.current.value = "";
       }
@@ -643,7 +678,7 @@ ${content}
     );
   }
 
-  const handleSubmit = (submitStatus) => {
+  const handleSubmit = async (submitStatus) => {
     if (!title.trim() || !content.trim()) return;
 
     if (!currentUser) {
@@ -654,11 +689,11 @@ ${content}
       return;
     }
 
-    // Bài viết mới đăng luôn ở trạng thái 'pending' để Ban quản trị (Admin) và Kiểm duyệt viên (Moderator) duyệt
+    // Áp dụng cơ chế HẬU KIỂM: Bài viết xuất bản công khai ngay lập tức ('approved')
     const isDraft = submitStatus === "draft";
     const resolvedStatus = isDraft
       ? "draft"
-      : (isEditing ? (editPostData?.status || "pending") : "pending");
+      : (isEditing ? (editPostData?.status || "approved") : "approved");
 
     // Chuẩn hóa tags
     const tags = tagsString
@@ -699,19 +734,18 @@ ${content}
       } catch {
         // ignore
       }
-      const newPost = createPost(postData);
-      if (submitStatus === "pending") {
-        if (isAdmin || isModerator) {
-          onNavigate("moderation");
+      try {
+        const newPost = await createPost(postData);
+        if (isDraft) {
+          onNavigate("profile", { tab: "drafts" });
+        } else if (newPost) {
+          if (onPostCreated) onPostCreated(newPost.id);
+          onNavigate("post_detail", { postId: newPost.id });
         } else {
-          addToast("Bài viết đã được gửi vào hàng đợi duyệt! Ban quản trị sẽ kiểm duyệt sớm. ⏳", "info");
-          onNavigate("profile", { tab: "my_posts" });
+          onNavigate("home");
         }
-      } else if (newPost && onPostCreated) {
-        onPostCreated(newPost.id);
-        onNavigate("post_detail", { postId: newPost.id });
-      } else {
-        onNavigate("home");
+      } catch (err) {
+        // createPost đã hiển thị toast lỗi thực tế
       }
     }
   };
@@ -854,11 +888,11 @@ ${content}
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Nhập tệp Markdown từ máy tính */}
+          {/* Nhập tệp Word, Markdown hoặc Text từ máy tính */}
           <input
             type="file"
             ref={markdownFileRef}
-            accept=".md,.markdown,.txt"
+            accept=".docx,.doc,.md,.markdown,.txt,.html"
             className="hidden"
             onChange={handleImportMarkdownFile}
           />
@@ -866,10 +900,10 @@ ${content}
             type="button"
             onClick={() => markdownFileRef.current && markdownFileRef.current.click()}
             className="btn btn-sm btn-outline btn-ghost font-semibold gap-1.5 rounded-xl text-xs hover:text-primary hover:border-primary"
-            title="Nhập tệp Markdown (.md) từ máy tính (Obsidian, VS Code...)"
+            title="Nhập tệp Word (.docx), Markdown (.md), hoặc Text (.txt) từ máy tính"
           >
             <span>📂</span>
-            <span className="hidden sm:inline">Nhập .md</span>
+            <span className="hidden sm:inline">Nhập tài liệu (.docx, .md, .txt)</span>
           </button>
           {isAdmin && (
             <button
@@ -935,7 +969,7 @@ ${content}
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              handleSubmit("pending");
+              handleSubmit("approved");
             }}
             className="space-y-5"
           >
@@ -1283,7 +1317,7 @@ ${content}
                   type="submit"
                   className="btn btn-sm btn-primary text-white font-bold px-5 shadow-md hover:scale-105 active:scale-95 transition-all text-xs"
                 >
-                  {isEditing ? "Lưu thay đổi" : "⏳ Gửi bài chờ duyệt"}
+                  {isEditing ? "Lưu thay đổi" : "🚀 Xuất bản ngay"}
                 </button>
               </div>
             </div>
@@ -1359,10 +1393,10 @@ ${content}
               ← Quay lại soạn thảo
             </button>
             <button
-              onClick={() => handleSubmit("pending")}
+              onClick={() => handleSubmit("approved")}
               className="btn btn-sm btn-primary text-white font-bold text-xs"
             >
-              {isEditing ? "Lưu thay đổi" : "⏳ Gửi bài chờ duyệt"}
+              {isEditing ? "Lưu thay đổi" : "🚀 Xuất bản ngay"}
             </button>
           </div>
         </div>

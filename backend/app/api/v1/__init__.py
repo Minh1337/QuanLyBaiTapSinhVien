@@ -23,6 +23,7 @@ from app.api.v1.analytics import router as analytics_router
 from app.api.v1.seo import router as seo_router
 from app.api.v1.uploads import router as uploads_router
 from app.api.v1.quiz import router as quiz_router
+from app.api.v1.series import router as series_router
 
 api_router = APIRouter()
 
@@ -50,6 +51,7 @@ api_router.include_router(analytics_router)
 api_router.include_router(seo_router)
 api_router.include_router(uploads_router)
 api_router.include_router(quiz_router, prefix="/quiz")
+api_router.include_router(series_router)
 
 from app.api.v1.gamification import get_leaderboard
 from app.schemas.gamification import LeaderboardUserResponse

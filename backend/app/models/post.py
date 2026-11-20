@@ -89,6 +89,24 @@ class Post(Base):
     def bookmarks_count(self) -> int:
         return len(self.bookmarked_by) if hasattr(self, "bookmarked_by") and self.bookmarked_by else 0
 
+    @property
+    def quiz_count(self) -> int:
+        if hasattr(self, "_quiz_count"):
+            return self._quiz_count
+        try:
+            from app.models.quiz import QuizQuestionPost
+            from app.db.session import SessionLocal
+            db = SessionLocal()
+            cnt = db.query(QuizQuestionPost).filter(QuizQuestionPost.post_id == self.id).count()
+            db.close()
+            return cnt
+        except Exception:
+            return 0
+
+    @property
+    def has_quiz(self) -> bool:
+        return self.quiz_count > 0
+
 
 
 class PostRevision(Base):

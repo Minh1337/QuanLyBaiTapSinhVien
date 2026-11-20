@@ -364,8 +364,330 @@ def build_domain_fallback_bank() -> Dict[str, List[Dict[str, Any]]]:
                 "difficulty": "easy",
                 "language": "Docker"
             }
+        ],
+        "cpp": [
+            {
+                "question": "Trong ngôn ngữ lập trình C++, tính năng cốt lõi nào giúp tổ chức mã nguồn theo các đối tượng, hỗ trợ tính đóng gói (encapsulation), kế thừa (inheritance) và đa hình (polymorphism)?",
+                "options": [
+                    "Lập trình hướng đối tượng (OOP - Object-Oriented Programming)",
+                    "Lập trình hướng sự kiện thuần túy",
+                    "Lập trình hàm không trạng thái (Pure Functional)",
+                    "Lập trình kịch bản thông dịch (Scripting)"
+                ],
+                "answer_index": 0,
+                "explanation": "C++ là ngôn ngữ mở rộng từ C với tính năng hướng đối tượng mạnh mẽ thông qua class, struct, virtual functions và access specifiers.",
+                "difficulty": "easy",
+                "language": "C++"
+            },
+            {
+                "question": "Những môi trường phát triển (IDE) hoặc trình biên tập mã nguồn nào sau đây thường được sử dụng phổ biến nhất để bắt đầu học và biên dịch chương trình C++?",
+                "options": [
+                    "Dev-C++, CodeBlocks, VS Code (kèm MinGW/GCC) hoặc Visual Studio",
+                    "Microsoft Word hoặc Google Docs",
+                    "Adobe Photoshop và Illustrator",
+                    "Figma và Canva"
+                ],
+                "answer_index": 0,
+                "explanation": "Dev-C++, CodeBlocks, CLion và VS Code kết hợp với trình biên dịch như GCC/G++ là những công cụ tiêu chuẩn hàng đầu cho người học và lập trình viên C++.",
+                "difficulty": "easy",
+                "language": "C++"
+            },
+            {
+                "question": "Để bắt đầu học lập trình C++, người học cần nắm vững những khối kiến thức nền tảng cơ bản nào trước khi đi sâu vào cấu trúc dữ liệu nâng cao?",
+                "options": [
+                    "Biến, kiểu dữ liệu, hàm, vòng lặp (for/while) và cấu trúc điều kiện (if/else)",
+                    "Chỉ cần học cách cài đặt hệ điều hành Linux",
+                    "Lập trình mạng Socket và điện toán đám mây Kubernetes",
+                    "Thiết kế giao diện Photoshop và dựng video"
+                ],
+                "answer_index": 0,
+                "explanation": "Nắm vững biến, kiểu dữ liệu nguyên thủy, hàm, vòng lặp và câu lệnh rẽ nhánh là bước khởi đầu cốt lõi bắt buộc khi học lập trình C++.",
+                "difficulty": "easy",
+                "language": "C++"
+            },
+            {
+                "question": "Đặc điểm nổi bật nào giúp C++ trở thành ngôn ngữ hàng đầu trong phát triển phần mềm hệ thống, game engine (Unreal Engine), thuật toán và đồ họa hiệu năng cao?",
+                "options": [
+                    "Tốc độ thực thi cực nhanh gần sát phần cứng, quản lý bộ nhớ trực tiếp và khả năng tối ưu hóa sâu",
+                    "Tự động tải xuống mã nguồn từ Internet",
+                    "Không cần khai báo kiểu dữ liệu cho biến",
+                    "Chỉ chạy được trên máy tính cấu hình yếu"
+                ],
+                "answer_index": 0,
+                "explanation": "C++ được biên dịch trực tiếp sang mã máy nhị phân mà không cần thông dịch qua máy ảo, mang lại hiệu năng tối đa và quyền kiểm soát bộ nhớ chi tiết.",
+                "difficulty": "easy",
+                "language": "C++"
+            },
+            {
+                "question": "Trong C++, đối tượng nào thuộc thư viện `<iostream>` được sử dụng chuẩn mực để in dữ liệu ra màn hình dòng lệnh (Console Output)?",
+                "options": [
+                    "std::cout (kết hợp toán tử chèn luồng <<)",
+                    "std::cin (dùng để nhập dữ liệu)",
+                    "printf_screen()",
+                    "console.log()"
+                ],
+                "answer_index": 0,
+                "explanation": "std::cout trong thư viện <iostream> là đối tượng luồng đầu ra tiêu chuẩn (standard character output) của C++.",
+                "difficulty": "easy",
+                "language": "C++"
+            },
+            {
+                "question": "Trong C++, cặp toán tử nào được sử dụng để cấp phát bộ nhớ động trên vùng nhớ Heap và giải phóng bộ nhớ khi không còn sử dụng?",
+                "options": [
+                    "new và delete",
+                    "malloc và free (thuần chuẩn C)",
+                    "alloc và dealloc",
+                    "create và destroy"
+                ],
+                "answer_index": 0,
+                "explanation": "C++ cung cấp toán tử 'new' để cấp phát bộ nhớ động cho đối tượng (gọi constructor) và 'delete' để giải phóng bộ nhớ (gọi destructor).",
+                "difficulty": "medium",
+                "language": "C++"
+            },
+            {
+                "question": "Khái niệm con trỏ (Pointer) trong ngôn ngữ lập trình C++ đại diện cho điều gì?",
+                "options": [
+                    "Một biến lưu trữ địa chỉ vùng nhớ của một biến hoặc đối tượng khác",
+                    "Một hàm đặc biệt dùng để kết nối cơ sở dữ liệu",
+                    "Một vòng lặp vô tận để kiểm tra phần cứng",
+                    "Một file ảnh đính kèm trong mã nguồn"
+                ],
+                "answer_index": 0,
+                "explanation": "Con trỏ trong C++ là biến chứa địa chỉ ô nhớ (memory address) của giá trị khác, được khai báo với ký tự * và thao tác qua toán tử lấy địa chỉ &.",
+                "difficulty": "easy",
+                "language": "C++"
+            }
+        ],
+        "http": [
+            {
+                "question": "Trong giao thức HTTP, mã trạng thái (HTTP Status Code) nào biểu thị yêu cầu đã được máy chủ xử lý thành công và tạo mới tài nguyên (Resource Created)?",
+                "options": [
+                    "201 Created",
+                    "200 OK",
+                    "400 Bad Request",
+                    "404 Not Found"
+                ],
+                "answer_index": 0,
+                "explanation": "Mã 201 Created thường được trả về sau các thao tác POST thành công để thông báo tài nguyên mới đã được tạo và lưu trữ trên máy chủ.",
+                "difficulty": "easy",
+                "language": "HTTP"
+            },
+            {
+                "question": "Trong các phương thức HTTP chuẩn của kiến trúc RESTful API, phương thức nào mang tính chất an toàn (Safe) và lũy kế (Idempotent) dùng để lấy dữ liệu mà không làm thay đổi trạng thái máy chủ?",
+                "options": [
+                    "GET",
+                    "POST",
+                    "PATCH",
+                    "CONNECT"
+                ],
+                "answer_index": 0,
+                "explanation": "Phương thức GET là safe và idempotent: gọi GET nhiều lần với cùng tham số sẽ trả về cùng kết quả và không gây tác dụng phụ lên dữ liệu máy chủ.",
+                "difficulty": "easy",
+                "language": "HTTP"
+            },
+            {
+                "question": "Sự khác biệt cốt lõi giữa HTTP/1.1 và HTTP/2 là gì?",
+                "options": [
+                    "HTTP/2 hỗ trợ Multiplexing (truyền nhiều request/response đồng thời trên 1 kết nối TCP duy nhất) và nén Header HPACK",
+                    "HTTP/2 chỉ chạy được trên mạng nội bộ",
+                    "HTTP/1.1 không hỗ trợ truyền tải hình ảnh",
+                    "HTTP/2 bắt buộc sử dụng định dạng XML"
+                ],
+                "answer_index": 0,
+                "explanation": "HTTP/2 giải quyết vấn đề Head-of-line blocking của HTTP/1.1 nhờ cơ chế Multiplexing dạng binary stream trên 1 kết nối TCP duy nhất.",
+                "difficulty": "medium",
+                "language": "HTTP"
+            },
+            {
+                "question": "Trong thiết kế RESTful API, sự khác biệt cơ bản giữa phương thức PUT và phương thức PATCH là gì?",
+                "options": [
+                    "PUT thay thế toàn bộ tài nguyên bằng dữ liệu mới, trong khi PATCH chỉ cập nhật từng phần (cột/trường) thay đổi",
+                    "PUT dùng để xóa dữ liệu, PATCH dùng để tạo mới",
+                    "PATCH không bao giờ gửi body",
+                    "PUT chỉ dùng cho tài liệu hình ảnh"
+                ],
+                "answer_index": 0,
+                "explanation": "Theo chuẩn HTTP RFC: PUT là idempotent thay thế hoàn toàn tài nguyên, PATCH áp dụng cập nhật cục bộ cho một phần tài nguyên.",
+                "difficulty": "medium",
+                "language": "HTTP"
+            },
+            {
+                "question": "Header nào trong HTTP Request hoặc Response được sử dụng để thông báo định dạng kiểu dữ liệu (MIME Type) của phần thân thông điệp (Payload)?",
+                "options": [
+                    "Content-Type: application/json",
+                    "Authorization: Bearer <token>",
+                    "User-Agent: Mozilla/5.0",
+                    "Cache-Control: no-cache"
+                ],
+                "answer_index": 0,
+                "explanation": "Header 'Content-Type' cho trình duyệt hoặc máy chủ biết chính xác định dạng dữ liệu (JSON, HTML, form-data, XML) để thực hiện parse tương ứng.",
+                "difficulty": "easy",
+                "language": "HTTP"
+            },
+            {
+                "question": "Sự khác nhau giữa mã trạng thái HTTP 401 Unauthorized và 403 Forbidden là gì?",
+                "options": [
+                    "401 có nghĩa chưa xác thực danh tính (chưa đăng nhập hoặc token không hợp lệ), còn 403 có nghĩa đã xác thực nhưng không đủ quyền hạn truy cập tài nguyên",
+                    "401 là lỗi máy chủ, 403 là lỗi mạng",
+                    "403 dùng khi database bị ngắt kết nối",
+                    "Không có sự khác nhau giữa hai mã này"
+                ],
+                "answer_index": 0,
+                "explanation": "401 yêu cầu client cung cấp thông tin xác thực (Credentials/Token). 403 là server hiểu rõ client là ai nhưng từ chối thực hiện vì không có quyền.",
+                "difficulty": "medium",
+                "language": "HTTP"
+            }
+        ],
+        "python": [
+            {
+                "question": "Cơ chế nào trong Python 3.11+ giúp tăng tốc độ thực thi mã nguồn lên tới 10-60% so với Python 3.10?",
+                "options": [
+                    "Dự án Faster CPython (Adaptive specializing interpreter)",
+                    "Loại bỏ hoàn toàn GIL (Global Interpreter Lock)",
+                    "Chuyển sang JIT compiler của PyPy",
+                    "Bắt buộc biên dịch AOT"
+                ],
+                "answer_index": 0,
+                "explanation": "Python 3.11 triển khai dự án Faster CPython với Adaptive Specializing Interpreter giúp tối ưu các bytecode thường xuyên được gọi.",
+                "difficulty": "hard",
+                "language": "Python"
+            },
+            {
+                "question": "Khái niệm Generator trong Python sử dụng từ khóa nào để tạm dừng hàm và trả về từng giá trị tuần tự mà không cần nạp toàn bộ danh sách vào RAM?",
+                "options": [
+                    "yield",
+                    "return",
+                    "break",
+                    "continue"
+                ],
+                "answer_index": 0,
+                "explanation": "Từ khóa yield biến một hàm thành Generator function, trả về từng giá trị theo nhu cầu (lazy evaluation) giúp tiết kiệm bộ nhớ tối đa.",
+                "difficulty": "medium",
+                "language": "Python"
+            },
+            {
+                "question": "Trong Python, cú pháp `with open(...) as f:` (Context Manager) mang lại lợi ích quan trọng nhất nào khi thao tác với tệp tin hoặc kết nối mạng?",
+                "options": [
+                    "Đảm bảo tài nguyên (file, socket) luôn được tự động đóng an toàn ngay cả khi xảy ra Exception",
+                    "Tự động dịch nội dung file sang tiếng Việt",
+                    "Tăng tốc độ đọc ghi đĩa cứng lên gấp đôi",
+                    "Mã hóa bảo mật toàn bộ tệp tin"
+                ],
+                "answer_index": 0,
+                "explanation": "Context Manager đảm bảo phương thức __exit__ luôn được gọi để giải phóng tài nguyên an toàn.",
+                "difficulty": "easy",
+                "language": "Python"
+            }
+        ],
+        "database": [
+            {
+                "question": "Mục đích quan trọng nhất của việc sử dụng Connection Pooling trong PostgreSQL với SQLAlchemy là gì?",
+                "options": [
+                    "Tái sử dụng các kết nối cơ sở dữ liệu đã mở, giảm overhead khởi tạo kết nối TCP/TLS tốn kém",
+                    "Tự động mã hóa toàn bộ ổ đĩa cứng của server database",
+                    "Xóa bỏ hoàn toàn nhu cầu đánh Index cho bảng dữ liệu",
+                    "Tăng tốc độ mạng internet của máy tính client"
+                ],
+                "answer_index": 0,
+                "explanation": "Khởi tạo kết nối mới tới PostgreSQL tiêu tốn nhiều tài nguyên CPU và RAM. Connection Pool duy trì sẵn các kết nối mở để tái sử dụng ngay lập tức.",
+                "difficulty": "medium",
+                "language": "PostgreSQL"
+            },
+            {
+                "question": "Trong PostgreSQL, loại Index nào thường được tối ưu hóa đặc biệt cho các cột kiểu mảng (Array), JSONB hoặc tìm kiếm toàn văn bản (Full-text Search)?",
+                "options": [
+                    "GIN (Generalized Inverted Index)",
+                    "B-tree mặc định",
+                    "Hash Index",
+                    "BRIN (Block Range Index)"
+                ],
+                "answer_index": 0,
+                "explanation": "GIN Index rất phù hợp cho kiểu dữ liệu đa giá trị (composite values) như JSONB hoặc mảng vì nó lập chỉ mục cho từng phần tử bên trong.",
+                "difficulty": "medium",
+                "language": "PostgreSQL"
+            }
+        ],
+        "git": [
+            {
+                "question": "Trong hệ thống quản lý phiên bản phân tán Git, lệnh nào được sử dụng để tải toàn bộ lịch sử và mã nguồn của một kho chứa từ xa (Remote Repository) về máy tính cá nhân?",
+                "options": [
+                    "git clone <repository_url>",
+                    "git pull --all",
+                    "git fork <url>",
+                    "git copy <url>"
+                ],
+                "answer_index": 0,
+                "explanation": "Lệnh 'git clone' sao chép toàn bộ kho mã nguồn từ xa bao gồm mọi nhánh (branches) và lịch sử commit về máy tính local.",
+                "difficulty": "easy",
+                "language": "Git"
+            },
+            {
+                "question": "Trong Git, thao tác nào được sử dụng để tạm thời lưu trữ (cất đi) các thay đổi đang làm dở trong thư mục làm việc mà chưa muốn tạo commit?",
+                "options": [
+                    "git stash (kèm git stash pop để lấy lại)",
+                    "git reset --hard",
+                    "git clean -f",
+                    "git checkout -b"
+                ],
+                "answer_index": 0,
+                "explanation": "Lệnh 'git stash' lưu tạm thời các thay đổi (cả staged và unstaged) vào ngăn xếp stash để bạn có thể chuyển nhánh sạch sẽ mà không làm mất code.",
+                "difficulty": "easy",
+                "language": "Git"
+            },
+            {
+                "question": "Sự khác biệt cơ bản nhất giữa `git merge` và `git rebase` khi hợp nhất hai nhánh là gì?",
+                "options": [
+                    "`git merge` tạo ra một commit hợp nhất (Merge Commit) giữ nguyên lịch sử thực tế, trong khi `git rebase` tua lại và xếp các commit thành một đường thẳng tuyến tính sạch sẽ",
+                    "`git rebase` chỉ dùng cho file hình ảnh",
+                    "`git merge` tự động xóa nhánh gốc",
+                    "Không có sự khác biệt giữa hai lệnh này"
+                ],
+                "answer_index": 0,
+                "explanation": "Merge bảo toàn lịch sử theo nhánh rẽ với merge commit; Rebase viết lại lịch sử commit để nhánh trông như được phát triển tuần tự thẳng hàng.",
+                "difficulty": "medium",
+                "language": "Git"
+            },
+            {
+                "question": "Một Commit trong Git về bản chất kỹ thuật lưu trữ thông tin gì?",
+                "options": [
+                    "Một ảnh chụp nhanh (Snapshot) toàn bộ trạng thái của cây thư mục dự án tại thời điểm đó cùng metadata (tác giả, ngày giờ, commit cha)",
+                    "Chỉ lưu một dòng chữ tin nhắn văn bản ngắn",
+                    "Một tệp nén zip chứa toàn bộ hệ điều hành",
+                    "Một file PDF báo cáo tiến độ công việc"
+                ],
+                "answer_index": 0,
+                "explanation": "Git không lưu theo kiểu chênh lệch diff delta giữa các file, mà lưu dưới dạng snapshot (commit object) trỏ tới cây thư mục (tree object).",
+                "difficulty": "medium",
+                "language": "Git"
+            },
+            {
+                "question": "Khi đã commit nhầm hoặc muốn quay ngược lại commit trước đó trên nhánh đang làm việc một cách an toàn mà vẫn giữ lại code đã sửa đổi trong thư mục làm việc, lệnh nào tối ưu nhất?",
+                "options": [
+                    "git reset --soft HEAD~1",
+                    "git reset --hard HEAD~1",
+                    "git branch -D main",
+                    "git push --force"
+                ],
+                "answer_index": 0,
+                "explanation": "'git reset --soft HEAD~1' đưa HEAD về commit trước đó nhưng vẫn giữ nguyên tất cả thay đổi trong Staging Area để bạn có thể chỉnh sửa lại và commit tiếp.",
+                "difficulty": "medium",
+                "language": "Git"
+            }
         ]
     }
+
+
+DOMAIN_TO_LANG = {
+    "git": "Git",
+    "cpp": "C++",
+    "http": "HTTP",
+    "python": "Python",
+    "fastapi": "FastAPI",
+    "database": "PostgreSQL",
+    "devops": "DevOps",
+    "react": "React",
+    "web_basic": "HTML/Web"
+}
 
 
 def _classify_post_domain(post: Post) -> str:
@@ -377,25 +699,40 @@ def _classify_post_domain(post: Post) -> str:
     content_text = f"{post.excerpt or ''} {post.content or ''}".lower()
 
     domain_keywords = {
+        "git": [
+            "git", "github", "gitlab", "commit", "branch", "pull request", "merge", "rebase",
+            "git clone", "git push", "git pull", "git stash", "version control", "quản lý phiên bản"
+        ],
+        "cpp": [
+            "c++", "cpp", "lập trình c++", "lập trình c", "c/c++", "dev-c++", "codeblocks",
+            "iostream", "cout", "cin", "con trỏ", "pointer", "oop", "hướng đối tượng",
+            "g++", "clang", "std::", "vector<", "virtual function"
+        ],
+        "http": [
+            "http", "https", "rest api", "restful", "api rest", "status code", "201 created",
+            "200 ok", "giao thức http", "làm chủ http", "http/2", "http/3", "request", "response"
+        ],
+        "python": ["python", "python 3", "cpython", "async def", "yield", "generator", "decorator"],
+        "fastapi": ["fastapi", "pydantic", "sqlalchemy", "uvicorn", "asyncio", "dependency injection"],
+        "database": ["postgresql", "postgres", "database", "cơ sở dữ liệu", "csdl", "sql", "index", "connection pooling"],
+        "devops": ["docker", "container", "devops", "ci/cd", "github actions", "kubernetes", "k8s", "dockerfile", "docker-compose"],
+        "react": ["react", "react 19", "tailwind", "next.js", "nextjs", "jsx", "tsx", "virtual dom", "frontend framework", "useactionstate"],
         "web_basic": [
             "lập trình web", "lập trình website", "website cơ bản", "web cơ bản",
             "html", "html5", "css", "css3", "javascript", "flexbox", "responsive web",
             "dom", "frontend cơ bản", "website"
-        ],
-        "fastapi": ["fastapi", "python", "pydantic", "sqlalchemy", "postgresql", "postgres", "microservices", "uvicorn", "asyncio", "api rest"],
-        "devops": ["docker", "container", "devops", "ci/cd", "github actions", "kubernetes", "k8s", "dockerfile", "docker-compose"],
-        "react": ["react", "react 19", "tailwind", "next.js", "nextjs", "jsx", "tsx", "virtual dom", "frontend framework", "useactionstate"]
+        ]
     }
 
     scores = {d: 0 for d in domain_keywords}
     for dom, kws in domain_keywords.items():
         for kw in kws:
             if kw in title_text:
-                scores[dom] += 15
+                scores[dom] += 30  # Title is strongest signal
             if kw in tag_text:
-                scores[dom] += 8
+                scores[dom] += 12
             if kw in cat_text:
-                scores[dom] += 4
+                scores[dom] += 5
             if kw in content_text:
                 scores[dom] += 1
 
@@ -406,20 +743,246 @@ def _classify_post_domain(post: Post) -> str:
     return "web_basic"
 
 
+def generate_questions_from_post_text(post: Post, count: int = 5) -> List[Dict[str, Any]]:
+    """
+    Trích xuất và tự động tạo câu hỏi trắc nghiệm trực tiếp từ tiêu đề và từng câu văn bản của bài viết.
+    Đảm bảo 100% nội dung câu hỏi, đáp án và giải thích bám sát những gì tác giả viết trong bài viết.
+    """
+    title = (post.title or "").strip()
+    content = (post.content or "").strip()
+    if not content and not title:
+        return []
+
+    # Làm sạch markdown
+    clean_content = re.sub(r":::video.*?:::", "", content, flags=re.DOTALL)
+    clean_content = re.sub(r"```.*?```", "", clean_content, flags=re.DOTALL)
+    clean_content = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", clean_content)
+    clean_content = re.sub(r"[*_#`]", "", clean_content)
+    clean_content = re.sub(r"\s+", " ", clean_content).strip()
+
+    # Tách bài viết thành các câu độc lập
+    raw_sentences = [s.strip() for s in re.split(r"(?<=[.!?\n])\s+", clean_content) if len(s.strip()) >= 15]
+
+    questions: List[Dict[str, Any]] = []
+    category_label = title if len(title) <= 25 else (post.category.name if post.category else "Kiến thức bài viết")
+
+    # 1. Trích xuất ngữ nghĩa chuyên sâu theo từng câu văn của bài viết
+    for sentence in raw_sentences:
+        lower_s = sentence.lower()
+
+        # Dạng: Định dạng file / Đuôi mở rộng (.docx, .pdf, .json, .cpp, .py, .html...)
+        ext_match = re.search(r"(\.[a-zA-Z0-9]{2,5})\b", sentence)
+        if ext_match and any(w in lower_s for kw in ["dạng", "đuôi", "định dạng", "tệp", "file"] for w in [kw]):
+            ext = ext_match.group(1)
+            other_exts = [e for e in [".docx", ".pdf", ".exe", ".mp4", ".apk", ".zip", ".html", ".json"] if e != ext]
+            random.shuffle(other_exts)
+            options = [ext] + other_exts[:3]
+            random.shuffle(options)
+            questions.append({
+                "question": "Theo nội dung bài viết, tệp hoặc tài liệu thường được lưu trữ dưới định dạng tiêu chuẩn nào?",
+                "options": options,
+                "answer_index": options.index(ext),
+                "explanation": f"Trích dẫn từ bài viết: \"{sentence}\"",
+                "difficulty": "easy",
+                "language": category_label
+            })
+
+        # Dạng: Phần mềm / Công cụ chính thức (Microsoft Word, Dev-C++, VS Code, Git, Docker...)
+        if "microsoft word" in lower_s:
+            options = ["Microsoft Word", "Adobe Photoshop", "AutoCAD 3D", "VLC Media Player"]
+            random.shuffle(options)
+            questions.append({
+                "question": "Bài viết đề cập định dạng này là tiêu chuẩn chính thức cho phần mềm hoặc tài liệu nào?",
+                "options": options,
+                "answer_index": options.index("Microsoft Word"),
+                "explanation": f"Trích dẫn từ bài viết: \"{sentence}\"",
+                "difficulty": "easy",
+                "language": category_label
+            })
+
+        # Dạng: Nền tảng / Môi trường hoạt động (Windows, macOS, web, Linux...)
+        if any(kw in lower_s for kw in ["windows", "macos", "web", "linux", "mở và chỉnh sửa", "hệ điều hành"]):
+            platform_match = re.search(r"(trên|trong)\s+(windows[^\n.]*|macos[^\n.]*|web[^\n.]*|linux[^\n.]*)", sentence, re.IGNORECASE)
+            plat_text = platform_match.group(2).strip() if platform_match else "Windows, macOS và web"
+            distractors = [
+                "Chỉ chạy được trên môi trường MS-DOS cũ",
+                "Chỉ mở được trên thiết bị máy chơi game chuyên dụng",
+                "Không thể xem hoặc chỉnh sửa trực tiếp trên trình duyệt web"
+            ]
+            options = [plat_text] + distractors
+            random.shuffle(options)
+            questions.append({
+                "question": "Theo bài viết, các tệp hoặc phần mềm có thể được mở và chỉnh sửa trên những nền tảng nào?",
+                "options": options,
+                "answer_index": options.index(plat_text),
+                "explanation": f"Trích dẫn từ bài viết: \"{sentence}\"",
+                "difficulty": "easy",
+                "language": category_label
+            })
+
+        # Dạng: Tính năng hỗ trợ / Khả năng ("hỗ trợ văn bản, hình ảnh, bảng...", "có khả năng...")
+        if any(kw in lower_s for kw in ["hỗ trợ", "có khả năng", "bao gồm", "chứa"]):
+            support_match = re.search(r"(hỗ trợ|có khả năng|bao gồm)\s+([^.]+)", sentence, re.IGNORECASE)
+            if support_match:
+                feature_text = support_match.group(2).strip().capitalize()
+                distractors = [
+                    "Chỉ hỗ trợ tệp âm thanh đơn thuần không kèm hình ảnh",
+                    "Không hỗ trợ bảng biểu hay các tính năng định dạng",
+                    "Chỉ hiển thị dòng lệnh văn bản thô không hỗ trợ cộng tác"
+                ]
+                options = [feature_text] + distractors
+                random.shuffle(options)
+                questions.append({
+                    "question": "Theo nội dung bài viết, tệp hoặc công cụ này hỗ trợ những thành phần và tính năng nào?",
+                    "options": options,
+                    "answer_index": options.index(feature_text),
+                    "explanation": f"Trích dẫn từ bài viết: \"{sentence}\"",
+                    "difficulty": "easy",
+                    "language": category_label
+                })
+
+        # Dạng: Công cụ trong ngoặc đơn (như Dev-C++, CodeBlocks, VS Code)
+        tools_match = re.search(r"\((như|ví dụ:?)\s+([^)]+)\)", sentence)
+        if tools_match:
+            tools_str = tools_match.group(2).strip()
+            distractors = [
+                "Microsoft Word và Excel",
+                "Adobe Photoshop và Illustrator",
+                "Trình duyệt Google Chrome đơn thuần"
+            ]
+            options = [tools_str] + distractors
+            random.shuffle(options)
+            questions.append({
+                "question": "Theo nội dung bài viết, những công cụ hoặc môi trường nào sau đây được gợi ý sử dụng?",
+                "options": options,
+                "answer_index": options.index(tools_str),
+                "explanation": f"Trích dẫn từ bài viết: \"{sentence}\"",
+                "difficulty": "easy",
+                "language": category_label
+            })
+
+        # Dạng: Khối kiến thức nền tảng (kiến thức cơ bản như biến, kiểu dữ liệu, hàm...)
+        knowledge_match = re.search(r"(kiến thức cơ bản|nền tảng|khái niệm cơ bản)\s+(như|bao gồm)\s+([^.]+)", sentence, re.IGNORECASE)
+        if knowledge_match:
+            k_str = knowledge_match.group(3).strip().capitalize()
+            distractors = [
+                "Chỉ cần cài đặt hệ điều hành và không cần học cú pháp",
+                "Điện toán đám mây và kiến trúc cụm vi dịch vụ phân tán",
+                "Thiết kế banner đồ họa và biên tập âm thanh kỹ thuật số"
+            ]
+            options = [k_str] + distractors
+            random.shuffle(options)
+            questions.append({
+                "question": "Theo bài viết, người học cần nắm vững những kiến thức nền tảng cơ bản nào?",
+                "options": options,
+                "answer_index": options.index(k_str),
+                "explanation": f"Trích dẫn từ bài viết: \"{sentence}\"",
+                "difficulty": "easy",
+                "language": category_label
+            })
+
+        # Dạng: Mục đích sử dụng ("sử dụng để...", "dùng để...")
+        use_match = re.search(r"(sử dụng để|dùng để|dùng rộng rãi trong)\s+([^.]+)", sentence, re.IGNORECASE)
+        if use_match:
+            u_str = use_match.group(2).strip().capitalize()
+            distractors = [
+                "Nghe nhạc và giải trí trực tuyến",
+                "Thiết kế mô hình 3D cho các trò chơi",
+                "Tự động tính toán tiền điện nước gia đình"
+            ]
+            options = [u_str] + distractors
+            random.shuffle(options)
+            questions.append({
+                "question": "Theo nội dung bài viết, mục đích hoặc phạm vi ứng dụng chính là gì?",
+                "options": options,
+                "answer_index": options.index(u_str),
+                "explanation": f"Trích dẫn từ bài viết: \"{sentence}\"",
+                "difficulty": "easy",
+                "language": category_label
+            })
+
+        # Dạng: Định nghĩa cốt lõi ("X là Y")
+        def_match = re.search(r"^([^.,]+?)\s+là\s+([^.,]+(?:,[^.,]+){0,2})", sentence)
+        if def_match and len(def_match.group(1).split()) <= 4:
+            term = def_match.group(1).strip()
+            def_text = def_match.group(2).strip()
+            distractors = [
+                "Một phần mềm chuyên dụng chỉ dùng để nghe nhạc và xem video",
+                "Một giao thức mạng cục bộ không có khả năng lưu trữ",
+                "Một công cụ đồ họa 3D không liên quan đến bài viết"
+            ]
+            options = [def_text.capitalize()] + distractors
+            random.shuffle(options)
+            questions.append({
+                "question": f"Theo bài viết, '{term}' được định nghĩa hoặc có vai trò cốt lõi là gì?",
+                "options": options,
+                "answer_index": options.index(def_text.capitalize()),
+                "explanation": f"Trích dẫn từ bài viết: \"{sentence}\"",
+                "difficulty": "easy",
+                "language": category_label
+            })
+
+    # 2. Tạo câu hỏi xác minh tính đúng đắn trực tiếp từ các câu trong bài viết (Fact Verification)
+    for sentence in raw_sentences:
+        if len(questions) >= count:
+            break
+        clean_s = sentence.rstrip(". ")
+        distractors = [
+            f"Không {clean_s[0].lower() + clean_s[1:]}",
+            f"{clean_s} (chỉ áp dụng duy nhất trên thiết bị di động cũ)",
+            "Nội dung này hoàn toàn không được hỗ trợ trong bài viết"
+        ]
+        options = [clean_s] + distractors
+        random.shuffle(options)
+        questions.append({
+            "question": "Dựa vào nội dung bài viết, khẳng định nào sau đây là CHÍNH XÁC?",
+            "options": options,
+            "answer_index": options.index(clean_s),
+            "explanation": f"Trích dẫn từ bài viết: \"{sentence}\"",
+            "difficulty": "medium",
+            "language": category_label
+        })
+
+    # 3. Câu hỏi về chủ đề / mục tiêu của bài viết (trích xuất từ Tiêu đề)
+    if title:
+        distractor_topics = [
+            "Cài đặt hệ điều hành Linux Server cho doanh nghiệp",
+            "Lập trình vi điều khiển và thiết kế bo mạch phần cứng",
+            "Kỹ thuật tối ưu hóa cơ sở dữ liệu quan hệ nâng cao"
+        ]
+        options = [title] + distractor_topics
+        random.shuffle(options)
+        questions.insert(0, {
+            "question": "Chủ đề chính được hướng dẫn và thảo luận trong bài viết là gì?",
+            "options": options,
+            "answer_index": options.index(title),
+            "explanation": f"Tiêu đề và nội dung trọng tâm của bài viết là: '{title}'.",
+            "difficulty": "easy",
+            "language": category_label
+        })
+
+    # Khử trùng lặp nội dung câu hỏi
+    seen_q = set()
+    unique_questions = []
+    for q in questions:
+        key = q["question"].strip()
+        if key not in seen_q:
+            seen_q.add(key)
+            unique_questions.append(q)
+
+    return unique_questions[:count]
+
+
 def generate_heuristic_questions_for_post(post: Post, count: int = 5) -> List[Dict[str, Any]]:
     """Produce domain-matched, randomized technical quiz questions tailored to the post."""
     bank = build_domain_fallback_bank()
     domain = _classify_post_domain(post)
-    pool = bank.get(domain, bank["web_basic"])
+    pool = bank.get(domain) or bank["web_basic"]
 
-    # If count requested is larger than pool, cycle or pull from other domains
+    # Cycle within the same domain to never cross-contaminate questions across different technologies
     selected_raw = pool.copy()
-    if len(selected_raw) < count:
-        for other_dom, items in bank.items():
-            if other_dom != domain:
-                selected_raw.extend(items)
-            if len(selected_raw) >= count:
-                break
+    while len(selected_raw) < count:
+        selected_raw.extend(pool)
 
     chosen = selected_raw[:count]
     return [_shuffle_question_options(q) for q in chosen]
@@ -506,6 +1069,42 @@ def generate_questions_with_gemini(post: Post, count: int = 5) -> Optional[List[
     return None
 
 
+def is_meaningful_post_content(post: Post) -> bool:
+    """
+    Kiểm tra tiêu đề và nội dung bài viết có ý nghĩa hay không.
+    Nếu bài viết là ký tự vô nghĩa (như 'nnnnn', 'kkkk', 'asdfgh', lặp ký tự, nội dung rác),
+    trả về False và không tạo trắc nghiệm.
+    """
+    if not post:
+        return False
+    title = (post.title or "").strip()
+    content = (post.content or "").strip()
+
+    # Tiêu đề không được để trống
+    if not title:
+        return False
+
+    clean_title = re.sub(r"\s+", "", title).lower()
+    # 1. Phát hiện tiêu đề rác lặp lại 1 ký tự duy nhất (ví dụ: 'nnnnn', 'aaaaa', '.....', '11111')
+    if len(clean_title) >= 3 and len(set(clean_title)) < 2:
+        return False
+
+    # 2. Kiểm tra nội dung
+    clean_content = content.replace(":::video", "").replace(":::", "").strip()
+    words_content = [w for w in re.split(r"\s+", clean_content) if len(w) > 1]
+    unique_words_content = set(w.lower() for w in words_content)
+
+    # Nếu nội dung có ý nghĩa (>= 25 ký tự và ít nhất 4 từ độc lập khác nhau, hoặc có video nhúng)
+    if (":::video" in content or len(clean_content) >= 25) and len(unique_words_content) >= 4:
+        return True
+
+    # Nếu tiêu đề có ý nghĩa rõ ràng (>= 4 ký tự và ít nhất 3 ký tự khác nhau) và nội dung có ít nhất 15 ký tự
+    if len(title) >= 4 and len(set(clean_title)) >= 3 and len(clean_content) >= 15 and len(unique_words_content) >= 3:
+        return True
+
+    return False
+
+
 def ensure_post_quiz_questions(
     db: Session,
     post: Post,
@@ -515,7 +1114,12 @@ def ensure_post_quiz_questions(
     """
     Ensure the given post has relevant quiz questions matching its content.
     If no questions exist for this post in `quiz_question_posts`, generates and persists them.
+    If the post is meaningless/gibberish, does NOT create any questions.
     """
+    # 0. Kiểm tra bài viết có ý nghĩa thực tế không (tránh sinh đề trắc nghiệm cho bài rác "nnnnn", "kkkk")
+    if not is_meaningful_post_content(post):
+        return []
+
     # 1. Check existing questions
     existing = (
         db.query(QuizQuestion)
@@ -530,10 +1134,16 @@ def ensure_post_quiz_questions(
     generated_raw = generate_questions_with_gemini(post, count=count)
     source = "ai"
     if not generated_raw:
+        # Ưu tiên cao nhất: Trích xuất trực tiếp câu hỏi & đáp án từ chính tiêu đề và nội dung bài viết
+        generated_raw = generate_questions_from_post_text(post, count=count)
+        source = "content_extracted"
+    if not generated_raw:
         generated_raw = generate_heuristic_questions_for_post(post, count=count)
         source = "heuristic"
 
     cat_name = post.category.name if post.category else "IT"
+    post_domain = _classify_post_domain(post)
+    domain_lang = DOMAIN_TO_LANG.get(post_domain)
 
     # Map category name → canonical quiz language (matches TOPIC_ALIASES in quiz.py)
     CAT_TO_LANG = {
@@ -555,9 +1165,14 @@ def ensure_post_quiz_questions(
         if ans_idx < 0 or ans_idx >= len(clean_opts):
             ans_idx = 0
 
-        # Prefer language from AI response; fallback to mapped category
-        raw_lang = q_data.get("language") or ""
-        lang_val = raw_lang if raw_lang else CAT_TO_LANG.get(cat_name, cat_name or "IT")
+        # Prefer specific language from question data; fallback to domain-derived language, then category
+        raw_lang = (q_data.get("language") or q_data.get("lang") or "").strip()
+        if raw_lang and raw_lang not in ["IT", "Backend", "Frontend", "Fullstack", "Khác"]:
+            lang_val = raw_lang
+        elif domain_lang:
+            lang_val = domain_lang
+        else:
+            lang_val = CAT_TO_LANG.get(cat_name, cat_name or "IT")
 
         q_obj = QuizQuestion(
             course_id=None,

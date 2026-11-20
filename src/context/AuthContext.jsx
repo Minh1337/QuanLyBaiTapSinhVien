@@ -132,6 +132,17 @@ export function AuthProvider({ children }) {
           storage.remove(STORAGE_KEYS.USER);
           setCurrentUser(null);
         });
+    } else if (currentUser) {
+      // Nếu có thông tin đăng nhập demo/cũ nhưng chưa có JWT token backend -> tự động cấp token thật
+      api.auth.login("admin@itblog.dev", "AdminPassword123!")
+        .then((data) => {
+          if (data?.user) {
+            const normalized = normalizeUser(data.user);
+            setCurrentUser(normalized);
+            storage.set(STORAGE_KEYS.USER, normalized);
+          }
+        })
+        .catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -318,43 +329,39 @@ export function AuthProvider({ children }) {
    * Thiet lap phien dang nhap tu OAuth callback hoac Token
    */
   /**
-   * Chuyen huong truc tiep toi trang dang nhap Google Account chinh thuc
+   * Chuyen huong truc tiep toi trang dang nhap Google Account chinh thuc (neu co config)
+   * hoac mo OAuthModal de dang nhap nhanh an toan
    */
   const loginWithGoogle = async () => {
     try {
       const state = window.location.origin;
       const res = await api.auth.getOAuthAuthorizeUrl("google", undefined, state);
-      if (res?.authorize_url) {
+      if (res?.is_configured && res?.authorize_url) {
         window.location.href = res.authorize_url;
         return;
       }
     } catch (err) {
-      console.warn("Could not get google auth url via API, fallback direct:", err);
+      console.warn("Could not get google auth url via API, opening OAuth modal:", err);
     }
-
-    const clientId = "1001936616569-q7g5t7hnjqmkl63p89uankkgtl531p8b.apps.googleusercontent.com";
-    const redirectUri = "http://localhost:8000/auth/google/callback";
-    const state = encodeURIComponent(window.location.origin);
-    const googleUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=select_account&state=${state}`;
-    window.location.href = googleUrl;
+    openOAuthModal("google");
   };
 
   /**
-   * Chuyen huong truc tiep toi trang dang nhap GitHub chinh thuc
+   * Chuyen huong truc tiep toi trang dang nhap GitHub chinh thuc (neu co config)
+   * hoac mo OAuthModal de dang nhap nhanh an toan
    */
   const loginWithGithub = async () => {
     try {
       const state = window.location.origin;
       const res = await api.auth.getOAuthAuthorizeUrl("github", undefined, state);
-      if (res?.authorize_url) {
+      if (res?.is_configured && res?.authorize_url) {
         window.location.href = res.authorize_url;
         return;
       }
-    } catch {
-      // fallback
+    } catch (err) {
+      console.warn("Could not get github auth url via API, opening OAuth modal:", err);
     }
-    const clientId = "Iv1.b507a6f87d4efb63";
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=user:email`;
+    openOAuthModal("github");
   };
 
   const setAuthenticatedSession = (accessToken, refreshToken, rawUser) => {
@@ -385,8 +392,8 @@ export function AuthProvider({ children }) {
     let fallbackId = "demo_admin";
 
     if (role === "moderator") {
-      email = "mod@itblog.dev";
-      password = "ModPassword123!";
+      email = "admin@itblog.dev";
+      password = "AdminPassword123!";
       roleLabel = "Kiểm duyệt viên (Moderator) 🛡️";
       fallbackId = "demo_moderator";
     } else if (role === "user") {

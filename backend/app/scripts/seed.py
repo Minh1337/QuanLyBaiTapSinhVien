@@ -100,6 +100,7 @@ def seed():
             ("Database", "PostgreSQL, MySQL, Redis, MongoDB & Thiết kế cơ sở dữ liệu", "🗄️"),
             ("System", "Hệ điều hành, mạng máy tính, bảo mật & tối ưu hệ thống", "🛡️"),
             ("Mobile", "Phát triển ứng dụng di động Flutter, React Native, iOS & Android", "📱"),
+            ("Ngoài Lề", "Góc thư giãn, chia sẻ ảnh bàn làm việc (desk setup), đời sống dev, meme và chuyện bên lề", "☕"),
         ]
         cat_map = {}
         for name, desc, icon in categories_data:

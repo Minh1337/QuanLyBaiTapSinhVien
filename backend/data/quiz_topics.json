@@ -61,5 +61,26 @@
     "icon": "💻",
     "badge": "Software Eng",
     "description": "gRPC vs REST, HTTP/2 & 3, SSE, SOLID, Clean Architecture và SemVer."
+  },
+  {
+    "id": "C++",
+    "title": "Lập trình C / C++",
+    "icon": "⚙️",
+    "badge": "Systems & OOP",
+    "description": "Lập trình hướng đối tượng OOP, quản lý bộ nhớ, con trỏ, STL và tối ưu hiệu năng."
+  },
+  {
+    "id": "HTTP",
+    "title": "Giao thức HTTP & REST API",
+    "icon": "🌐",
+    "badge": "Web Protocols",
+    "description": "HTTP Methods, Status Codes, HTTP/2 & 3 Multiplexing, Headers và chuẩn RESTful API."
+  },
+  {
+    "id": "Git",
+    "title": "Git & Quản lý Phiên bản",
+    "icon": "🐙",
+    "badge": "VCS & Git Flow",
+    "description": "Quản lý mã nguồn phân tán, Commit snapshot, Merge vs Rebase, Stash và Reset."
   }
 ]

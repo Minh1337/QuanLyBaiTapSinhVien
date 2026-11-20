@@ -19,11 +19,14 @@ import EventsPage from "./pages/events";
 import LeaderboardPage from "./pages/leaderboard";
 import QuizPage from "./pages/quiz";
 import PolicyPage from "./pages/policy";
+import SeriesPage from "./pages/series";
+import GalleryPage from "./pages/gallery";
 
 import AuthModal from "./components/AuthModal";
 import OAuthModal from "./components/OAuthModal";
 import Navbar from "./components/navigator";
 import Foot from "./components/footer";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import { useAuth } from "./context/AuthContext";
 
@@ -42,6 +45,11 @@ export function getRouteUrl(page, params = null) {
       return "/roadmaps";
     case "courses":
       return "/courses";
+    case "series":
+      return "/series";
+    case "gallery":
+    case "ngoai_le":
+      return "/gallery";
     case "quiz":
       return "/quiz";
     case "jobs":
@@ -99,7 +107,8 @@ export function parseRouteFromLocation() {
       postId: decodeURIComponent(postMatch[1]),
       authorId: null,
       tab: "my_posts",
-      section: "terms"
+      section: "terms",
+      scroll: searchParams.get("scroll") || null
     };
   }
 
@@ -117,6 +126,8 @@ export function parseRouteFromLocation() {
   // - Các tab tính năng chính
   if (rawPath === "/roadmaps") return { page: "roadmaps", postId: null, authorId: null, tab: "my_posts", section: "terms" };
   if (rawPath === "/courses") return { page: "courses", postId: null, authorId: null, tab: "my_posts", section: "terms" };
+  if (rawPath === "/series") return { page: "series", postId: null, authorId: null, tab: "my_posts", section: "terms" };
+  if (rawPath === "/gallery" || rawPath === "/ngoai-le") return { page: "gallery", postId: null, authorId: null, tab: "my_posts", section: "terms" };
   if (rawPath === "/quiz") {
     const pId = searchParams.get("postId") || searchParams.get("post_id") || null;
     const cId = searchParams.get("courseId") || searchParams.get("course_id") || null;
@@ -158,7 +169,7 @@ function AppContent() {
   const [selectedPostId, setSelectedPostId] = useState(initialRoute.postId);
   const [editPostData, setEditPostData] = useState(null);
   const [quizParams, setQuizParams] = useState({});
-  const [pageParams, setPageParams] = useState({});
+  const [pageParams, setPageParams] = useState(() => (initialRoute.scroll ? { scroll: initialRoute.scroll } : {}));
   const [selectedAuthorId, setSelectedAuthorId] = useState(initialRoute.authorId);
   const [profileTab, setProfileTab] = useState(initialRoute.tab || "my_posts");
   const [policySection, setPolicySection] = useState(initialRoute.section || "terms");
@@ -283,13 +294,20 @@ function AppContent() {
         )}
 
         {currentPage === "post_detail" && (
-          <PostDetailPage
-            key={`${selectedPostId}-${pageParams?.scroll || "default"}`}
-            postId={selectedPostId}
-            params={pageParams}
-            onNavigate={navigateTo}
-            onEditPost={(post) => setEditPostData(post)}
-          />
+          <ErrorBoundary
+            title="Đã xảy ra lỗi khi tải trang chi tiết bài viết"
+            onReset={() => {
+              window.location.reload();
+            }}
+          >
+            <PostDetailPage
+              key={`${selectedPostId}-${pageParams?.scroll || "default"}`}
+              postId={selectedPostId}
+              params={pageParams}
+              onNavigate={navigateTo}
+              onEditPost={(post) => setEditPostData(post)}
+            />
+          </ErrorBoundary>
         )}
 
         {currentPage === "create_post" && (
@@ -333,6 +351,14 @@ function AppContent() {
           <CoursesPage onNavigate={navigateTo} params={pageParams} />
         )}
 
+        {currentPage === "series" && (
+          <SeriesPage onNavigate={navigateTo} params={pageParams} />
+        )}
+
+        {(currentPage === "gallery" || currentPage === "ngoai_le") && (
+          <GalleryPage onNavigate={navigateTo} params={pageParams} />
+        )}
+
         {currentPage === "jobs" && (
           <JobsPage onNavigate={navigateTo} params={pageParams} />
         )}
@@ -370,7 +396,7 @@ function AppContent() {
           <PolicyPage key={policySection} onNavigate={navigateTo} initialSection={policySection} />
         )}
 
-        {!["home", "post_detail", "create_post", "edit_post", "profile", "moderation", "roadmaps", "courses", "jobs", "events", "leaderboard", "quiz", "login", "logup", "policy"].includes(currentPage) && (
+        {!["home", "post_detail", "create_post", "edit_post", "profile", "moderation", "roadmaps", "courses", "series", "gallery", "ngoai_le", "jobs", "events", "leaderboard", "quiz", "login", "logup", "policy"].includes(currentPage) && (
           <div className="w-full max-w-xl mx-auto px-4 py-20 text-center space-y-4 animate-fade-in">
             <div className="text-6xl select-none">🔍</div>
             <h2 className="text-2xl font-black text-base-content">Không tìm thấy trang (404)</h2>

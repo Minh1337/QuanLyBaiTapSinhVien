@@ -12,8 +12,9 @@ import { DEFAULT_QUIZ_TOPICS, DEFAULT_QUIZ_QUESTIONS, TOPIC_ALIASES, DEFAULT_POS
  * 3. Ho tro luyen lai cau sai, xuat Markdown, tao de bang AI.
  */
 export default function QuizPage({ params = {}, onNavigate }) {
-  const { currentUser, requireAuth, isAdmin } = useAuth();
+  const { currentUser, requireAuth, isAdmin, isModerator } = useAuth();
   const { addToast } = useToast();
+  const canModerate = Boolean(isAdmin || isModerator || currentUser?.role === "admin" || currentUser?.role === "moderator");
   const rawPostId = params.postId || params.post_id || params.quizParams?.postId || params.quizParams?.post_id;
   const rawCourseId = params.courseId || params.course_id || params.quizParams?.courseId || params.quizParams?.course_id;
   const title = params.title || params.quizParams?.title || "";
@@ -189,14 +190,11 @@ export default function QuizPage({ params = {}, onNavigate }) {
         let list = Array.isArray(res) ? res : (res?.questions || []);
         if (!list || list.length === 0) {
           if (effectivePostId) {
-            list = DEFAULT_QUIZ_QUESTIONS.filter((q) => {
-              return Array.isArray(q.post_ids) && q.post_ids.includes(Number(effectivePostId));
-            });
-            if (list.length === 0) {
-              const matchedPq = DEFAULT_POST_QUIZZES.find((pq) => Number(pq.post_id) === Number(effectivePostId));
-              if (matchedPq?.question_ids) {
-                list = DEFAULT_QUIZ_QUESTIONS.filter((q) => matchedPq.question_ids.includes(Number(q.id)));
-              }
+            const matchedPq = DEFAULT_POST_QUIZZES.find((pq) => Number(pq.post_id) === Number(effectivePostId));
+            if (matchedPq?.question_ids) {
+              list = DEFAULT_QUIZ_QUESTIONS.filter((q) => matchedPq.question_ids.includes(Number(q.id)));
+            } else {
+              list = DEFAULT_QUIZ_QUESTIONS.filter((q) => Array.isArray(q.post_ids) && q.post_ids.includes(Number(effectivePostId)));
             }
           } else if (selectedTopic === "all") {
             list = DEFAULT_QUIZ_QUESTIONS;
@@ -233,14 +231,11 @@ export default function QuizPage({ params = {}, onNavigate }) {
         console.warn("Quiz questions fetch error, using local fallback data:", err);
         let list = [];
         if (effectivePostId) {
-          list = DEFAULT_QUIZ_QUESTIONS.filter((q) => {
-            return Array.isArray(q.post_ids) && q.post_ids.includes(Number(effectivePostId));
-          });
-          if (list.length === 0) {
-            const matchedPq = DEFAULT_POST_QUIZZES.find((pq) => Number(pq.post_id) === Number(effectivePostId));
-            if (matchedPq?.question_ids) {
-              list = DEFAULT_QUIZ_QUESTIONS.filter((q) => matchedPq.question_ids.includes(Number(q.id)));
-            }
+          const matchedPq = DEFAULT_POST_QUIZZES.find((pq) => Number(pq.post_id) === Number(effectivePostId));
+          if (matchedPq?.question_ids) {
+            list = DEFAULT_QUIZ_QUESTIONS.filter((q) => matchedPq.question_ids.includes(Number(q.id)));
+          } else {
+            list = DEFAULT_QUIZ_QUESTIONS.filter((q) => Array.isArray(q.post_ids) && q.post_ids.includes(Number(effectivePostId)));
           }
         } else if (selectedTopic && selectedTopic !== "all") {
           const aliases = TOPIC_ALIASES[selectedTopic] || [selectedTopic.toLowerCase()];
@@ -619,18 +614,22 @@ export default function QuizPage({ params = {}, onNavigate }) {
 
   const handleGenerateAiQuiz = async (e) => {
     if (e) e.preventDefault();
-    if (!isAdmin) {
-      addToast("Chỉ Quản trị viên (Admin) mới có quyền tạo đề trắc nghiệm bằng AI!", "error");
+    if (!canModerate) {
+      addToast("Chỉ Quản trị viên (Admin) hoặc Kiểm duyệt viên mới có quyền tạo đề trắc nghiệm bằng AI!", "error");
       return;
     }
     setIsGenerating(true);
     setError("");
     try {
-      const res = await api.quiz.generate({
-        language: aiTopic.trim() || "IT",
+      const payload = {
+        language: aiTopic.trim() || (effectiveTitle || "IT"),
         difficulty: aiDifficulty,
         count: Number(aiCount),
-      });
+      };
+      if (effectivePostId) {
+        payload.post_ids = [Number(effectivePostId)];
+      }
+      const res = await api.quiz.generate(payload);
 
       let newQuestions = [];
       if (res?.created && res.created.length > 0 && res.created[0].options?.length > 0) {
@@ -639,7 +638,10 @@ export default function QuizPage({ params = {}, onNavigate }) {
           id: q.id != null && String(q.id).trim() !== "" ? String(q.id) : `ai_${Date.now()}_${idx + 1}`
         }));
       } else {
-        const fresh = await api.quiz.getQuestions({ language: aiTopic.trim(), limit: Number(aiCount) });
+        const queryParams = { limit: Number(aiCount) };
+        if (effectivePostId) queryParams.post_id = Number(effectivePostId);
+        else queryParams.language = aiTopic.trim();
+        const fresh = await api.quiz.getQuestions(queryParams);
         const freshList = Array.isArray(fresh) ? fresh : (fresh?.questions || []);
         if (freshList.length > 0) {
           newQuestions = freshList.map((q, idx) => ({
@@ -650,11 +652,13 @@ export default function QuizPage({ params = {}, onNavigate }) {
       }
 
       if (newQuestions.length > 0) {
-        setActivePostId(null);
-        setActiveCourseId(null);
+        if (!effectivePostId) {
+          setActivePostId(null);
+          setActiveCourseId(null);
+          setSelectedTopic(aiTopic.trim());
+        }
         const diffLabel = aiDifficulty === "hard" ? "Nâng cao" : aiDifficulty === "easy" ? "Cơ bản" : "Trung bình";
-        setActiveTitle(`Đề thi AI: ${aiTopic.trim()} (${diffLabel})`);
-        setSelectedTopic(aiTopic.trim());
+        setActiveTitle(effectivePostId ? (effectiveTitle || aiTopic.trim()) : `Đề thi AI: ${aiTopic.trim()} (${diffLabel})`);
         setAllPoolQuestions(newQuestions);
         setQuestions(newQuestions);
         setAnswers({});
@@ -675,7 +679,9 @@ export default function QuizPage({ params = {}, onNavigate }) {
       loadAiQuizzes();
     } catch (err) {
       console.warn("AI Quiz generation error:", err);
-      setError("Không thể tạo đề thi bằng AI lúc này. Vui lòng thử lại sau.");
+      const msg = err?.message || err?.detail || "Không thể tạo đề thi bằng AI lúc này. Vui lòng thử lại sau.";
+      setError(msg);
+      addToast(msg, "error");
     } finally {
       setIsGenerating(false);
     }
@@ -1331,7 +1337,50 @@ export default function QuizPage({ params = {}, onNavigate }) {
             </div>
           )}
 
-          {!loading && !error && displayedQuestions.length === 0 && (
+          {effectivePostId && displayedQuestions.length === 0 && !loading && (
+            <div className="p-8 sm:p-12 text-center rounded-3xl border border-dashed border-base-300 bg-base-100 max-w-xl mx-auto space-y-4 my-8 animate-fade-in shadow-xs">
+              <div className="w-16 h-16 rounded-3xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto text-3xl">
+                📝
+              </div>
+              <div>
+                <h3 className="text-lg sm:text-xl font-black text-base-content">
+                  Chưa có câu hỏi trắc nghiệm cho bài viết này
+                </h3>
+                <p className="text-xs sm:text-sm text-base-content/60 mt-1 max-w-md mx-auto">
+                  {effectiveTitle
+                    ? `Bài viết "${effectiveTitle}" hiện chưa có câu hỏi trắc nghiệm.`
+                    : "Bài viết này hiện chưa có câu hỏi trắc nghiệm được liên kết."}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => onNavigate && onNavigate("post_detail", { postId: effectivePostId })}
+                  className="btn btn-sm btn-ghost border border-base-300 rounded-xl font-bold"
+                >
+                  ← Quay lại bài viết
+                </button>
+                {canModerate ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAiTopic(effectiveTitle || "");
+                      setShowAiModal(true);
+                    }}
+                    className="btn btn-sm btn-primary text-white font-bold rounded-xl gap-1.5 shadow-sm"
+                  >
+                    ✨ Tạo trắc nghiệm cho bài viết này
+                  </button>
+                ) : (
+                  <span className="text-xs text-base-content/50 italic py-1">
+                    (Đang chờ ban kiểm duyệt cập nhật đề thi)
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!effectivePostId && !loading && !error && displayedQuestions.length === 0 && (
             <div className="text-center py-12 border border-dashed border-base-300 rounded-3xl">
               <p className="text-4xl mb-3">🎉</p>
               <p className="font-bold">
@@ -1343,6 +1392,7 @@ export default function QuizPage({ params = {}, onNavigate }) {
           )}
 
           {/* Bo cuc 2 cot: Trai cau hoi, Phai Sidebar */}
+          {displayedQuestions.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div className="lg:col-span-8 space-y-4 min-w-0">
               <div className="space-y-4">
@@ -1576,11 +1626,12 @@ export default function QuizPage({ params = {}, onNavigate }) {
               </div>
             </aside>
           </div>
+          )}
         </div>
       )}
 
       {/* Modal Tao de thi bang AI */}
-      {isAdmin && showAiModal && (
+      {canModerate && showAiModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in"
           onClick={(e) => {
@@ -1608,6 +1659,12 @@ export default function QuizPage({ params = {}, onNavigate }) {
             </div>
 
             <form onSubmit={handleGenerateAiQuiz} className="p-5 space-y-4">
+              {effectivePostId && (
+                <div className="p-3 bg-base-200/50 rounded-2xl border border-base-300 text-xs">
+                  <span className="font-bold text-base-content block mb-0.5">Bài viết liên kết:</span>
+                  <span className="text-primary font-medium line-clamp-1">{effectiveTitle || `Bài viết #${effectivePostId}`}</span>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-bold text-base-content/80 mb-1.5">
                   Chủ đề / Công nghệ mục tiêu:

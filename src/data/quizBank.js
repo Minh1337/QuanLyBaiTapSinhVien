@@ -65,6 +65,27 @@ export const RAW_QUIZ_TOPICS = [
     "icon": "💻",
     "badge": "Software Eng",
     "description": "gRPC vs REST, HTTP/2 & 3, SSE, SOLID, Clean Architecture và SemVer."
+  },
+  {
+    "id": "C++",
+    "title": "Lập trình C / C++",
+    "icon": "⚙️",
+    "badge": "Systems & OOP",
+    "description": "Lập trình hướng đối tượng OOP, quản lý bộ nhớ, con trỏ, STL và tối ưu hiệu năng."
+  },
+  {
+    "id": "HTTP",
+    "title": "Giao thức HTTP & REST API",
+    "icon": "🌐",
+    "badge": "Web Protocols",
+    "description": "HTTP Methods, Status Codes, HTTP/2 & 3 Multiplexing, Headers và chuẩn RESTful API."
+  },
+  {
+    "id": "Git",
+    "title": "Git & Quản lý Phiên bản",
+    "icon": "🐙",
+    "badge": "VCS & Git Flow",
+    "description": "Quản lý mã nguồn phân tán, Commit snapshot, Merge vs Rebase, Stash và Reset."
   }
 ];
 
@@ -2858,6 +2879,306 @@ const RAW_QUIZ_QUESTIONS = [
     "difficulty": "medium",
     "language": "Python",
     "course_id": null
+  },
+  {
+    "id": 234,
+    "question": "Trong giao thức HTTP, mã trạng thái (HTTP Status Code) nào biểu thị yêu cầu đã được máy chủ xử lý thành công và tạo mới tài nguyên (Resource Created)?",
+    "options": [
+      "201 Created",
+      "200 OK",
+      "400 Bad Request",
+      "404 Not Found"
+    ],
+    "answer_index": 0,
+    "explanation": "Mã 201 Created thường được trả về sau các thao tác POST thành công để thông báo tài nguyên mới đã được tạo và lưu trữ trên máy chủ.",
+    "difficulty": "easy",
+    "language": "HTTP",
+    "course_id": null
+  },
+  {
+    "id": 235,
+    "question": "Trong các phương thức HTTP chuẩn của kiến trúc RESTful API, phương thức nào mang tính chất an toàn (Safe) và lũy kế (Idempotent) dùng để lấy dữ liệu mà không làm thay đổi trạng thái máy chủ?",
+    "options": [
+      "GET",
+      "POST",
+      "PATCH",
+      "CONNECT"
+    ],
+    "answer_index": 0,
+    "explanation": "Phương thức GET là safe và idempotent: gọi GET nhiều lần với cùng tham số sẽ trả về cùng kết quả và không gây tác dụng phụ lên dữ liệu máy chủ.",
+    "difficulty": "easy",
+    "language": "HTTP",
+    "course_id": null
+  },
+  {
+    "id": 236,
+    "question": "Sự khác biệt cốt lõi giữa HTTP/1.1 và HTTP/2 là gì?",
+    "options": [
+      "HTTP/2 hỗ trợ Multiplexing (truyền nhiều request/response đồng thời trên 1 kết nối TCP duy nhất) và nén Header HPACK",
+      "HTTP/2 chỉ chạy được trên mạng nội bộ",
+      "HTTP/1.1 không hỗ trợ truyền tải hình ảnh",
+      "HTTP/2 bắt buộc sử dụng định dạng XML"
+    ],
+    "answer_index": 0,
+    "explanation": "HTTP/2 giải quyết vấn đề Head-of-line blocking của HTTP/1.1 nhờ cơ chế Multiplexing dạng binary stream trên 1 kết nối TCP duy nhất.",
+    "difficulty": "medium",
+    "language": "HTTP",
+    "course_id": null
+  },
+  {
+    "id": 237,
+    "question": "Trong thiết kế RESTful API, sự khác biệt cơ bản giữa phương thức PUT và phương thức PATCH là gì?",
+    "options": [
+      "PUT thay thế toàn bộ tài nguyên bằng dữ liệu mới, trong khi PATCH chỉ cập nhật từng phần (cột/trường) thay đổi",
+      "PUT dùng để xóa dữ liệu, PATCH dùng để tạo mới",
+      "PATCH không bao giờ gửi body",
+      "PUT chỉ dùng cho tài liệu hình ảnh"
+    ],
+    "answer_index": 0,
+    "explanation": "Theo chuẩn HTTP RFC: PUT là idempotent thay thế hoàn toàn tài nguyên, PATCH áp dụng cập nhật cục bộ cho một phần tài nguyên.",
+    "difficulty": "medium",
+    "language": "HTTP",
+    "course_id": null
+  },
+  {
+    "id": 238,
+    "question": "Header nào trong HTTP Request hoặc Response được sử dụng để thông báo định dạng kiểu dữ liệu (MIME Type) của phần thân thông điệp (Payload)?",
+    "options": [
+      "Content-Type: application/json",
+      "Authorization: Bearer <token>",
+      "User-Agent: Mozilla/5.0",
+      "Cache-Control: no-cache"
+    ],
+    "answer_index": 0,
+    "explanation": "Header 'Content-Type' cho trình duyệt hoặc máy chủ biết chính xác định dạng dữ liệu (JSON, HTML, form-data, XML) để thực hiện parse tương ứng.",
+    "difficulty": "easy",
+    "language": "HTTP",
+    "course_id": null
+  },
+  {
+    "id": 239,
+    "question": "Trong ngôn ngữ lập trình C++, tính năng cốt lõi nào giúp tổ chức mã nguồn theo các đối tượng, hỗ trợ tính đóng gói (encapsulation), kế thừa (inheritance) và đa hình (polymorphism)?",
+    "options": [
+      "Lập trình hướng đối tượng (OOP - Object-Oriented Programming)",
+      "Lập trình hướng sự kiện thuần túy",
+      "Lập trình hàm không trạng thái (Pure Functional)",
+      "Lập trình kịch bản thông dịch (Scripting)"
+    ],
+    "answer_index": 0,
+    "explanation": "C++ là ngôn ngữ mở rộng từ C với tính năng hướng đối tượng mạnh mẽ thông qua class, struct, virtual functions và access specifiers.",
+    "difficulty": "easy",
+    "language": "C++",
+    "course_id": null
+  },
+  {
+    "id": 240,
+    "question": "Những môi trường phát triển (IDE) hoặc trình biên tập mã nguồn nào sau đây thường được sử dụng phổ biến nhất để bắt đầu học và biên dịch chương trình C++?",
+    "options": [
+      "Dev-C++, CodeBlocks, VS Code (kèm MinGW/GCC) hoặc Visual Studio",
+      "Microsoft Word hoặc Google Docs",
+      "Adobe Photoshop và Illustrator",
+      "Figma và Canva"
+    ],
+    "answer_index": 0,
+    "explanation": "Dev-C++, CodeBlocks, CLion và VS Code kết hợp với trình biên dịch như GCC/G++ là những công cụ tiêu chuẩn hàng đầu cho người học và lập trình viên C++.",
+    "difficulty": "easy",
+    "language": "C++",
+    "course_id": null
+  },
+  {
+    "id": 241,
+    "question": "Để bắt đầu học lập trình C++, người học cần nắm vững những khối kiến thức nền tảng cơ bản nào trước khi đi sâu vào cấu trúc dữ liệu nâng cao?",
+    "options": [
+      "Biến, kiểu dữ liệu, hàm, vòng lặp (for/while) và cấu trúc điều kiện (if/else)",
+      "Chỉ cần học cách cài đặt hệ điều hành Linux",
+      "Lập trình mạng Socket và điện toán đám mây Kubernetes",
+      "Thiết kế giao diện Photoshop và dựng video"
+    ],
+    "answer_index": 0,
+    "explanation": "Nắm vững biến, kiểu dữ liệu nguyên thủy, hàm, vòng lặp và câu lệnh rẽ nhánh là bước khởi đầu cốt lõi bắt buộc khi học lập trình C++.",
+    "difficulty": "easy",
+    "language": "C++",
+    "course_id": null
+  },
+  {
+    "id": 242,
+    "question": "Đặc điểm nổi bật nào giúp C++ trở thành ngôn ngữ hàng đầu trong phát triển phần mềm hệ thống, game engine (Unreal Engine), thuật toán và đồ họa hiệu năng cao?",
+    "options": [
+      "Tốc độ thực thi cực nhanh gần sát phần cứng, quản lý bộ nhớ trực tiếp và khả năng tối ưu hóa sâu",
+      "Tự động tải xuống mã nguồn từ Internet",
+      "Không cần khai báo kiểu dữ liệu cho biến",
+      "Chỉ chạy được trên máy tính cấu hình yếu"
+    ],
+    "answer_index": 0,
+    "explanation": "C++ được biên dịch trực tiếp sang mã máy nhị phân mà không cần thông dịch qua máy ảo, mang lại hiệu năng tối đa và quyền kiểm soát bộ nhớ chi tiết.",
+    "difficulty": "easy",
+    "language": "C++",
+    "course_id": null
+  },
+  {
+    "id": 243,
+    "question": "Trong C++, đối tượng nào thuộc thư viện `<iostream>` được sử dụng chuẩn mực để in dữ liệu ra màn hình dòng lệnh (Console Output)?",
+    "options": [
+      "std::cout (kết hợp toán tử chèn luồng <<)",
+      "std::cin (dùng để nhập dữ liệu)",
+      "printf_screen()",
+      "console.log()"
+    ],
+    "answer_index": 0,
+    "explanation": "std::cout trong thư viện <iostream> là đối tượng luồng đầu ra tiêu chuẩn (standard character output) của C++.",
+    "difficulty": "easy",
+    "language": "C++",
+    "course_id": null
+  },
+  {
+    "id": 244,
+    "question": "Trong hệ thống quản lý phiên bản phân tán Git, lệnh nào được sử dụng để tải toàn bộ lịch sử và mã nguồn của một kho chứa từ xa (Remote Repository) về máy tính cá nhân?",
+    "options": [
+      "git clone <repository_url>",
+      "git pull --all",
+      "git fork <url>",
+      "git copy <url>"
+    ],
+    "answer_index": 0,
+    "explanation": "Lệnh 'git clone' sao chép toàn bộ kho mã nguồn từ xa bao gồm mọi nhánh (branches) và lịch sử commit về máy tính local.",
+    "difficulty": "easy",
+    "language": "Git",
+    "course_id": null
+  },
+  {
+    "id": 245,
+    "question": "Trong Git, thao tác nào được sử dụng để tạm thời lưu trữ (cất đi) các thay đổi đang làm dở trong thư mục làm việc mà chưa muốn tạo commit?",
+    "options": [
+      "git stash (kèm git stash pop để lấy lại)",
+      "git reset --hard",
+      "git clean -f",
+      "git checkout -b"
+    ],
+    "answer_index": 0,
+    "explanation": "Lệnh 'git stash' lưu tạm thời các thay đổi vào ngăn xếp stash để bạn có thể chuyển nhánh sạch sẽ mà không làm mất code.",
+    "difficulty": "easy",
+    "language": "Git",
+    "course_id": null
+  },
+  {
+    "id": 246,
+    "question": "Sự khác biệt cơ bản nhất giữa `git merge` và `git rebase` khi hợp nhất hai nhánh là gì?",
+    "options": [
+      "`git merge` tạo ra một commit hợp nhất (Merge Commit) giữ nguyên lịch sử thực tế, trong khi `git rebase` tua lại và xếp các commit thành một đường thẳng tuyến tính sạch sẽ",
+      "`git rebase` chỉ dùng cho file hình ảnh",
+      "`git merge` tự động xóa nhánh gốc",
+      "Không có sự khác biệt giữa hai lệnh này"
+    ],
+    "answer_index": 0,
+    "explanation": "Merge bảo toàn lịch sử theo nhánh rẽ với merge commit; Rebase viết lại lịch sử commit để nhánh trông như được phát triển tuần tự thẳng hàng.",
+    "difficulty": "medium",
+    "language": "Git",
+    "course_id": null
+  },
+  {
+    "id": 247,
+    "question": "Một Commit trong Git về bản chất kỹ thuật lưu trữ thông tin gì?",
+    "options": [
+      "Một ảnh chụp nhanh (Snapshot) toàn bộ trạng thái của cây thư mục dự án tại thời điểm đó cùng metadata (tác giả, ngày giờ, commit cha)",
+      "Chỉ lưu một dòng chữ tin nhắn văn bản ngắn",
+      "Một tệp nén zip chứa toàn bộ hệ điều hành",
+      "Một file PDF báo cáo tiến độ công việc"
+    ],
+    "answer_index": 0,
+    "explanation": "Git không lưu theo kiểu chênh lệch diff delta giữa các file, mà lưu dưới dạng snapshot (commit object) trỏ tới cây thư mục (tree object).",
+    "difficulty": "medium",
+    "language": "Git",
+    "course_id": null
+  },
+  {
+    "id": 248,
+    "question": "Khi đã commit nhầm hoặc muốn quay ngược lại commit trước đó trên nhánh đang làm việc một cách an toàn mà vẫn giữ lại code đã sửa đổi trong thư mục làm việc, lệnh nào tối ưu nhất?",
+    "options": [
+      "git reset --soft HEAD~1",
+      "git reset --hard HEAD~1",
+      "git branch -D main",
+      "git push --force"
+    ],
+    "answer_index": 0,
+    "explanation": "'git reset --soft HEAD~1' đưa HEAD về commit trước đó nhưng vẫn giữ nguyên tất cả thay đổi trong Staging Area để bạn có thể chỉnh sửa lại và commit tiếp.",
+    "difficulty": "medium",
+    "language": "Git",
+    "course_id": null
+  },
+  {
+    "id": 254,
+    "question": "Chủ đề chính được hướng dẫn và thảo luận trong bài viết là gì?",
+    "options": [
+      "Cài đặt hệ điều hành Linux Server cho doanh nghiệp",
+      "Kỹ thuật tối ưu hóa cơ sở dữ liệu quan hệ nâng cao",
+      "cách tạo file",
+      "Lập trình vi điều khiển và thiết kế bo mạch phần cứng"
+    ],
+    "answer_index": 2,
+    "explanation": "Tiêu đề và nội dung trọng tâm của bài viết là: 'cách tạo file'.",
+    "difficulty": "easy",
+    "language": "cách tạo file",
+    "course_id": null
+  },
+  {
+    "id": 255,
+    "question": "Theo nội dung bài viết, tệp hoặc tài liệu thường được lưu trữ dưới định dạng tiêu chuẩn nào?",
+    "options": [
+      ".json",
+      ".zip",
+      ".html",
+      ".docx"
+    ],
+    "answer_index": 3,
+    "explanation": "Trích dẫn từ bài viết: \"Một tệp Word thường được lưu dưới dạng .docx, định dạng tiêu chuẩn cho các tài liệu Microsoft Word.\"",
+    "difficulty": "easy",
+    "language": "cách tạo file",
+    "course_id": null
+  },
+  {
+    "id": 256,
+    "question": "Bài viết đề cập định dạng này là tiêu chuẩn chính thức cho phần mềm hoặc tài liệu nào?",
+    "options": [
+      "VLC Media Player",
+      "Adobe Photoshop",
+      "Microsoft Word",
+      "AutoCAD 3D"
+    ],
+    "answer_index": 2,
+    "explanation": "Trích dẫn từ bài viết: \"Một tệp Word thường được lưu dưới dạng .docx, định dạng tiêu chuẩn cho các tài liệu Microsoft Word.\"",
+    "difficulty": "easy",
+    "language": "cách tạo file",
+    "course_id": null
+  },
+  {
+    "id": 257,
+    "question": "Theo nội dung bài viết, tệp hoặc công cụ này hỗ trợ những thành phần và tính năng nào?",
+    "options": [
+      "Không hỗ trợ bảng biểu hay các tính năng định dạng",
+      "Chỉ hỗ trợ tệp âm thanh đơn thuần không kèm hình ảnh",
+      "Chỉ hiển thị dòng lệnh văn bản thô không hỗ trợ cộng tác",
+      "Văn bản, hình ảnh, bảng, định dạng, mẫu và các tính năng cộng tác"
+    ],
+    "answer_index": 3,
+    "explanation": "Trích dẫn từ bài viết: \"Nó hỗ trợ văn bản, hình ảnh, bảng, định dạng, mẫu và các tính năng cộng tác.\"",
+    "difficulty": "easy",
+    "language": "cách tạo file",
+    "course_id": null
+  },
+  {
+    "id": 258,
+    "question": "Theo bài viết, các tệp hoặc phần mềm có thể được mở và chỉnh sửa trên những nền tảng nào?",
+    "options": [
+      "Không thể xem hoặc chỉnh sửa trực tiếp trên trình duyệt web",
+      "Chỉ chạy được trên môi trường MS-DOS cũ",
+      "Chỉ mở được trên thiết bị máy chơi game chuyên dụng",
+      "Windows, macOS và web"
+    ],
+    "answer_index": 3,
+    "explanation": "Trích dẫn từ bài viết: \"Các tệp Word có thể được mở và chỉnh sửa trên Windows, macOS và web\"",
+    "difficulty": "easy",
+    "language": "cách tạo file",
+    "course_id": null
   }
 ];
 
@@ -2866,7 +3187,11 @@ export const POST_QUIZ_MAPPING = {
   2: [62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
   3: [95, 96, 97, 98, 99, 100, 101, 102, 103, 104],
   7: [149, 150, 151, 152, 153, 154, 155, 156, 157, 158],
-  9: [194, 195, 196, 197, 198]
+  9: [194, 195, 196, 197, 198],
+  11: [234, 235, 236, 237, 238],
+  17: [239, 240, 241, 242, 243],
+  18: [244, 245, 246, 247, 248],
+  19: [254, 255, 256, 257, 258]
 };
 
 export const DEFAULT_POST_QUIZZES = [
@@ -2919,6 +3244,46 @@ export const DEFAULT_POST_QUIZZES = [
     question_count: 5,
     author_name: "Quản Trị Viên IT Blog",
     question_ids: [194, 195, 196, 197, 198]
+  },
+  {
+    post_id: 11,
+    title: "Làm chủ http: Hướng dẫn từ Cơ bản đến Thực chiến 2026",
+    slug: "lam-chu-http-huong-dan-tu-co-ban-den-thuc-chien-2026",
+    category_name: "Backend",
+    cover_image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1000&auto=format&fit=crop&q=80",
+    question_count: 5,
+    author_name: "Quản Trị Viên IT Blog",
+    question_ids: [234, 235, 236, 237, 238]
+  },
+  {
+    post_id: 17,
+    title: "lập trình c++",
+    slug: "lap-trinh-c-plus-plus",
+    category_name: "Frontend",
+    cover_image: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=1000&auto=format&fit=crop&q=80",
+    question_count: 5,
+    author_name: "Quản Trị Viên IT Blog",
+    question_ids: [239, 240, 241, 242, 243]
+  },
+  {
+    post_id: 18,
+    title: "git",
+    slug: "git",
+    category_name: "DevOps",
+    cover_image: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=1000&auto=format&fit=crop&q=80",
+    question_count: 5,
+    author_name: "Quản Trị Viên IT Blog",
+    question_ids: [244, 245, 246, 247, 248]
+  },
+  {
+    post_id: 19,
+    title: "cách tạo file",
+    slug: "cach-tao-file",
+    category_name: "Frontend",
+    cover_image: "https://images.unsplash.com/photo-1517842645767-c639042777db?w=1000&auto=format&fit=crop&q=80",
+    question_count: 5,
+    author_name: "Quản Trị Viên IT Blog",
+    question_ids: [254, 255, 256, 257, 258]
   }
 ];
 
@@ -2946,7 +3311,10 @@ export const TOPIC_ALIASES = {
   Python: ["python", "asyncio", "python core", "cpython"],
   Security: ["security", "web security", "owasp", "bảo mật", "bảo mật web", "jwt"],
   Architecture: ["architecture", "microservices", "system design", "kiến trúc", "hệ thống", "kiến trúc hệ thống"],
-  Fullstack: ["fullstack", "full stack", "html5", "css3", "javascript", "html/web", "web", "clean architecture", "php"]
+  Fullstack: ["fullstack", "full stack", "html5", "css3", "javascript", "html/web", "web", "clean architecture", "php"],
+  "C++": ["c++", "cpp", "c/c++", "c và c++", "lập trình c++", "lập trình c", "clang", "g++"],
+  HTTP: ["http", "https", "giao thức http", "làm chủ http", "rest api", "restful", "api"],
+  Git: ["git", "github", "gitlab", "vcs", "version control", "quản lý phiên bản", "commit", "stash"]
 };
 
 export const DEFAULT_QUIZ_TOPICS = RAW_QUIZ_TOPICS.map((topic) => {

@@ -422,6 +422,11 @@ const wsUrl = `${base}/notifications/ws?token=${token}`;
         body: JSON.stringify(resolveData),
       }),
 
+    aiInspectReport: (reportId) =>
+      request(`/admin/reports/${reportId}/ai-inspect`, {
+        method: "POST",
+      }),
+
     getAdminStats: () => request("/admin/stats"),
     getStats: () => request("/admin/stats"),
 
@@ -808,6 +813,42 @@ const wsUrl = `${base}/notifications/ws?token=${token}`;
         body: formData,
       });
     },
+    importDocument: (file) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      return request("/uploads/document", {
+        method: "POST",
+        body: formData,
+      });
+    },
+  },
+
+  // Series / Post Playlist (Chuỗi bài viết ghép từ nhiều bài)
+  series: {
+    list: (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.author_id) query.append("author_id", params.author_id);
+      if (params.search) query.append("search", params.search);
+      if (params.limit) query.append("limit", params.limit);
+      const qs = query.toString();
+      return request(`/series${qs ? `?${qs}` : ""}`);
+    },
+    get: (slugOrId) => request(`/series/${slugOrId}`),
+    getByPost: (postId) => request(`/series/by-post/${postId}`),
+    create: (data) =>
+      request("/series", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    update: (seriesId, data) =>
+      request(`/series/${seriesId}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    delete: (seriesId) =>
+      request(`/series/${seriesId}`, {
+        method: "DELETE",
+      }),
   },
 
   // SEO, Sitemap & RSS Feed (Section 15)

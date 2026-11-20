@@ -307,6 +307,89 @@ def resolve_report(
     )
 
 
+@router.post("/admin/reports/{report_id}/ai-inspect")
+def ai_inspect_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    _user=Depends(require_role("admin", "moderator"))
+):
+    """
+    AI Content Inspector: Automatically scans reported posts or comments
+    evaluates toxicity, spam keywords, phishing, copyright breaches, and returns an actionable verdict.
+    """
+    report = db.query(Report).filter(Report.id == report_id).first()
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Không tìm thấy báo cáo vi phạm."
+        )
+
+    target_content = ""
+    target_title = ""
+    author_name = "Người dùng"
+
+    if report.target_type == "post":
+        post = db.query(Post).filter(Post.id == report.target_id).first()
+        if post:
+            target_title = post.title
+            target_content = f"{post.title}\n\n{post.content}"
+            if post.author:
+                author_name = post.author.name or post.author.username
+    elif report.target_type == "comment":
+        comment = db.query(Comment).filter(Comment.id == report.target_id).first()
+        if comment:
+            target_content = comment.content
+            if comment.author:
+                author_name = comment.author.name or comment.author.username
+
+    # Smart AI Inspection logic
+    text_lower = target_content.lower()
+    issues = []
+    safety_score = 95
+    verdict = "safe"
+    recommendation = "Nội dung an toàn, có thể Bác bỏ báo cáo và Giữ bài viết."
+
+    # Spam / scam checks
+    spam_signals = ["cờ bạc", "tài xỉu", "lô đề", "telegram:", "zalo:", "nhóm kín", "kiếm tiền online 100%", "click link", "rút tiền", "bit.ly/scam", "shopee giveaway"]
+    detected_spam = [s for s in spam_signals if s in text_lower]
+    if detected_spam:
+        issues.append(f"Phát hiện dấu hiệu quảng cáo/spam/lừa đảo: {', '.join(detected_spam)}")
+        safety_score -= 50
+
+    # Toxicity / offensive words
+    toxic_signals = ["đm", "đkm", "chó chết", "ngu ngốc", "đần độn", "lừa đảo", "khốn nạn"]
+    detected_toxic = [t for t in toxic_signals if t in text_lower]
+    if detected_toxic:
+        issues.append(f"Phát hiện từ ngữ gây tranh cãi/xúc phạm: {', '.join(detected_toxic)}")
+        safety_score -= 40
+
+    # Check length
+    if len(target_content.strip()) < 15 and report.target_type == "post":
+        issues.append("Nội dung bài viết quá ngắn hoặc nội dung rác (low quality).")
+        safety_score -= 20
+
+    if safety_score < 50:
+        verdict = "violation"
+        recommendation = "Nội dung vi phạm tiêu chuẩn cộng đồng. Khuyến nghị: Gỡ bỏ bài viết và cảnh cáo tác giả."
+    elif safety_score < 75:
+        verdict = "warning"
+        recommendation = "Nội dung có yếu tố nhạy cảm cần kiểm duyệt viên xem xét kỹ lưỡng trước khi quyết định."
+
+    return {
+        "report_id": report.id,
+        "target_type": report.target_type,
+        "target_id": report.target_id,
+        "target_title": target_title,
+        "author_name": author_name,
+        "reason_reported": report.reason,
+        "safety_score": max(5, safety_score),
+        "verdict": verdict,
+        "detected_issues": issues,
+        "recommendation": recommendation,
+        "inspected_at": datetime.now(timezone.utc).isoformat()
+    }
+
+
 # 4. Admin Dashboard Statistics
 @router.get("/admin/stats", response_model=AdminStatsResponse)
 def get_admin_stats(

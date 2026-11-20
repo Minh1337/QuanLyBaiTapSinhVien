@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useBlog } from "../context/BlogContext";
 import { useToast } from "../context/ToastContext";
@@ -9,6 +9,19 @@ import DeveloperAdCard from "../components/DeveloperAdCard";
 import { BrandIcon } from "../components/icons";
 import { Compass, HelpCircle, Share2, ArrowUp, Sparkles, Clock, Eye } from "../components/icons";
 
+const DEV_GIFS = [
+  { name: "Mind Blown 🤯", url: "https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" },
+  { name: "LGTM / Approved 👍", url: "https://media.giphy.com/media/l41lI4bYmcsPJX9Go/giphy.gif" },
+  { name: "Hacking / Coding 💻", url: "https://media.giphy.com/media/unQ3IJU2RG7DO/giphy.gif" },
+  { name: "Bug in Production 🐛", url: "https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif" },
+  { name: "It Works! 🎉", url: "https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif" },
+  { name: "Coffee Break ☕", url: "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif" },
+  { name: "This is Fine 🔥", url: "https://media.giphy.com/media/9M5jK4GXmD5o1irGrF/giphy.gif" },
+  { name: "Thank You / Respect 🙏", url: "https://media.giphy.com/media/osAcIGJnye079MRbiG/giphy.gif" },
+  { name: "Facepalm 🤦", url: "https://media.giphy.com/media/XsUtdIeJ0MWMo/giphy.gif" },
+  { name: "Dancing Dev 🕺", url: "https://media.giphy.com/media/blSTtZehjAZ8I/giphy.gif" },
+];
+
 export default function PostDetailPage({ postId, params = {}, onNavigate, onEditPost }) {
   const { currentUser, requireAuth, toggleFollow, isAdmin, isModerator } = useAuth();
   const { posts, getAuthor, toggleLike, toggleBookmark, addComment, deleteComment, deletePost, incrementViews, syncPostComments, approvePost, rejectPost } = useBlog();
@@ -17,60 +30,154 @@ export default function PostDetailPage({ postId, params = {}, onNavigate, onEdit
 
   const [commentText, setCommentText] = useState("");
   const [commentSearch, setCommentSearch] = useState("");
+  const [commentImage, setCommentImage] = useState(null);
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const commentFileRef = useRef(null);
+
+  const [replyImage, setReplyImage] = useState(null);
+  const [showReplyGifPicker, setShowReplyGifPicker] = useState(false);
+  const replyFileRef = useRef(null);
+
+  const [lightboxImage, setLightboxImage] = useState(null);
+
+  // Chuỗi bài viết (Series)
+  const [seriesInfo, setSeriesInfo] = useState(null);
+
+  // Báo cáo bài viết (Post Report)
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("spam");
+  const [reportDetails, setReportDetails] = useState("");
+  const [submittingReport, setSubmittingReport] = useState(false);
+
+  // Trắc nghiệm bài viết (Quiz States)
+  const [hasQuiz, setHasQuiz] = useState(null);
+  const [showCreateQuizModal, setShowCreateQuizModal] = useState(false);
+  const [aiQuizTopic, setAiQuizTopic] = useState("");
+  const [aiQuizDifficulty, setAiQuizDifficulty] = useState("medium");
+  const [aiQuizCount, setAiQuizCount] = useState(5);
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
 
   const postInContext = posts.find((p) => String(p.id) === String(postId) || String(p.slug) === String(postId));
   const [directPost, setDirectPost] = useState(null);
   const [loadingDirectPost, setLoadingDirectPost] = useState(true);
+  const [commentsList, setCommentsList] = useState([]);
+  const hasScrolledToCommentsRef = useRef(false);
+
+  const refreshComments = useCallback(async () => {
+    if (!postId) return;
+    try {
+      const res = await api.comments.list(postId);
+      const items = res?.items || (Array.isArray(res) ? res : []);
+      const formatted = items.map((c) => ({
+        id: String(c.id),
+        userId: String(c.author?.id || c.user_id || c.user?.id || "unknown"),
+        userName: c.author?.name || c.author?.username || c.user?.name || c.user?.username || "Thành viên IT",
+        userAvatar: c.author?.avatar || c.user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(c.author?.username || c.author?.name || c.user_id || "dev")}`,
+        content: c.content || c.text || "",
+        parentId: c.parent_id ? String(c.parent_id) : null,
+        parent_id: c.parent_id ? String(c.parent_id) : null,
+        likes_count: c.likes_count || 0,
+        isPinned: Boolean(c.is_pinned),
+        isAccepted: Boolean(c.is_accepted_answer),
+        createdAt: c.created_at || new Date().toISOString()
+      }));
+      setCommentsList(formatted);
+    } catch (e) {
+      console.warn("Could not load comments from API:", e);
+    }
+  }, [postId]);
+
+  useEffect(() => {
+    hasScrolledToCommentsRef.current = false;
+    refreshComments();
+    if (postId) {
+      api.quiz.getQuestions({ postId, limit: 1 })
+        .then((res) => {
+          const list = Array.isArray(res) ? res : (res?.questions || []);
+          setHasQuiz(list.length > 0);
+        })
+        .catch(() => {
+          setHasQuiz(Boolean(postInContext?.has_quiz || (postInContext?.quiz_count > 0)));
+        });
+    }
+  }, [postId, refreshComments]);
+
   const post = useMemo(() => {
     // Ưu tiên dữ liệu tươi từ DB (directPost) thay vì cache localStorage cũ,
     // tránh lệch tiêu đề/nội dung như bài /posts/4.
     const base = directPost || postInContext;
     if (!base) return null;
+
+    // Chuẩn hóa Chuyên mục (tránh trường hợp category là Object từ API DB)
+    const rawCat = directPost?.category ?? base.category ?? postInContext?.category;
+    const catName = typeof rawCat === "object" && rawCat !== null
+      ? (rawCat.name || "Công nghệ")
+      : (rawCat || "Công nghệ");
+
+    // Chuẩn hóa Thẻ Tags (tránh tags là danh sách Object [{ name, id }] từ DB)
+    const rawTags = directPost?.tags ?? base.tags ?? postInContext?.tags;
+    const normalizedTags = Array.isArray(rawTags)
+      ? rawTags.map((t) => (typeof t === "object" && t !== null ? t.name : String(t))).filter(Boolean)
+      : [];
+
+    const activeComments = commentsList.length > 0
+      ? commentsList
+      : ((postInContext?.comments && postInContext.comments.length > 0)
+          ? postInContext.comments
+          : (directPost?.comments || []));
+
     return {
       ...postInContext,
       ...base,
+      category: catName,
+      category_name: catName,
+      category_id: base.category_id || (typeof rawCat === "object" ? rawCat?.id : null) || postInContext?.category_id,
+      tags: normalizedTags,
       content: directPost?.content || base.content,
       title: directPost?.title || postInContext?.title || base.title,
       excerpt: directPost?.excerpt ?? postInContext?.excerpt ?? base.excerpt,
       coverImage: directPost?.coverImage || directPost?.cover_image || postInContext?.coverImage || base.coverImage,
-      comments: (directPost?.comments && directPost.comments.length > 0) ? directPost.comments : (postInContext?.comments || []),
-      comments_count: directPost?.comments_count ?? postInContext?.comments_count ?? (postInContext?.comments?.length || directPost?.comments?.length || 0),
+      comments: activeComments,
+      comments_count: activeComments.length,
       likes: directPost?.likes ?? postInContext?.likes ?? [],
       likes_count: directPost?.likes_count ?? postInContext?.likes_count ?? 0,
-      bookmarks: directPost?.bookmarks ?? postInContext?.bookmarks ?? []
+      bookmarks: directPost?.bookmarks ?? postInContext?.bookmarks ?? [],
+      has_quiz: directPost?.has_quiz ?? postInContext?.has_quiz ?? false,
+      quiz_count: directPost?.quiz_count ?? postInContext?.quiz_count ?? 0
     };
-  }, [directPost, postInContext]);
+  }, [directPost, postInContext, commentsList]);
 
   const [isVerifiedState, setIsVerifiedState] = useState(Boolean(post?.isVerified || post?.is_verified));
   const [pinnedComments, setPinnedComments] = useState({});
 
-  // Tu dong cuon toi khu vuc binh luan neu duoc dieu huong tu thong bao (retry loop ben bi)
+  // Tự động cuộn tới khu vực bình luận nếu được điều hướng từ thông báo (chỉ cuộn 1 lần, không lặp vô tận)
   useEffect(() => {
     const isCommentsTarget =
       params?.scroll === "comments" ||
       params?.scroll === "comment" ||
       (typeof window !== "undefined" && window.location.search.includes("scroll=comments"));
 
-    if (isCommentsTarget) {
+    if (isCommentsTarget && !hasScrolledToCommentsRef.current) {
       let attempts = 0;
       const interval = setInterval(() => {
         attempts++;
         const el = document.getElementById("comments-section");
         if (el) {
           clearInterval(interval);
+          hasScrolledToCommentsRef.current = true;
           el.scrollIntoView({ behavior: "smooth", block: "start" });
           el.classList.add("ring-4", "ring-primary/40");
           setTimeout(() => {
             el.classList.remove("ring-4", "ring-primary/40");
           }, 2500);
-        } else if (attempts >= 25) {
+        } else if (attempts >= 30) {
           clearInterval(interval);
         }
       }, 100);
 
       return () => clearInterval(interval);
     }
-  }, [postId, params?.scroll, post]);
+  }, [postId, params?.scroll]);
 
 
   const [acceptedComments, setAcceptedComments] = useState({});
@@ -128,6 +235,36 @@ export default function PostDetailPage({ postId, params = {}, onNavigate, onEdit
       setIsEnrichingCurrent(false);
     }
   };
+
+  const handleCreatePostQuiz = async (e) => {
+    if (e) e.preventDefault();
+    if (!canModerate) {
+      addToast("Chỉ Quản trị viên (Admin) hoặc Kiểm duyệt viên mới có quyền tạo câu hỏi trắc nghiệm!", "error");
+      return;
+    }
+    if (!post?.id) return;
+    setIsGeneratingQuiz(true);
+    try {
+      const topicName = aiQuizTopic.trim() || post.title || post.category || "IT";
+      const res = await api.quiz.generate({
+        post_ids: [Number(post.id)],
+        language: topicName,
+        difficulty: aiQuizDifficulty,
+        count: Number(aiQuizCount),
+      });
+
+      const countCreated = res?.created?.length || aiQuizCount;
+      addToast(`Đã tạo thành công ${countCreated} câu hỏi trắc nghiệm gắn với bài viết! 🎉`, "success");
+      setHasQuiz(true);
+      setShowCreateQuizModal(false);
+      window.dispatchEvent(new CustomEvent("refresh_posts"));
+    } catch (err) {
+      const msg = err?.message || err?.detail || "Không thể tạo trắc nghiệm cho bài viết này. Hãy kiểm tra nội dung bài viết.";
+      addToast(msg, "error");
+    } finally {
+      setIsGeneratingQuiz(false);
+    }
+  };
   const [fontSizeLevel, setFontSizeLevel] = useState("base"); // 'sm' | 'base' | 'lg' | 'xl'
   const [speechState, setSpeechState] = useState("idle"); // idle | loading | playing | paused
   const [speechMode, setSpeechMode] = useState("audio"); // 'audio' | 'browser'
@@ -151,13 +288,20 @@ export default function PostDetailPage({ postId, params = {}, onNavigate, onEdit
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isZenMode, addToast]);
 
-  // Theo dõi tiến độ cuộn trang đọc bài viết
+  // Theo dõi tiến độ cuộn trang đọc bài viết (được throttle bằng requestAnimationFrame)
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight > 0) {
-        const progress = Math.min(100, Math.max(0, Math.round((window.scrollY / totalHeight) * 100)));
-        setReadingProgress(progress);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+          if (totalHeight > 0) {
+            const progress = Math.min(100, Math.max(0, Math.round((window.scrollY / totalHeight) * 100)));
+            setReadingProgress((prev) => (prev !== progress ? progress : prev));
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -375,33 +519,6 @@ export default function PostDetailPage({ postId, params = {}, onNavigate, onEdit
     window.print();
   };
 
-  // Violation Report States
-  const [showReportModal, setShowReportModal] = useState(false);
-  const [reportReason, setReportReason] = useState("spam");
-  const [reportDetails, setReportDetails] = useState("");
-  const [submittingReport, setSubmittingReport] = useState(false);
-
-  const handleSubmitReport = async (e) => {
-    e.preventDefault();
-    if (!post) return;
-    setSubmittingReport(true);
-    try {
-      await api.moderation.createReport({
-        target_type: "post",
-        target_id: post.id,
-        reason: reportReason,
-        details: reportDetails.trim() || undefined
-      });
-      addToast("Báo cáo vi phạm đã được gửi tới Ban Kiểm duyệt! 🚩", "success");
-      setShowReportModal(false);
-      setReportDetails("");
-    } catch (err) {
-      addToast(`Lỗi gửi báo cáo: ${err.message}`, "error");
-    } finally {
-      setSubmittingReport(false);
-    }
-  };
-
 
   // Tăng lượt xem thật, nạp dữ liệu mở rộng & ghi nhận hành vi đọc (chạy duy nhất theo postId, không lặp vô hạn)
   useEffect(() => {
@@ -445,6 +562,8 @@ export default function PostDetailPage({ postId, params = {}, onNavigate, onEdit
               views: fetched.views ?? 0,
               readTime: fetched.read_time || "5 phút đọc",
               isVerified: Boolean(fetched.is_verified || fetched.isVerified),
+              has_quiz: Boolean(fetched.has_quiz),
+              quiz_count: fetched.quiz_count || 0,
               createdAt: fetched.created_at || fetched.createdAt || new Date().toISOString()
             });
           }
@@ -464,6 +583,17 @@ export default function PostDetailPage({ postId, params = {}, onNavigate, onEdit
         if (Array.isArray(ads) && ads.length > 0) setSponsoredAd(ads[0]);
       })
       .catch(() => {});
+
+    // Lấy thông tin chuỗi bài viết nếu có
+    api.series.getByPost(postId)
+      .then((res) => {
+        if (res && res.has_series) {
+          setSeriesInfo(res.series);
+        } else {
+          setSeriesInfo(null);
+        }
+      })
+      .catch(() => setSeriesInfo(null));
 
     // Lấy bài viết liên quan
     api.feeds.related(postId, 3)
@@ -630,18 +760,235 @@ export default function PostDetailPage({ postId, params = {}, onNavigate, onEdit
     );
   };
 
-  // Xử lý Gửi bình luận
+  const handleCommentFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await api.uploads.uploadImage(file);
+      if (res?.url) {
+        setCommentImage(res.url);
+        addToast("Đã tải ảnh lên bình luận thành công! 🖼️", "success");
+        return;
+      }
+    } catch {
+      // fallback data url
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCommentImage(reader.result);
+      addToast("Đã đính kèm ảnh thành công! 🖼️", "success");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleReplyFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await api.uploads.uploadImage(file);
+      if (res?.url) {
+        setReplyImage(res.url);
+        addToast("Đã tải ảnh lên phản hồi thành công! 🖼️", "success");
+        return;
+      }
+    } catch {
+      // fallback
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setReplyImage(reader.result);
+      addToast("Đã đính kèm ảnh vào phản hồi! 🖼️", "success");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Xử lý Gửi bình luận (Hỗ trợ Text + Ảnh + GIF)
   const handleCommentSubmit = (e) => {
     e.preventDefault();
     const contentToSubmit = commentText.trim();
-    if (!contentToSubmit) return;
+    if (!contentToSubmit && !commentImage) return;
 
     requireAuth(
-      () => {
-        addComment(post.id, contentToSubmit);
+      async () => {
+        let finalContent = contentToSubmit;
+        if (commentImage) {
+          finalContent = finalContent ? `${finalContent}\n\n![comment_image](${commentImage})` : `![comment_image](${commentImage})`;
+        }
         setCommentText("");
+        setCommentImage(null);
+        setShowGifPicker(false);
+
+        // Cập nhật giao diện tức thì
+        const tempId = "temp_" + Date.now();
+        const optimisticComment = {
+          id: tempId,
+          userId: String(currentUser?.id || "me"),
+          userName: currentUser?.name || currentUser?.username || "Tôi",
+          userAvatar: currentUser?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser?.id || "user"}`,
+          content: finalContent,
+          parentId: null,
+          parent_id: null,
+          likes_count: 0,
+          isPinned: false,
+          isAccepted: false,
+          createdAt: new Date().toISOString()
+        };
+        setCommentsList((prev) => [...prev, optimisticComment]);
+        addToast("Đã gửi bình luận thành công! 💬", "success");
+
+        try {
+          const res = await api.comments.create(post.id, { content: finalContent });
+          if (res?.id) {
+            setCommentsList((prev) =>
+              prev.map((c) => (c.id === tempId ? { ...c, id: String(res.id) } : c))
+            );
+          }
+          refreshComments();
+        } catch (err) {
+          console.warn("Lỗi gửi bình luận API:", err);
+        }
       },
       "Vui lòng đăng nhập để gửi bình luận!"
+    );
+  };
+
+  // Xử lý Gửi phản hồi (Reply)
+  const handleSendReply = (parentCommentId) => {
+    const trimmed = replyText.trim();
+    if (!trimmed && !replyImage) return;
+    requireAuth(async () => {
+      let finalContent = trimmed;
+      if (replyImage) {
+        finalContent = finalContent ? `${finalContent}\n\n![reply_image](${replyImage})` : `![reply_image](${replyImage})`;
+      }
+      setReplyText("");
+      setReplyImage(null);
+      setShowReplyGifPicker(false);
+      setReplyingToId(null);
+
+      const tempId = "temp_r_" + Date.now();
+      const optimisticReply = {
+        id: tempId,
+        userId: String(currentUser?.id || "me"),
+        userName: currentUser?.name || currentUser?.username || "Tôi",
+        userAvatar: currentUser?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser?.id || "user"}`,
+        content: finalContent,
+        parentId: String(parentCommentId),
+        parent_id: String(parentCommentId),
+        likes_count: 0,
+        isPinned: false,
+        isAccepted: false,
+        createdAt: new Date().toISOString()
+      };
+      setCommentsList((prev) => [...prev, optimisticReply]);
+      addToast("Đã gửi phản hồi bình luận! 💬", "success");
+
+      try {
+        const res = await api.comments.create(post.id, {
+          content: finalContent,
+          parent_id: Number(parentCommentId) || undefined
+        });
+        if (res?.id) {
+          setCommentsList((prev) =>
+            prev.map((c) => (c.id === tempId ? { ...c, id: String(res.id) } : c))
+          );
+        }
+        refreshComments();
+      } catch (err) {
+        console.warn("Lỗi gửi phản hồi:", err);
+      }
+    }, "Vui lòng đăng nhập để phản hồi bình luận!");
+  };
+
+  // Xóa bình luận
+  const handleDeleteComment = async (commentId) => {
+    setCommentsList((prev) => prev.filter((c) => String(c.id) !== String(commentId) && String(c.parentId) !== String(commentId)));
+    deleteComment(post.id, commentId);
+    try {
+      await api.comments.delete(commentId);
+      refreshComments();
+    } catch (e) {
+      console.warn("Delete comment error:", e);
+    }
+  };
+
+  // Xử lý Báo cáo bài viết
+  const handleOpenReportModal = () => {
+    requireAuth(() => {
+      setShowReportModal(true);
+      setReportReason("spam");
+      setReportDetails("");
+    }, "Vui lòng đăng nhập để gửi báo cáo vi phạm!");
+  };
+
+  const handleSubmitReport = async (e) => {
+    e.preventDefault();
+    setSubmittingReport(true);
+    try {
+      await api.moderation.createReport({
+        target_type: "post",
+        target_id: Number(post.id),
+        reason: reportReason,
+        details: reportDetails.trim() || undefined
+      });
+      setShowReportModal(false);
+      addToast("Báo cáo của bạn đã được gửi tới Ban quản trị & AI kiểm duyệt! Cảm ơn bạn. 🛡️", "success");
+    } catch (err) {
+      addToast(err.message || "Không thể gửi báo cáo vi phạm.", "error");
+    } finally {
+      setSubmittingReport(false);
+    }
+  };
+
+  // Helper render bình luận có hình ảnh / GIF
+  const renderCommentMedia = (rawContent) => {
+    if (!rawContent) return null;
+    const strContent = typeof rawContent === "string" ? rawContent : String(rawContent || "");
+    if (!strContent) return null;
+
+    const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    const images = [];
+    let match;
+    while ((match = imgRegex.exec(strContent)) !== null) {
+      images.push(match[2]);
+    }
+
+    const urlRegex = /(https?:\/\/[^\s]+(?:\.gif|\.png|\.jpg|\.jpeg|\.webp)(?:\?[^\s]*)?)/gi;
+    let urlMatch;
+    while ((urlMatch = urlRegex.exec(strContent)) !== null) {
+      if (!images.includes(urlMatch[1])) {
+        images.push(urlMatch[1]);
+      }
+    }
+
+    const cleanText = strContent
+      .replace(imgRegex, "")
+      .replace(urlRegex, "")
+      .trim();
+
+    return (
+      <div className="space-y-2">
+        {cleanText && (
+          <p className="text-xs sm:text-sm text-base-content/80 whitespace-pre-wrap break-words leading-relaxed">
+            {cleanText}
+          </p>
+        )}
+        {images.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {images.map((img, idx) => (
+              <img
+                key={idx}
+                src={img}
+                alt="Đính kèm bình luận"
+                className="max-h-64 rounded-xl border border-base-300 object-contain bg-base-200 cursor-zoom-in hover:brightness-95 transition-all shadow-xs"
+                onClick={() => setLightboxImage(img)}
+                loading="lazy"
+                onError={(e) => { e.currentTarget.style.display = "none"; }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -940,17 +1287,6 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
     }, "Vui lòng đăng nhập để thích bình luận!");
   };
 
-  // Gửi trả lời bình luận lồng cấp
-  const handleSendReply = (parentCommentId) => {
-    const trimmed = replyText.trim();
-    if (!trimmed) return;
-    requireAuth(() => {
-      addComment(post.id, trimmed, parentCommentId);
-      setReplyText("");
-      setReplyingToId(null);
-    }, "Vui lòng đăng nhập để phản hồi bình luận!");
-  };
-
   // Kích hoạt Bot tương tác (Engagement Bot)
   const handleTriggerBotComment = async () => {
     if (!currentUser) {
@@ -962,9 +1298,11 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
       const res = await api.posts.triggerBotComment(post.id);
       addComment(post.id, res.content);
       addToast("AI TechBot đã gửi bình luận phân tích chuyên sâu! 🤖", "success");
+      refreshComments();
     } catch {
       addComment(post.id, `🤖 **[AI TechBot Phản hồi]**: Về bài viết **${post.title}**, độc giả cần lưu ý tối ưu hóa hiệu năng, áp dụng chuẩn thiết kế module hóa và tham khảo tài liệu chính thức của thư viện.`);
       addToast("AI TechBot đã tham gia bình luận! 🤖", "info");
+      refreshComments();
     } finally {
       setBotLoading(false);
     }
@@ -1082,7 +1420,7 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
           <div className="max-w-3xl mx-auto px-6 sm:px-8 py-10">
             <div className="mb-8">
               <div className="flex items-center gap-2 text-xs text-base-content/60 mb-2">
-                <span className="badge badge-sm badge-primary text-white font-semibold">{post.category}</span>
+                <span className="badge badge-sm badge-primary text-white font-semibold">{typeof post.category === "object" && post.category !== null ? post.category?.name : (post.category || "Công nghệ")}</span>
                 <span>•</span>
                 <span>{post.readTime}</span>
                 <span>•</span>
@@ -1260,7 +1598,7 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
 
         {/* Category, Tags, Tech Stack & Verification Badges */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <span className="badge badge-primary font-bold text-xs">{post.category}</span>
+          <span className="badge badge-primary font-bold text-xs">{typeof post.category === "object" && post.category !== null ? post.category?.name : (post.category || "Công nghệ")}</span>
           {isVerifiedState && (
             <span className="badge badge-success text-white font-bold text-xs gap-1 shadow-2xs">
               🛡️ Đã xác thực
@@ -1271,14 +1609,17 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
               📦 {post.techStackVersion || post.tech_stack_version}
             </span>
           )}
-          {post.tags?.map((tag) => (
-            <span
-              key={tag}
-              className="badge badge-sm border border-base-300 bg-base-200/60 text-base-content/80 text-xs font-medium hover:border-primary/50 transition-colors"
-            >
-              #{tag}
-            </span>
-          ))}
+          {post.tags?.map((tag, idx) => {
+            const tagName = typeof tag === "object" && tag !== null ? tag.name : tag;
+            return (
+              <span
+                key={typeof tag === "object" && tag !== null ? (tag.id || tag.name || idx) : `${tag}-${idx}`}
+                className="badge badge-sm border border-base-300 bg-base-200/60 text-base-content/80 text-xs font-medium hover:border-primary/50 transition-colors"
+              >
+                #{tagName}
+              </span>
+            );
+          })}
 
           {/* Action cho Admin/Moderator để xác thực chuyên môn */}
           {currentUser && (currentUser.role === "admin" || currentUser.role === "moderator") && !isVerifiedState && (
@@ -1622,6 +1963,80 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
           </div>
         )}
 
+        {/* Hộp Chuỗi Bài Viết (Series) */}
+        {seriesInfo && (
+          <div className="my-5 p-4 sm:p-5 rounded-2xl bg-primary/5 border-2 border-primary/20 space-y-3 animate-fade-in shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">📚</span>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Nằm trong Chuỗi bài viết</span>
+                  <h3
+                    className="text-sm sm:text-base font-extrabold text-base-content hover:text-primary transition-colors cursor-pointer"
+                    onClick={() => onNavigate && onNavigate("series", { slug: seriesInfo.slug })}
+                  >
+                    {seriesInfo.title}
+                  </h3>
+                </div>
+              </div>
+              <span className="badge badge-primary text-white font-bold text-xs">
+                Phần {seriesInfo.current_index} / {seriesInfo.total_posts}
+              </span>
+            </div>
+
+            {/* Danh sách các bài trong chuỗi */}
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              {seriesInfo.all_posts?.map((p, idx) => (
+                <div
+                  key={p.id}
+                  onClick={() => {
+                    if (String(p.id) !== String(post.id)) {
+                      onNavigate && onNavigate("post_detail", { postId: p.id });
+                    }
+                  }}
+                  className={`flex items-center justify-between p-2 rounded-xl text-xs cursor-pointer transition-all ${
+                    p.is_current
+                      ? "bg-primary text-white font-bold shadow-xs"
+                      : "bg-base-100 hover:bg-base-200 text-base-content/80 border border-base-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="w-5 text-center font-mono opacity-70">#{idx + 1}</span>
+                    <span className="truncate">{p.title}</span>
+                  </div>
+                  {p.is_current && <span className="text-[10px] uppercase font-bold tracking-wider shrink-0">Đang đọc</span>}
+                </div>
+              ))}
+            </div>
+
+            {/* Nút điều hướng bài trước / bài tiếp */}
+            <div className="flex items-center justify-between pt-2 border-t border-primary/10 gap-2">
+              {seriesInfo.prev_post ? (
+                <button
+                  type="button"
+                  onClick={() => onNavigate && onNavigate("post_detail", { postId: seriesInfo.prev_post.id })}
+                  className="btn btn-xs btn-outline btn-primary rounded-lg gap-1 text-xs truncate max-w-[48%]"
+                  title={seriesInfo.prev_post.title}
+                >
+                  <span>←</span>
+                  <span className="truncate">Bài trước: {seriesInfo.prev_post.title}</span>
+                </button>
+              ) : <div />}
+              {seriesInfo.next_post ? (
+                <button
+                  type="button"
+                  onClick={() => onNavigate && onNavigate("post_detail", { postId: seriesInfo.next_post.id })}
+                  className="btn btn-xs btn-primary text-white rounded-lg gap-1 text-xs truncate max-w-[48%] ml-auto"
+                  title={seriesInfo.next_post.title}
+                >
+                  <span className="truncate">Bài tiếp: {seriesInfo.next_post.title}</span>
+                  <span>→</span>
+                </button>
+              ) : <div />}
+            </div>
+          </div>
+        )}
+
         {/* Nội dung bài viết */}
         <div className={`py-4 transition-all ${
           fontSizeLevel === "sm"
@@ -1685,7 +2100,9 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-base-content flex items-center gap-2">
             <span>📚 Bài viết cùng chuyên mục</span>
-            <span className="badge badge-primary badge-outline text-xs">{post.category}</span>
+            <span className="badge badge-primary badge-outline text-xs">
+              {typeof post.category === "object" && post.category !== null ? post.category?.name : (post.category || "Công nghệ")}
+            </span>
           </h3>
           <button
             onClick={() => onNavigate("home")}
@@ -1914,8 +2331,15 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
           </button>
         </div>
 
-        {/* Form viết bình luận */}
-        <form onSubmit={handleCommentSubmit} className="mb-8">
+        {/* Form viết bình luận với hỗ trợ Hình ảnh & GIF */}
+        <form onSubmit={handleCommentSubmit} className="mb-8 p-4 rounded-2xl bg-base-200/40 border border-base-300">
+          <input
+            type="file"
+            ref={commentFileRef}
+            accept="image/*"
+            className="hidden"
+            onChange={handleCommentFileChange}
+          />
           <div className="relative">
             <textarea
               value={commentText}
@@ -1926,16 +2350,92 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
                   : "Nhập bình luận của bạn (Hệ thống sẽ yêu cầu đăng nhập trước khi gửi và giữ nguyên nội dung)..."
               }
               rows={3}
-              className="textarea textarea-bordered w-full text-sm focus:textarea-primary transition-all p-3"
-              required
+              className="textarea textarea-bordered w-full text-sm focus:textarea-primary transition-all p-3 rounded-xl"
+              required={!commentImage}
             />
-            <div className="flex justify-between items-center mt-2">
-              <p className="text-xs text-base-content/50">
-                Hãy thảo luận văn minh và tôn trọng quan điểm của người khác.
-              </p>
+
+            {/* Preview ảnh hoặc GIF đã chọn */}
+            {commentImage && (
+              <div className="relative inline-block mt-2 p-1.5 bg-base-100 rounded-xl border border-base-300 shadow-xs">
+                <img src={commentImage} alt="Đính kèm" className="h-28 max-w-xs object-cover rounded-lg" />
+                <button
+                  type="button"
+                  onClick={() => setCommentImage(null)}
+                  className="btn btn-circle btn-xs btn-error text-white absolute -top-2 -right-2 shadow-md"
+                  title="Gỡ ảnh"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* GIF Picker Dropdown */}
+            {showGifPicker && (
+              <div className="mt-2 p-3 bg-base-100 rounded-2xl border border-base-300 shadow-xl space-y-2 animate-fade-in z-20">
+                <div className="flex items-center justify-between pb-1 border-b border-base-200">
+                  <span className="text-xs font-bold text-base-content flex items-center gap-1.5">
+                    <span>🎭</span>
+                    <span>Chọn GIF Lập Trình & Phản Hồi</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowGifPicker(false)}
+                    className="btn btn-xs btn-circle btn-ghost"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-1">
+                  {DEV_GIFS.map((g, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        setCommentImage(g.url);
+                        setShowGifPicker(false);
+                      }}
+                      className="cursor-pointer group relative rounded-lg overflow-hidden border border-base-300 hover:border-primary hover:scale-[1.02] transition-all bg-base-200"
+                    >
+                      <img src={g.url} alt={g.name} className="w-full h-20 object-cover" loading="lazy" />
+                      <div className="absolute inset-x-0 bottom-0 bg-black/70 text-white text-[10px] p-1 text-center truncate">
+                        {g.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-wrap justify-between items-center mt-2.5 gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => commentFileRef.current?.click()}
+                  className="btn btn-xs btn-outline border-base-300 gap-1 rounded-lg text-xs hover:border-primary hover:text-primary"
+                  title="Tải ảnh lên từ máy tính"
+                >
+                  <span>🖼️</span>
+                  <span>Ảnh</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowGifPicker(!showGifPicker)}
+                  className={`btn btn-xs rounded-lg text-xs gap-1 border ${
+                    showGifPicker
+                      ? "btn-primary text-white"
+                      : "btn-outline border-base-300 hover:border-primary hover:text-primary"
+                  }`}
+                  title="Chọn biểu cảm GIF"
+                >
+                  <span>🎭</span>
+                  <span>GIF</span>
+                </button>
+                <p className="text-[11px] text-base-content/50 hidden sm:inline">
+                  Hỗ trợ Markdown, chèn ảnh và biểu cảm GIF thảo luận văn minh.
+                </p>
+              </div>
               <button
                 type="submit"
-                className="btn btn-sm btn-primary text-white font-semibold"
+                className="btn btn-sm btn-primary text-white font-bold rounded-xl shadow-xs"
               >
                 Gửi bình luận
               </button>
@@ -2148,7 +2648,7 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
 
                             {canDeleteComment && (
                               <button
-                                onClick={() => deleteComment(post.id, comment.id)}
+                                onClick={() => handleDeleteComment(comment.id)}
                                 className="text-xs text-error hover:underline ml-1"
                                 title="Xóa bình luận này"
                               >
@@ -2158,9 +2658,9 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
                           </div>
                         </div>
 
-                        <p className="text-xs sm:text-sm text-base-content/80 whitespace-pre-wrap break-words">
-                          {comment.content}
-                        </p>
+                        <div className="pt-0.5">
+                          {renderCommentMedia(comment.content)}
+                        </div>
 
                         {/* Thanh tương tác bình luận: Like & Reply */}
                         <div className="flex items-center gap-3 pt-2.5 mt-1 border-t border-base-200/60">
@@ -2183,6 +2683,8 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
                             onClick={() => {
                               setReplyingToId((curr) => (curr === comment.id ? null : comment.id));
                               setReplyText("");
+                              setReplyImage(null);
+                              setShowReplyGifPicker(false);
                             }}
                             className="btn btn-xs btn-ghost text-base-content/70 hover:text-primary rounded-lg text-[11px] font-semibold gap-1"
                           >
@@ -2194,9 +2696,16 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
                       </div>
                     </div>
 
-                    {/* Inline Reply Form */}
+                    {/* Inline Reply Form với ảnh & GIF */}
                     {replyingToId === comment.id && (
-                      <div className="mt-2 pl-3 sm:pl-10 pr-2 py-2 space-y-2 animate-fade-in">
+                      <div className="mt-2 pl-3 sm:pl-10 pr-2 py-2 space-y-2 animate-fade-in bg-base-100/90 p-3 rounded-2xl border border-base-300">
+                        <input
+                          type="file"
+                          ref={replyFileRef}
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleReplyFileChange}
+                        />
                         <textarea
                           value={replyText}
                           onChange={(e) => setReplyText(e.target.value)}
@@ -2204,26 +2713,98 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
                           rows={2}
                           className="textarea textarea-bordered w-full text-xs focus:textarea-primary rounded-xl"
                           autoFocus
+                          required={!replyImage}
                         />
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setReplyingToId(null);
-                              setReplyText("");
-                            }}
-                            className="btn btn-xs btn-ghost rounded-lg"
-                          >
-                            Hủy
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleSendReply(comment.id)}
-                            disabled={!replyText.trim()}
-                            className="btn btn-xs btn-primary text-white font-bold px-3 rounded-lg"
-                          >
-                            Gửi phản hồi
-                          </button>
+
+                        {/* Preview ảnh phản hồi */}
+                        {replyImage && (
+                          <div className="relative inline-block p-1 bg-base-200 rounded-xl border border-base-300">
+                            <img src={replyImage} alt="Đính kèm phản hồi" className="h-20 max-w-xs object-cover rounded-lg" />
+                            <button
+                              type="button"
+                              onClick={() => setReplyImage(null)}
+                              className="btn btn-circle btn-xs btn-error text-white absolute -top-2 -right-2 shadow-xs"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        )}
+
+                        {/* GIF Picker cho Reply */}
+                        {showReplyGifPicker && (
+                          <div className="p-2.5 bg-base-100 rounded-xl border border-base-300 shadow-lg space-y-1.5 animate-fade-in">
+                            <div className="flex items-center justify-between pb-1 border-b border-base-200">
+                              <span className="text-[11px] font-bold">Chọn GIF phản hồi</span>
+                              <button
+                                type="button"
+                                onClick={() => setShowReplyGifPicker(false)}
+                                className="btn btn-xs btn-circle btn-ghost"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 max-h-40 overflow-y-auto">
+                              {DEV_GIFS.map((g, idx) => (
+                                <div
+                                  key={idx}
+                                  onClick={() => {
+                                    setReplyImage(g.url);
+                                    setShowReplyGifPicker(false);
+                                  }}
+                                  className="cursor-pointer group relative rounded-lg overflow-hidden border border-base-300 hover:border-primary"
+                                >
+                                  <img src={g.url} alt={g.name} className="w-full h-16 object-cover" loading="lazy" />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => replyFileRef.current?.click()}
+                              className="btn btn-xs btn-outline border-base-300 gap-1 rounded-lg text-[11px]"
+                              title="Thêm ảnh"
+                            >
+                              <span>🖼️</span>
+                              <span>Ảnh</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setShowReplyGifPicker(!showReplyGifPicker)}
+                              className={`btn btn-xs rounded-lg text-[11px] gap-1 border ${
+                                showReplyGifPicker ? "btn-primary text-white" : "btn-outline border-base-300"
+                              }`}
+                              title="Chọn GIF"
+                            >
+                              <span>🎭</span>
+                              <span>GIF</span>
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReplyingToId(null);
+                                setReplyText("");
+                                setReplyImage(null);
+                                setShowReplyGifPicker(false);
+                              }}
+                              className="btn btn-xs btn-ghost rounded-lg"
+                            >
+                              Hủy
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSendReply(comment.id)}
+                              disabled={!replyText.trim() && !replyImage}
+                              className="btn btn-xs btn-primary text-white font-bold px-3 rounded-lg"
+                            >
+                              Gửi phản hồi
+                            </button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -2279,7 +2860,7 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
                                     {canDeleteReply && (
                                       <button
                                         type="button"
-                                        onClick={() => deleteComment(post.id, reply.id)}
+                                        onClick={() => handleDeleteComment(reply.id)}
                                         className="text-error hover:underline"
                                       >
                                         Xóa
@@ -2287,9 +2868,9 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
                                     )}
                                   </div>
                                 </div>
-                                <p className="text-base-content/80 whitespace-pre-wrap break-words leading-relaxed">
-                                  {reply.content}
-                                </p>
+                                <div className="pt-0.5">
+                                  {renderCommentMedia(reply.content)}
+                                </div>
                                 <div className="pt-1">
                                   <button
                                     type="button"
@@ -2345,17 +2926,42 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
           <TableOfContents content={post.content} headingIdPrefix={"post-" + post.id + "-"} />
 
           {/* Widget 3: Trắc nghiệm bài viết */}
-          <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm text-center">
-            <HelpCircle size={28} className="text-amber-500 mx-auto mb-1" />
-            <p className="text-sm font-bold text-base-content mb-1">Trắc nghiệm kiến thức</p>
-            <p className="text-xs text-base-content/60 mb-3">Kiểm tra mức độ hiểu bài qua các câu hỏi trắc nghiệm!</p>
-            <button
-              onClick={() => onNavigate("quiz", { quizParams: { postId: post.id, title: post.title } })}
-              className="btn btn-sm btn-primary w-full text-white font-bold gap-1 shadow-2xs"
-            >
-              Làm bài trắc nghiệm
-            </button>
-          </div>
+          {(hasQuiz || (hasQuiz === null && (post.has_quiz || post.quiz_count > 0))) ? (
+            <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm text-center">
+              <HelpCircle size={28} className="text-amber-500 mx-auto mb-1" />
+              <p className="text-sm font-bold text-base-content mb-1">Trắc nghiệm kiến thức</p>
+              <p className="text-xs text-base-content/60 mb-3">Kiểm tra mức độ hiểu bài qua các câu hỏi trắc nghiệm!</p>
+              <button
+                onClick={() => onNavigate("quiz", { quizParams: { postId: post.id, title: post.title } })}
+                className="btn btn-sm btn-primary w-full text-white font-bold gap-1 shadow-2xs"
+              >
+                Làm bài trắc nghiệm
+              </button>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm text-center">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto mb-2 font-bold text-lg">
+                📝
+              </div>
+              <p className="text-sm font-bold text-base-content mb-1">Trắc nghiệm kiến thức</p>
+              <p className="text-xs text-base-content/60 mb-3">Chưa có câu hỏi trắc nghiệm cho bài viết này.</p>
+              {canModerate ? (
+                <button
+                  onClick={() => {
+                    setAiQuizTopic(post.title || post.category || "Kiến thức IT");
+                    setShowCreateQuizModal(true);
+                  }}
+                  className="btn btn-sm btn-outline btn-primary w-full font-bold gap-1 shadow-2xs hover:text-white"
+                >
+                  ✨ Tạo trắc nghiệm cho bài viết
+                </button>
+              ) : (
+                <p className="text-[11px] text-base-content/50 italic">
+                  (Đang chờ ban kiểm duyệt cập nhật đề thi)
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Widget 4: Chia sẻ bài viết với Brand Icons */}
           <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
@@ -2404,14 +3010,17 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
                 Chủ đề liên quan
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="badge badge-sm border border-base-300 bg-base-200/60 text-xs font-semibold"
-                  >
-                    #{tag}
-                  </span>
-                ))}
+                {post.tags.map((tag, idx) => {
+                  const tagName = typeof tag === "object" && tag !== null ? tag.name : tag;
+                  return (
+                    <span
+                      key={typeof tag === "object" && tag !== null ? (tag.id || tag.name || idx) : `${tag}-${idx}`}
+                      className="badge badge-sm border border-base-300 bg-base-200/60 text-xs font-semibold"
+                    >
+                      #{tagName}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -2742,6 +3351,156 @@ tags: [${(post.tags || []).map((t) => `"${t}"`).join(", ")}]
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Tạo câu hỏi trắc nghiệm bằng AI gắn với bài viết */}
+      {canModerate && showCreateQuizModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in"
+          onClick={(e) => {
+            if (!isGeneratingQuiz && e.target === e.currentTarget) setShowCreateQuizModal(false);
+          }}
+        >
+          <div className="bg-base-100 rounded-3xl border border-base-300 shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-5 border-b border-base-200 flex items-center justify-between bg-gradient-to-r from-purple-500/10 via-primary/10 to-transparent">
+              <div className="flex items-center gap-2.5">
+                <span className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center text-lg font-bold shadow-xs">
+                  ⚡
+                </span>
+                <div>
+                  <h3 className="font-extrabold text-base text-base-content">Tạo câu hỏi trắc nghiệm bằng AI</h3>
+                  <p className="text-[11px] text-base-content/60">Gắn trực tiếp bộ đề kiểm tra kiến thức vào bài viết này</p>
+                </div>
+              </div>
+              <button
+                onClick={() => !isGeneratingQuiz && setShowCreateQuizModal(false)}
+                disabled={isGeneratingQuiz}
+                className="btn btn-sm btn-ghost btn-circle"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreatePostQuiz} className="p-5 space-y-4 overflow-y-auto">
+              <div className="p-3 bg-base-200/50 rounded-2xl border border-base-300 text-xs">
+                <span className="font-bold text-base-content block mb-0.5">Bài viết liên kết:</span>
+                <span className="text-primary font-medium line-clamp-1">{post?.title}</span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-base-content/80 mb-1">
+                  Chủ đề / Công nghệ trọng tâm muốn kiểm tra:
+                </label>
+                <input
+                  type="text"
+                  value={aiQuizTopic}
+                  onChange={(e) => setAiQuizTopic(e.target.value)}
+                  placeholder="Ví dụ: Docker, React 19, FastAPI, PostgreSQL..."
+                  className="input input-bordered input-sm w-full text-xs focus:input-primary rounded-xl"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-base-content/80 mb-1.5">
+                  Độ khó câu hỏi:
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: "easy", label: "🌱 Dễ" },
+                    { id: "medium", label: "⚡ Vừa" },
+                    { id: "hard", label: "🔥 Khó" },
+                  ].map((d) => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      onClick={() => setAiQuizDifficulty(d.id)}
+                      className={"btn btn-sm text-xs font-semibold rounded-xl " + (
+                        aiQuizDifficulty === d.id
+                          ? "btn-primary text-white"
+                          : "btn-outline border-base-300"
+                      )}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-base-content/80 mb-1.5">
+                  Số lượng câu hỏi:
+                </label>
+                <div className="flex gap-2">
+                  {[3, 5, 10].map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setAiQuizCount(c)}
+                      className={"btn btn-sm flex-1 text-xs font-bold rounded-xl " + (
+                        aiQuizCount === c ? "btn-primary text-white" : "btn-outline border-base-300"
+                      )}
+                    >
+                      {c} câu
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-wrap items-center justify-end gap-2 border-t border-base-200">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateQuizModal(false)}
+                  disabled={isGeneratingQuiz}
+                  className="btn btn-sm btn-ghost rounded-xl"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isGeneratingQuiz || !aiQuizTopic.trim()}
+                  className="btn btn-sm btn-primary text-white font-bold gap-1.5 shadow-md rounded-xl"
+                >
+                  {isGeneratingQuiz ? (
+                    <>
+                      <span className="loading loading-spinner loading-xs"></span>
+                      <span>Đang tạo câu hỏi...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>✨</span>
+                      <span>Bắt đầu tạo đề thi</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox xem ảnh/GIF phóng to */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-xs p-4 animate-fade-in"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <img
+              src={lightboxImage}
+              alt="Phóng to"
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl"
+            />
+            <button
+              type="button"
+              onClick={() => setLightboxImage(null)}
+              className="btn btn-circle btn-sm bg-base-100/90 hover:bg-base-100 text-base-content absolute -top-3 -right-3 shadow-lg"
+              title="Đóng"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}

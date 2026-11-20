@@ -282,7 +282,7 @@ export default function AuthModal() {
                   >
                     Chính sách bảo mật
                   </a>{" "}
-                  của IT Blog (đồng ý thu thập và xử lý họ tên, email, mật khẩu phục vụ tạo tài khoản).
+                  (đồng ý cho phép IT Blog thu thập email và dữ liệu cá nhân để cá nhân hóa gợi ý bài viết và hiển thị quảng cáo, thông tin công nghệ phù hợp).
                 </span>
               </label>
               {termsError && (

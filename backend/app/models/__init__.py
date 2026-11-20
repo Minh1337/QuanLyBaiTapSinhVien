@@ -16,6 +16,7 @@ from app.models.behavior import UserBehaviorEvent
 from app.models.course import Course, CourseLesson, CourseEnrollment, CourseLessonProgress
 from app.models.ads import AdCampaign, Ad, AdClick
 from app.models.quiz import QuizQuestion, QuizQuestionPost
+from app.models.series import Series, SeriesItem
 
 __all__ = [
     "Base",
@@ -60,5 +61,7 @@ __all__ = [
     "Ad",
     "AdClick",
     "QuizQuestion",
-    "QuizQuestionPost"
+    "QuizQuestionPost",
+    "Series",
+    "SeriesItem"
 ]

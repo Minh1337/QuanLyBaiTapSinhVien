@@ -456,7 +456,7 @@ export default function Logup_page({ onNavigate }) {
                 }`}
               />
               <span className="text-base-content/80 leading-snug">
-                Tôi đồng ý với{" "}
+                Tôi đã đọc và đồng ý với{" "}
                 <button
                   type="button"
                   onClick={() => onNavigate && onNavigate("policy", { section: "terms" })}
@@ -472,7 +472,7 @@ export default function Logup_page({ onNavigate }) {
                 >
                   Chính sách bảo mật
                 </button>{" "}
-                của IT Blog (đồng ý thu thập và xử lý họ tên, email, tên đăng nhập, mật khẩu phục vụ tạo và quản lý tài khoản thành viên).
+                (bao gồm việc cho phép IT Blog thu thập email và dữ liệu tương tác để cá nhân hóa gợi ý bài viết và hiển thị thông tin công nghệ, quảng cáo phù hợp).
               </span>
             </label>
             {errors.agreeTerms && (

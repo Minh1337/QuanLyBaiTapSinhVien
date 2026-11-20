@@ -70,7 +70,7 @@ def calculate_read_time(content: str) -> str:
 def get_posts(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1, description="Page number"),
-    limit: int = Query(9, ge=1, le=30, description="Items per page"),
+    limit: int = Query(9, ge=1, le=100, description="Items per page"),
     category: Optional[str] = Query(None, description="Category name or slug"),
     tag: Optional[str] = Query(None, description="Tag name or slug"),
     author_id: Optional[int] = Query(None, description="Filter by author ID"),
@@ -270,14 +270,13 @@ def create_post(
         any(getattr(r, "name", "") in ["admin", "moderator"] for r in getattr(current_user, "roles", []))
     ))
 
-    # Bài viết mới đăng mặc định PENDING, trừ khi draft hoặc do Admin/Moderator chủ động duyệt thẳng 'approved'
+    # Cơ chế HẬU KIỂM: Bài viết mới đăng mặc định xuất bản ngay ('approved') để cộng đồng đọc ngay,
+    # trừ khi tác giả lưu nháp ('draft'). Người dùng có thể báo cáo vi phạm để AI & Admin hậu kiểm.
     clean_status = (post_in.status or "").lower().strip()
     if clean_status == PostStatus.DRAFT.value:
         post_status = PostStatus.DRAFT.value
-    elif clean_status == PostStatus.APPROVED.value and is_admin:
-        post_status = PostStatus.APPROVED.value
     else:
-        post_status = PostStatus.PENDING.value
+        post_status = PostStatus.APPROVED.value
 
     new_post = Post(
         title=post_in.title.strip(),
@@ -319,13 +318,6 @@ def create_post(
 
     db.commit()
     db.refresh(new_post)
-
-    # Tự động sinh bộ câu hỏi trắc nghiệm khớp với nội dung bài viết vừa đăng
-    try:
-        from app.services.quiz_generator import ensure_post_quiz_questions
-        ensure_post_quiz_questions(db, new_post, count=5, user_id=current_user.id)
-    except Exception as e:
-        logger.warning(f"Could not auto-generate quiz questions for new post #{new_post.id}: {e}")
 
     return PostResponse.model_validate(new_post)
 
@@ -406,11 +398,6 @@ def update_post(
         if new_status == PostStatus.APPROVED.value:
             if not post.published_at:
                 post.published_at = datetime.now(timezone.utc)
-            try:
-                from app.services.quiz_generator import ensure_post_quiz_questions
-                ensure_post_quiz_questions(db, post, count=5, user_id=current_user.id)
-            except Exception as e:
-                logger.warning(f"Could not auto-generate quiz questions for approved post #{post.id}: {e}")
 
     if post_in.category_id is not None:
         if post_in.category_id > 0:
@@ -474,13 +461,6 @@ def update_post(
     db.add(post)
     db.commit()
     db.refresh(post)
-
-    # Đảm bảo bài viết luôn có câu hỏi trắc nghiệm khớp nội dung
-    try:
-        from app.services.quiz_generator import ensure_post_quiz_questions
-        ensure_post_quiz_questions(db, post, count=5, user_id=current_user.id)
-    except Exception as e:
-        logger.warning(f"Could not ensure quiz questions for updated post #{post.id}: {e}")
 
     return PostResponse.model_validate(post)
 

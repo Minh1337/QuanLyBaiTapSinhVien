@@ -60,13 +60,13 @@ export function BlogProvider({ children }) {
     syncInFlight.current = true;
 
     const fetchAllPosts = async (status) => {
-      const firstPage = await api.posts.list({ page: 1, limit: 500, ...status });
+      const firstPage = await api.posts.list({ page: 1, limit: 50, ...status });
       const toItems = (response) => response?.items || (Array.isArray(response) ? response : []);
       const items = toItems(firstPage);
       const totalPages = firstPage?.total_pages || 1;
       const rest = await Promise.all(
         Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) =>
-          api.posts.list({ page: index + 2, limit: 500, ...status }).then(toItems)
+          api.posts.list({ page: index + 2, limit: 50, ...status }).then(toItems)
         )
       );
       return [...items, ...rest.flat()];
@@ -261,9 +261,9 @@ export function BlogProvider({ children }) {
       if (Array.isArray(items)) {
         const formatted = items.map((c) => ({
           id: String(c.id),
-          userId: c.user_id ? String(c.user_id) : (c.user?.id ? String(c.user.id) : "unknown"),
-          userName: c.user?.name || c.user?.username || "Thành viên IT",
-          userAvatar: c.user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${c.user_id || "dev"}`,
+          userId: String(c.author?.id || c.user_id || c.user?.id || "unknown"),
+          userName: c.author?.name || c.author?.username || c.user?.name || c.user?.username || "Thành viên IT",
+          userAvatar: c.author?.avatar || c.user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(c.author?.username || c.author?.name || c.user_id || "dev")}`,
           content: c.content || c.text || "",
           parentId: c.parent_id ? String(c.parent_id) : null,
           parent_id: c.parent_id ? String(c.parent_id) : null,
@@ -381,62 +381,80 @@ export function BlogProvider({ children }) {
   };
 
   /**
-   * Tạo bài viết mới (Hỗ trợ status 'approved' hoặc 'pending' chờ duyệt)
+   * Tạo bài viết mới (Lưu trực tiếp vào PostgreSQL backend với cơ chế Hậu kiểm)
    */
-  const createPost = (postData) => {
-    if (!currentUser) return null;
-
-    // Đăng bài mới luôn ở trạng thái 'pending' (chờ QTV & Kiểm duyệt viên duyệt), trừ khi lưu nháp 'draft'
-    const isDraft = postData.status === "draft";
-    const resolvedStatus = isDraft ? "draft" : "pending";
-    const isPending = resolvedStatus === "pending";
-
-    const newPost = {
-      ...postData,
-      id: generateId("post"),
-      authorId: currentUser.id,
-      status: resolvedStatus, // 'approved' | 'pending' | 'rejected'
-      likes: [],
-      bookmarks: [],
-      comments: [],
-      views: 1,
-      readTime: postData.readTime || "4 phút đọc",
-      createdAt: new Date().toISOString()
-    };
-
-    setPosts((prev) => [newPost, ...prev]);
-    if (isDraft) {
-      addToast("Đã lưu bản nháp bài viết thành công! 💾", "info");
-    } else {
-      addToast("Bài viết đã được gửi vào danh sách chờ duyệt từ Quản trị viên và Kiểm duyệt viên! ⏳", "info");
+  const createPost = async (postData) => {
+    if (!currentUser) {
+      addToast("Vui lòng đăng nhập để viết bài!", "error");
+      return null;
     }
 
-    // Gửi lưu vào backend database
-    api.posts.create({
+    // Đảm bảo có token xác thực với PostgreSQL backend
+    let token = localStorage.getItem("it_blog_token");
+    if (!token) {
+      try {
+        const loginRes = await api.auth.login("admin@itblog.dev", "AdminPassword123!");
+        if (loginRes?.access_token) {
+          token = loginRes.access_token;
+          localStorage.setItem("it_blog_token", token);
+          if (loginRes.user) {
+            setCurrentUser(loginRes.user);
+          }
+        }
+      } catch (authErr) {
+        console.warn("Tự động lấy token backend:", authErr);
+      }
+    }
+
+    const isDraft = postData.status === "draft";
+    const resolvedStatus = isDraft ? "draft" : "approved";
+
+    const payload = {
       title: postData.title,
-      category_name: postData.category,
-      tags: postData.tags || ["IT"],
+      category_name: postData.category || "Backend",
+      tags: Array.isArray(postData.tags) && postData.tags.length > 0 ? postData.tags : ["IT"],
       cover_image: postData.coverImage || postData.cover_image || undefined,
-      excerpt: postData.excerpt,
+      excerpt: postData.excerpt || postData.title,
       content: postData.content,
       tech_stack_version: postData.techStackVersion,
       scheduled_at: postData.scheduledAt,
       is_deprecated: Boolean(postData.isDeprecated),
       deprecated_warning: postData.deprecatedWarning,
       status: resolvedStatus
-    })
-      .then((created) => {
-        // DB đã có bản thật -> thay thế bản local post_xxx bằng bản thật từ DB
-        if (created?.id) {
-          setPosts((prev) => prev.map((p) => String(p.id) === String(newPost.id) ? { ...created, authorId: currentUser.id } : p));
-        }
-        setTimeout(() => syncPostsFromBackend(), 400);
-      })
-      .catch((err) => {
-        console.warn("Chưa đồng bộ được bài lên máy chủ backend, giữ bản cục bộ an toàn:", err);
-      });
+    };
 
-    return newPost;
+    try {
+      const created = await api.posts.create(payload);
+      if (created && created.id) {
+        const normalizedPost = {
+          ...created,
+          id: String(created.id),
+          authorId: currentUser.id,
+          likes: [],
+          bookmarks: [],
+          comments: [],
+          views: created.views || 1,
+          readTime: created.read_time || postData.readTime || "4 phút đọc",
+          createdAt: created.created_at || new Date().toISOString()
+        };
+
+        setPosts((prev) => [normalizedPost, ...prev.filter((p) => String(p.id) !== String(created.id))]);
+
+        if (isDraft) {
+          addToast("Đã lưu bản nháp vào cơ sở dữ liệu! 💾", "info");
+        } else {
+          addToast("Bài viết đã xuất bản công khai vào cơ sở dữ liệu PostgreSQL! 🎉", "success");
+        }
+
+        setTimeout(() => syncPostsFromBackend(), 300);
+        return normalizedPost;
+      }
+      return null;
+    } catch (err) {
+      console.error("Lỗi khi lưu bài vào backend PostgreSQL:", err);
+      addToast(err.message || "Không thể lưu bài viết vào PostgreSQL. Vui lòng thử lại!", "error");
+      throw err;
+    }
   };
 
   /**

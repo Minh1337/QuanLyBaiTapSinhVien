@@ -71,7 +71,8 @@ export const CATEGORIES = [
   "DevOps",
   "Database",
   "System Design",
-  "Career"
+  "Career",
+  "Ngoài Lề"
 ];
 
 export const POPULAR_TAGS = [
@@ -83,6 +84,10 @@ export const POPULAR_TAGS = [
   "Kubernetes",
   "PostgreSQL",
   "Redis",
+  "ngoàilề",
+  "goclaptrinh",
+  "desksetup",
+  "chiaseanh",
   "RAG",
   "LLM",
   "Microservices",
@@ -214,5 +219,55 @@ export const SEED_POSTS = [
     readTime: "8 phút đọc",
     status: "approved",
     createdAt: "2026-10-14T14:11:29.363Z"
+  },
+  {
+    id: "991",
+    title: "Góc Làm Việc Minimalist 2026: Chia Sẻ Bàn Nâng Hạ, Màn Hình Ultrawide & Đèn BenQ",
+    slug: "goc-lam-viec-minimalist-2026-chia-se-ban-nang-ha-man-hinh-ultrawide",
+    excerpt: "Bộ ảnh góc làm việc tại nhà (Work from Home) của một lập trình viên Fullstack. Cùng ngắm setup ánh sáng, bàn phím cơ và các phụ kiện công nghệ yêu thích.",
+    content: "# 📸 Góc Làm Việc Minimalist 2026 Của Fullstack Dev\n\nChào anh em IT Blog! Hôm nay nhân ngày cuối tuần dọn dẹp lại không gian làm việc sau chuỗi ngày cày sprint căng thẳng, mình chụp vài tấm ảnh chia sẻ cùng mọi người theo phong cách Flickr album.\n\n![Setup Bàn Làm Việc](https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=1000&auto=format&fit=crop&q=80)\n\n### 🖥️ Danh sách thiết bị cấu hình:\n- **Bàn làm việc:** Bàn nâng hạ Epione SmartDesk Pro mặt gỗ sồi tự nhiên.\n- **Màn hình:** LG 34WN80C Ultrawide 34 inch IPS chuẩn màu cho code & xem preview.\n- **Bàn phím cơ:** Keychron Q1 Pro mod gateron oil kings gõ cực đầm và êm tai.\n- **Ánh sáng:** Đèn treo màn hình BenQ ScreenBar Halo chống mỏi mắt ban đêm.\n\n![Bàn phím cơ và cốc cafe](https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=1000&auto=format&fit=crop&q=80)\n\nAnh em cùng chia sẻ góc làm việc hoặc phụ kiện công nghệ tâm đắc của mình ở phần bình luận bên dưới nhé!",
+    coverImage: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=1000&auto=format&fit=crop&q=80",
+    category: "Ngoài Lề",
+    tags: ["ngoàilề", "goclaptrinh", "desksetup", "chiaseanh"],
+    authorId: "2",
+    author: {
+      id: "2",
+      name: "Nguyễn Văn Hoàng",
+      username: "hoang_dev",
+      avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=hoang",
+      role: "user"
+    },
+    likes: [],
+    bookmarks: [],
+    comments: [],
+    views: 856,
+    readTime: "3 phút đọc",
+    status: "approved",
+    createdAt: "2026-11-01T10:00:00.000Z"
+  },
+  {
+    id: "992",
+    title: "Chùm Ảnh: 1 Ngày Đi Cafe Code & Săn Bình Minh Cùng MacBook M3 Pro",
+    slug: "chum-anh-1-ngay-di-cafe-code-va-san-binh-minh",
+    excerpt: "Những khoảnh khắc đời sống bình yên ngoài dòng code: Tách cà phê sáng, thành phố thức giấc và vài trang sách công nghệ truyền cảm hứng.",
+    content: "# ☕ Chùm Ảnh: Một Ngày Rời Xa Văn Phòng\n\nĐôi khi bug không thể fix được bằng cách ngồi dán mắt vào màn hình 8 tiếng liên tục, mà cần một chuyến đi dạo, một tách latte nóng và chút khí trời ban mai.\n\n![Cà phê và Laptop](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1000&auto=format&fit=crop&q=80)\n\n> \"Lập trình là nghệ thuật sáng tạo, và người nghệ sĩ cần những khoảng lặng để tái tạo nguồn năng lượng!\"\n\n![Khoảnh khắc bình minh](https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1000&auto=format&fit=crop&q=80)",
+    coverImage: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1000&auto=format&fit=crop&q=80",
+    category: "Ngoài Lề",
+    tags: ["ngoàilề", "chiaseanh", "devlife"],
+    authorId: "1",
+    author: {
+      id: "1",
+      name: "Quản Trị Viên IT Blog",
+      username: "admin",
+      avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=admin",
+      role: "admin"
+    },
+    likes: [],
+    bookmarks: [],
+    comments: [],
+    views: 620,
+    readTime: "2 phút đọc",
+    status: "approved",
+    createdAt: "2026-11-05T08:30:00.000Z"
   }
 ];

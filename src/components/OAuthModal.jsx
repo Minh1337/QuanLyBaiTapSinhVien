@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../services/api";
@@ -169,18 +169,70 @@ export default function OAuthModal({ isOpen, onClose, provider = "google", onSuc
           </p>
         </div>
 
-        {/* Nut mo cua so OAuth tieu chuan */}
-        <button
-          type="button"
-          onClick={handleOpenOAuthWindow}
-          className={`btn w-full gap-2 font-bold shadow-sm rounded-xl border mb-3 flex items-center justify-center transition-transform hover:scale-[1.01] ${providerMeta.color}`}
-        >
-          {providerMeta.icon}
-          <span>Mở cửa sổ ủy quyền {providerMeta.name}</span>
-        </button>
+        {/* Nut mo cua so OAuth tieu chuan neu server da config Client ID */}
+        {providerConfig?.is_configured ? (
+          <button
+            type="button"
+            onClick={handleOpenOAuthWindow}
+            className={`btn w-full gap-2 font-bold shadow-sm rounded-xl border mb-3 flex items-center justify-center transition-transform hover:scale-[1.01] ${providerMeta.color}`}
+          >
+            {providerMeta.icon}
+            <span>Mở cửa sổ ủy quyền {providerMeta.name}</span>
+          </button>
+        ) : (
+          <div className="p-2.5 rounded-xl bg-info/10 border border-info/20 text-xs text-info-content mb-3 flex items-center gap-2">
+            <span className="text-base shrink-0">💡</span>
+            <span>
+              Chế độ xác thực nhanh: Đăng nhập trực tiếp bằng định danh tài khoản <strong>{providerMeta.name}</strong> với JWT token bảo mật.
+            </span>
+          </div>
+        )}
 
-        <div className="divider text-xs text-base-content/40 my-3">
-          HOẶC XÁC THỰC NHANH VỚI TÀI KHOẢN
+        <div className="text-[11px] font-semibold text-base-content/60 mb-2">
+          Chọn tài khoản mẫu hoặc nhập tài khoản của bạn:
+        </div>
+
+        {/* Quick account presets */}
+        <div className="flex flex-wrap gap-2 mb-3">
+          {provider === "google" ? (
+            <>
+              <button
+                type="button"
+                onClick={() => { setEmail("dev.google@gmail.com"); setName("Nguyễn Developer (Google)"); }}
+                className="btn btn-xs rounded-lg btn-outline border-base-300 hover:border-primary text-[11px]"
+              >
+                🔴 dev.google@gmail.com
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail("member.tech@gmail.com"); setName("Tech Enthusiast"); }}
+                className="btn btn-xs rounded-lg btn-outline border-base-300 hover:border-primary text-[11px]"
+              >
+                🔴 member.tech@gmail.com
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => { setEmail("octocat.coder@github.com"); setName("GitHub Octocat"); }}
+                className="btn btn-xs rounded-lg btn-outline border-base-300 hover:border-primary text-[11px]"
+              >
+                🐙 octocat.coder@github.com
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail("senior.fullstack@github.com"); setName("Senior Fullstack Dev"); }}
+                className="btn btn-xs rounded-lg btn-outline border-base-300 hover:border-primary text-[11px]"
+              >
+                🐙 senior.fullstack@github.com
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="divider text-xs text-base-content/40 my-2">
+          HOẶC NHẬP THÔNG TIN
         </div>
 
         {/* Form xac thuc thuc te vao Database backend */}
