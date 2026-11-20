@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Sổ bài tập</string>
+    <string-array name="muc_uu_tien_array">
+        <item>Thấp</item>
+        <item>Trung bình</item>
+        <item>Cao</item>
+    </string-array>
 </resources>

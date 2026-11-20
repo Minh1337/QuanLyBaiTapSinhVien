@@ -15,7 +15,21 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TEN_DATABASE = "QuanLyHocTap.db";
-    private static final int PHIEN_BAN = 5;
+    private static final int PHIEN_BAN = 6;
+
+    // Bảng Tiến độ (Dùng cho phần 5)
+    public static final String BANG_TIEN_DO = "tien_do";
+    public static final String COT_TD_ID_NOI_DUNG = "id_noi_dung";
+    public static final String COT_TD_ID_SINH_VIEN = "id_sinh_vien";
+    public static final String COT_TD_TRANG_THAI = "trang_thai";
+    public static final String COT_TD_MUC_UU_TIEN = "muc_uu_tien";
+    public static final String COT_TD_THOI_GIAN_NHAC = "thoi_gian_nhac";
+
+    // Bảng Mục Checklist (Dùng cho phần 5)
+    public static final String BANG_CHECKLIST = "muc_checklist";
+    public static final String COT_CL_ID_TIEN_DO = "id_tien_do";
+    public static final String COT_CL_MO_TA = "mo_ta";
+    public static final String COT_CL_TRANG_THAI = "trang_thai_hoan_thanh";
 
     // Bảng Tài khoản
     public static final String BANG_TAI_KHOAN = "tai_khoan";
@@ -93,6 +107,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + BANG_CHECKLIST);
+        db.execSQL("DROP TABLE IF EXISTS " + BANG_TIEN_DO);
         db.execSQL("DROP TABLE IF EXISTS " + BANG_BAI_NOP_FILE);
         db.execSQL("DROP TABLE IF EXISTS " + BANG_KET_QUA);
         db.execSQL("DROP TABLE IF EXISTS " + BANG_CAU_HOI);
@@ -176,6 +192,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COT_TEN_FILE + " TEXT NOT NULL, " +
                 COT_DUONG_DAN_FILE + " TEXT NOT NULL, " +
                 "ngay_nop TEXT NOT NULL)");
+
+        db.execSQL("CREATE TABLE " + BANG_TIEN_DO + " (" +
+                COT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COT_TD_ID_NOI_DUNG + " INTEGER NOT NULL, " +
+                COT_TD_ID_SINH_VIEN + " INTEGER NOT NULL, " +
+                COT_TD_TRANG_THAI + " TEXT, " +
+                COT_TD_MUC_UU_TIEN + " TEXT, " +
+                COT_TD_THOI_GIAN_NHAC + " TEXT, " +
+                "UNIQUE(" + COT_TD_ID_NOI_DUNG + ", " + COT_TD_ID_SINH_VIEN + "))");
+
+        db.execSQL("CREATE TABLE " + BANG_CHECKLIST + " (" +
+                COT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COT_CL_ID_TIEN_DO + " INTEGER NOT NULL, " +
+                COT_CL_MO_TA + " TEXT NOT NULL, " +
+                COT_CL_TRANG_THAI + " INTEGER DEFAULT 0)");
     }
 
     private void themDuLieuMacDinh(SQLiteDatabase db) {

@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -84,6 +88,9 @@
             android:name=".AdminManagementActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name=".TienDoActivity" android:exported="false" />
+        <receiver android:name=".ReminderReceiver" android:exported="false" />
 
         <!-- FileProvider cho phép chia sẻ & mở tệp an toàn -->
         <provider

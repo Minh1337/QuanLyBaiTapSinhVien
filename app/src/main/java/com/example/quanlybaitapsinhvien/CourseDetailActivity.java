@@ -527,13 +527,47 @@ public class CourseDetailActivity extends AppCompatActivity {
                     tvTypeIcon.setText("📤");
                     String hanNopText = !TextUtils.isEmpty(item.getHanNop()) ? "Hạn: " + item.getHanNop() : "Bài tập nộp file";
                     tvStatus.setText(item.isHoanThanh() ? "✓ Đã nộp bài (" + hanNopText + ")" : hanNopText);
-                    btnItemAction.setText(isGiaoVien ? "Xem bài nộp" : "Nộp bài");
+                    btnItemAction.setText(isGiaoVien ? "Quản lý bài tập" : "Vào bài tập");
                     btnItemAction.setOnClickListener(v -> {
-                        Intent submitIntent = new Intent(CourseDetailActivity.this, SubmitAssignmentActivity.class);
-                        submitIntent.putExtra("NOI_DUNG_ID", item.getId());
-                        submitIntent.putExtra("TIEU_DE", item.getTieuDe());
-                        submitIntent.putExtra("IS_GIAO_VIEN", isGiaoVien);
-                        startActivity(submitIntent);
+                        if (isGiaoVien) {
+                            new AlertDialog.Builder(CourseDetailActivity.this)
+                                    .setTitle(item.getTieuDe())
+                                    .setMessage("Bạn muốn xem bài sinh viên đã nộp hay xem tiến độ (Checklist) của lớp?")
+                                    .setPositiveButton("Xem bài nộp file", (d, w) -> {
+                                        Intent submitIntent = new Intent(CourseDetailActivity.this, SubmitAssignmentActivity.class);
+                                        submitIntent.putExtra("NOI_DUNG_ID", item.getId());
+                                        submitIntent.putExtra("TIEU_DE", item.getTieuDe());
+                                        submitIntent.putExtra("IS_GIAO_VIEN", isGiaoVien);
+                                        startActivity(submitIntent);
+                                    })
+                                    .setNeutralButton("Xem Tiến độ / Nhắc hẹn", (d, w) -> {
+                                        Intent intent = new Intent(CourseDetailActivity.this, TienDoActivity.class);
+                                        intent.putExtra("BAI_TAP_ID", item.getId());
+                                        intent.putExtra("TEN_BAI", item.getTieuDe());
+                                        startActivity(intent);
+                                    })
+                                    .setNegativeButton("Đóng", null)
+                                    .show();
+                        } else {
+                            new AlertDialog.Builder(CourseDetailActivity.this)
+                                    .setTitle(item.getTieuDe())
+                                    .setMessage("Bạn muốn nộp file trực tiếp hay quản lý tiến độ / việc cần làm (Checklist)?")
+                                    .setPositiveButton("Nộp file", (d, w) -> {
+                                        Intent submitIntent = new Intent(CourseDetailActivity.this, SubmitAssignmentActivity.class);
+                                        submitIntent.putExtra("NOI_DUNG_ID", item.getId());
+                                        submitIntent.putExtra("TIEU_DE", item.getTieuDe());
+                                        submitIntent.putExtra("IS_GIAO_VIEN", isGiaoVien);
+                                        startActivity(submitIntent);
+                                    })
+                                    .setNeutralButton("Quản lý tiến độ", (d, w) -> {
+                                        Intent intent = new Intent(CourseDetailActivity.this, TienDoActivity.class);
+                                        intent.putExtra("BAI_TAP_ID", item.getId());
+                                        intent.putExtra("TEN_BAI", item.getTieuDe());
+                                        startActivity(intent);
+                                    })
+                                    .setNegativeButton("Đóng", null)
+                                    .show();
+                        }
                     });
                 } else {
                     tvTypeIcon.setText("📌");
