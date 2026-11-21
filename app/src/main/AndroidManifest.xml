@@ -29,12 +29,6 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Màn hình Đăng ký -->
-        <activity
-            android:name=".RegisterActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
         <!-- Màn hình Trang chủ phân quyền -->
         <activity
             android:name=".HomeActivity"
