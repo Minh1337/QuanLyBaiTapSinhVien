@@ -10,7 +10,6 @@
     tools:context=".LoginActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/mainLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="24dp">
@@ -31,16 +30,12 @@
                 android:id="@+id/btnQuayLai"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minHeight="48dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="4dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                android:paddingEnd="12dp">
 
                 <ImageView
                     android:layout_width="20dp"
@@ -155,18 +150,14 @@
                 android:textColorHint="@color/text_hint"
                 android:textSize="14sp" />
 
-            <!-- Chữ nhỏ góc dưới bên phải phần nhập mật khẩu: Đăng ký -->
+            <!-- Hướng dẫn nơi nhận tài khoản -->
             <TextView
-                android:id="@+id/tvDangKyNgay"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
                 android:layout_marginTop="12dp"
-                android:padding="4dp"
-                android:text="Chưa có tài khoản? Đăng ký"
-                android:textColor="@color/blue_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:text="Tài khoản được cấp bởi quản trị viên."
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
         </LinearLayout>
 
         <!-- Nút Đăng nhập -->
@@ -185,88 +176,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layoutForm" />
 
-        <!-- Khối Đăng nhập nhanh bằng tài khoản Demo -->
-        <LinearLayout
-            android:id="@+id/layoutDemoAccounts"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnThucHienDangNhap">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="⚡ Đăng nhập nhanh bằng tài khoản Demo:"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <!-- Demo Sinh viên -->
-                <TextView
-                    android:id="@+id/btnDemoStudent"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_outline_button"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:text="Sinh viên"
-                    android:textColor="@color/blue_primary"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <!-- Demo Giáo viên -->
-                <TextView
-                    android:id="@+id/btnDemoTeacher"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_marginHorizontal="4dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_outline_button"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:text="Giáo viên"
-                    android:textColor="@color/blue_primary"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <!-- Demo Admin -->
-                <TextView
-                    android:id="@+id/btnDemoAdmin"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="4dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_outline_button"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:text="Admin"
-                    android:textColor="@color/blue_primary"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </LinearLayout>
-
         <!-- Dòng chữ nhỏ dưới cùng -->
         <TextView
             android:id="@+id/tvFootnote"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="40dp"
             android:layout_marginBottom="16dp"
             android:text="Sổ bài tập · Học tập có kế hoạch"
             android:textColor="@color/text_hint"
@@ -274,7 +189,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layoutDemoAccounts"
+            app:layout_constraintTop_toBottomOf="@+id/btnThucHienDangNhap"
             app:layout_constraintVertical_bias="1.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
